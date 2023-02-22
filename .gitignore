@@ -1,3 +1,10 @@
+# Specific files to ignore
+config/config.py
+tests/t_config.py
+tests/Makefile
+.vscode
+.pylintrc
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
