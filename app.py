@@ -7,7 +7,6 @@ from flask import Flask, send_file, request
 from flask_cors import CORS
 
 # import our app libraries
-from interfaces.MySQLInterface import MySQLInterface
 from models.APIResponse import APIResponse
 
 # By default we'll log to the WSGI errors stream which ends up in the Apache error log
@@ -92,7 +91,7 @@ def get_game_usage_by_month():
     
 
     # TODO: If game_id isn't empty, query the database with the given criteria
-    # Code should go in MySQLInterface
+    # Code should go in a BigQueryInterface
 
     responseObj = {
         "game_id": sanitizedInput["game_id"],

@@ -1,21 +1,4 @@
 settings = {
-    "DB_CONFIG":
-    {
-        "id_gen": {
-            "DB_HOST" : "127.0.0.1",
-            "DB_USER" : "username",
-            "DB_PW"   : "password",
-            "DB_NAME" : "id_generator",
-            "DB_PORT" : 3306
-        },
-        "fd_users": {
-            "DB_HOST" : "127.0.0.1",
-            "DB_USER" : "username",
-            "DB_PW"   : "password",
-            "DB_NAME" : "fieldday_users",
-            "DB_PORT" : 3306
-        }
-    },
     "DEBUG_LEVEL":"INFO",
     "VER":0
 }
