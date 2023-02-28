@@ -1,0 +1,4 @@
+settings = {
+    "DEBUG_LEVEL":"INFO",
+    "VER":0
+}
