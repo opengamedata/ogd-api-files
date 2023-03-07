@@ -97,10 +97,6 @@ def get_game_usage_by_month():
         "game_id": sanitizedInput["game_id"],
         "selected_month": sanitizedInput["month"],
         "selected_year": sanitizedInput["year"],
-        "first_month": 3,
-        "first_year": 2020,
-        "last_month": 2,
-        "last_year": 2023,
         "total_monthly_sessions": 235235,
         "sessions_by_day": {
             1: 34,
@@ -123,14 +119,24 @@ def get_game_file_info_by_month():
     file_list_response = urllib.request.urlopen(file_list_url)
     file_list_json = json.loads(file_list_response.read())
 
-    if not sanitizedInput["game_id"] in file_list_json:
+    if not sanitizedInput["game_id"] in file_list_json or len(file_list_json[sanitizedInput["game_id"]]) == 0:
         return APIResponse(False, None).ToDict()
 
-    file_info = None
+    file_info = {}
+    files_base_url = file_list_json["CONFIG"]["files_base"]
+    templates_base_url = file_list_json["CONFIG"]["templates_base"]
+    found_matching_range = False
+
+    # None of the paths in file_list.json are populated yet, so default to the base URL which is the Github repo root
+    # TODO: Remove this when we get non-null entries
+    file_info["events_template"] = templates_base_url
+    file_info["players_template"] = templates_base_url
+    file_info["population_template"] = templates_base_url
+    file_info["sessions_template"] = templates_base_url
 
     # rangeKey format is GAMEID_YYYYMMDD_to_YYYYMMDD
     for rangeKey in file_list_json[sanitizedInput["game_id"]]:
-      
+            
         rangeKeyParts = rangeKey.split("_")
         
         # If this rangeKey matches the expected format
@@ -140,16 +146,61 @@ def get_game_file_info_by_month():
             toYear = int(rangeKeyParts[3][0:4])
             toMonth = int(rangeKeyParts[3][4:6])
 
-            # If the given date is within the range
+            # If this is the first range block in our loop, or this range block has an earlier year than our first_year
+            if "first_year" not in file_info or file_info["first_year"] > fromYear:
+
+                file_info["first_year"] = fromYear
+                file_info["first_month"] = fromMonth
+
+            # If this is range is for the same year but an earlier month
+            elif file_info["first_year"] == fromYear and file_info["first_month"] > fromMonth:
+
+                file_info["first_month"] = fromMonth
+
+            # If this is the first range block, or this range block has a later year than the last_year
+            if "last_year" not in file_info or file_info["last_year"] < toYear:
+
+                file_info["last_year"] = toYear
+                file_info["last_month"] = toMonth
+
+            # If this is range is for the same year but with a later month
+            elif file_info["last_year"] == toYear and file_info["last_month"] < toMonth:
+
+                file_info["last_month"] = toMonth
+
+            # If this range contains the given year & month
             if sanitizedInput["year"] >= fromYear and sanitizedInput["month"] >= fromMonth and sanitizedInput["year"] <= toYear and sanitizedInput["month"] <= toMonth:
-                # Use this file info
-                file_info = file_list_json[sanitizedInput["game_id"]][rangeKey]
-                break
+              
+                # Files
+                file_info["events_file"] = files_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["events_file"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["events_file"] else None
+                file_info["players_file"] = files_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["players_file"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["players_file"] else None
+                file_info["population_file"] = files_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["population_file"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["population_file"] else None
+                file_info["raw_file"] = files_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["raw_file"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["raw_file"] else None
+                file_info["sessions_file"] = files_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["sessions_file"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["sessions_file"] else None
 
-    # TODO: Determine the response structure we need for the frontend
+                # Templates
+                # TODO: Uncomment this section when we have non-null values in file_list.json
+                #file_info["events_template"] = templates_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["events_template"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["events_template"] else None
+                #file_info["players_template"] = templates_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["players_template"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["players_template"] else None
+                #file_info["population_template"] = templates_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["population_template"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["population_template"] else None
+                #file_info["sessions_template"] = templates_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["sessions_template"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["sessions_template"] else None
+                
+                found_matching_range = True
 
-    if file_info is None:
-        return APIResponse(False, None).ToDict()
+    if not found_matching_range:
+        file_info["found_matching_range"] = False
+        file_info["events_file"] = None
+        file_info["players_file"] = None
+        file_info["population_file"] = None
+        file_info["raw_file"] = None
+        file_info["sessions_file"] = None
+        # TODO: Uncomment this section when we have non-null values in file_list.json
+        #file_info["events_template"] = None
+        #file_info["players_template"] = None
+        #file_info["population_template"] = None
+        #file_info["sessions_template"] = None
+    else:
+        file_info["found_matching_range"] = True
 
     return APIResponse(True, file_info).ToDict()
 
