@@ -1,4 +1,10 @@
 settings = {
     "DEBUG_LEVEL":"INFO",
-    "VER":0
+	"BIGQUERY_GAME_MAPPING":
+    {
+        "AQUALAB":       {"PROJECT_ID":"aqualab-57f88",		"DATASET_ID":"analytics_271167280",	"TABLE_PREFIX":"events_",   "credential":"./config/aqualab.json"},
+		"MASHOPOLIS":    {"PROJECT_ID":"mashopolis-36754",	"DATASET_ID":"analytics_302498821",	"TABLE_PREFIX":"events_",   "credential":"./config/mashopolis.json"},
+		"SHADOWSPECT":   {"PROJECT_ID":"shadowspect-b8e63",	"DATASET_ID":"analytics_284091572",	"TABLE_PREFIX":"events_",   "credential":"./config/shadowspect.json"},
+		"SHIPWRECKS":    {"PROJECT_ID":"shipwrecks-8d142",	"DATASET_ID":"analytics_269167605",	"TABLE_PREFIX":"events_",   "credential":"./config/shipwrecks.json"}
+    },
 }
