@@ -1,4 +1,10 @@
 settings = {
     "DEBUG_LEVEL":"INFO",
-    "VER":0
+	"BIGQUERY_GAME_MAPPING":
+    {
+        "AQUALAB":       {"PROJECT_ID":"aqualab-57f88",		"DATASET_ID":"analytics_271167280",	"TABLE_PREFIX":"events_*",   "CREDENTIALS_PATH":"./config/aqualab.json", 	"SCHEMA_TYPE": "EVENTS-FIREBASE"},
+		"MASHOPOLIS":    {"PROJECT_ID":"mashopolis-36754",	"DATASET_ID":"analytics_302498821",	"TABLE_PREFIX":"events_*",   "CREDENTIALS_PATH":"./config/mashopolis.json",  "SCHEMA_TYPE": "EVENTS-FIREBASE"},
+		"SHADOWSPECT":   {"PROJECT_ID":"shadowspect-b8e63",	"DATASET_ID":"analytics_284091572",	"TABLE_PREFIX":"events_*",   "CREDENTIALS_PATH":"./config/shadowspect.json", "SCHEMA_TYPE": "EVENTS-FIREBASE"},
+		"SHIPWRECKS":    {"PROJECT_ID":"shipwrecks-8d142",	"DATASET_ID":"analytics_269167605",	"TABLE_PREFIX":"events_*",   "CREDENTIALS_PATH":"./config/shipwrecks.json",	"SCHEMA_TYPE": "EVENTS-FIREBASE"}
+    },
 }

@@ -1,6 +1,7 @@
 # import standard libraries
 import sys, os, re, datetime, urllib, json
 from logging.config import dictConfig
+from calendar import monthrange
 
 # import 3rd-party libraries
 from flask import Flask, send_file, request
@@ -8,6 +9,7 @@ from flask_cors import CORS
 
 # import our app libraries
 from models.APIResponse import APIResponse
+from interfaces.BigQueryInterface import BigQueryInterface
 
 # By default we'll log to the WSGI errors stream which ends up in the Apache error log
 logHandlers = {
@@ -52,8 +54,8 @@ application = Flask(__name__)
 CORS(application)
 
 # TODO: Now that logging is set up, import our local config settings
-# from config.config import settings
-# application.logger.setLevel(settings['DEBUG_LEVEL'])
+from config.config import settings
+application.logger.setLevel(settings['DEBUG_LEVEL'])
 
 # Shared utility function to retrieve game_id, year, and month from the request's query string.
 # Defaults are used if a value was not given or is invalid
@@ -88,22 +90,24 @@ def get_game_usage_by_month():
 
     if sanitizedInput["game_id"] is None or sanitizedInput["game_id"] == "":
         return APIResponse(False, None).ToDict()
-    
 
-    # TODO: If game_id isn't empty, query the database with the given criteria
-    # Code should go in a BigQueryInterface
+    # If we don't have a mapping for the given game
+    if not sanitizedInput["game_id"] in settings["BIGQUERY_GAME_MAPPING"]:
+        return APIResponse(False, None).ToDict()
+
+    total_monthly_sessions = 0
+    sessions_by_day = {}
+
+    bqInterface = BigQueryInterface(settings["BIGQUERY_GAME_MAPPING"][sanitizedInput["game_id"]])
+    total_monthly_sessions = bqInterface.GetTotalSessionsForMonth(sanitizedInput["year"], sanitizedInput["month"])
+    sessions_by_day = bqInterface.GetSessionsPerDayForMonth(sanitizedInput["year"], sanitizedInput["month"])
 
     responseObj = {
         "game_id": sanitizedInput["game_id"],
         "selected_month": sanitizedInput["month"],
         "selected_year": sanitizedInput["year"],
-        "total_monthly_sessions": 235235,
-        "sessions_by_day": {
-            1: 34,
-            2: 6034,
-            3: 0,
-            4: 3333
-        }
+        "total_monthly_sessions": total_monthly_sessions,
+        "sessions_by_day": sessions_by_day
     }
 
     return APIResponse(True, responseObj).ToDict()
