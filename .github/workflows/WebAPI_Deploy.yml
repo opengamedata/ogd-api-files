@@ -1,13 +1,13 @@
 # Workflow to build and deploy designer dashboard to server.
 name: OGD-Website-API Deploy Script
 on:
+  workflow_dispatch: # Allow manual trigger of this workflow from the Actions tab
   # push:
   #   paths:
   #   - '.github/workflows/WebAPI_CI.yml'
   #   - '.github/actions/**'
   #   - 'interfaces/**'
   #   - 'models/**'
-  workflow_dispatch: # Allow manual trigger of this workflow from the Actions tab
 
 env:
   CI: ""
