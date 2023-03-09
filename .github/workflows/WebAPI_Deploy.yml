@@ -1,12 +1,12 @@
 # Workflow to build and deploy designer dashboard to server.
-name: OpenGameData-Website-API CI
+name: OpenGameData-Website-API Deploy Script
 on:
-  push:
-    paths:
-    - '.github/workflows/WebAPI_CI.yml'
-    - '.github/actions/**'
-    - 'interfaces/**'
-    - 'models/**'
+  # push:
+  #   paths:
+  #   - '.github/workflows/WebAPI_CI.yml'
+  #   - '.github/actions/**'
+  #   - 'interfaces/**'
+  #   - 'models/**'
   workflow_dispatch: # Allow manual trigger of this workflow from the Actions tab
 
 env:
@@ -31,7 +31,7 @@ jobs:
       with:
         switches: -vrc --exclude-from rsync-exclude
         path: build/*
-        remote_path: ${{ secrets.WEBAPI_PATH_CI }}
+        remote_path: ${{ secrets.WEBAPI_PATH }}
         remote_host: ${{ secrets.WEBAPI_HOST }}
         remote_user: ${{ secrets.WEBAPI_USER }}
         remote_key:  ${{ secrets.DESIGN_DASH_KEY  }}
