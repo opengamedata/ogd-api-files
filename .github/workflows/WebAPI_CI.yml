@@ -30,7 +30,7 @@ jobs:
       uses: burnett01/rsync-deployments@5.2
       with:
         switches: -vrc --exclude-from rsync-exclude
-        path: build/*
+        path: ./*
         remote_path: ${{ secrets.WEBAPI_PATH_CI }}
         remote_host: ${{ secrets.FILE_HOST }}
         remote_user: ${{ secrets.FILE_USER }}
