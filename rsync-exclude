@@ -5,6 +5,8 @@ config/config.py
 .gitmodules
 .git
 Makefile
+LICENSE
 README.md
+requirements.txt
 rsync-exclude
 *.log
