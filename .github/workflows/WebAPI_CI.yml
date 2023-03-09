@@ -18,7 +18,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Set up Config File
-      uses: ./.github/actions/apis_config
+      uses: ./.github/actions/web_api_config
     #   with:
     #     db_host:
     #     db_user:
@@ -34,7 +34,7 @@ jobs:
         remote_path: ${{ secrets.WEBAPI_PATH }}
         remote_host: ${{ secrets.WEBAPI_HOST }}
         remote_user: ${{ secrets.WEBAPI_USER }}
-        remote_key:  ${{ secrets.WEBAPI_KEY  }}
+        remote_key:  ${{ secrets.DESIGN_DASH_KEY  }}
     - name: Upload logs as artifacts
       uses: actions/upload-artifact@v2
       with:
