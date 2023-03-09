@@ -7,7 +7,7 @@ on:
     - '.github/actions/**'
     - 'interfaces/**'
     - 'models/**'
-  workflow_dispatch # Allow manual trigger of this workflow from the Actions tab
+  workflow_dispatch: # Allow manual trigger of this workflow from the Actions tab
 
 env:
   CI: ""
