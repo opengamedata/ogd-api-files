@@ -1,0 +1,41 @@
+# Workflow to build and deploy designer dashboard to server.
+name: OpenGameData-Website-API CI
+on:
+  push:
+    paths:
+    - '.github/workflows/WebAPI_CI.yml'
+    - '.github/actions/**'
+    - 'interfaces/**'
+    - 'models/**'
+  workflow_dispatch: # Allow manual trigger of this workflow from the Actions tab
+
+env:
+  CI: ""
+
+jobs:
+  test_export:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Config File
+      uses: ./.github/actions/apis_config
+    #   with:
+    #     db_host:
+    #     db_user:
+    - name: Get OpenConnect installed
+      run: sudo apt-get -q update && sudo apt-get -q install openconnect
+    - name: Connect VPN
+      run: echo ${{ secrets.VPN_PASS }} | sudo openconnect --protocol=gp -u ${{ secrets.VPN_USER }} --passwd-on-stdin soe.vpn.wisc.edu &
+    - name: Upload to web server via rsync
+      uses: burnett01/rsync-deployments@5.2
+      with:
+        switches: -vrc --exclude-from rsync-exclude
+        path: build/*
+        remote_path: ${{ secrets.WEBAPI_PATH }}
+        remote_host: ${{ secrets.WEBAPI_HOST }}
+        remote_user: ${{ secrets.WEBAPI_USER }}
+        remote_key:  ${{ secrets.WEBAPI_KEY  }}
+    - name: Upload logs as artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        path: ./*.log
