@@ -1,5 +1,5 @@
 # Workflow to build and deploy designer dashboard to server.
-name: OpenGameData-Website-API Deploy Script
+name: OGD-Website-API Deploy Script
 on:
   # push:
   #   paths:
