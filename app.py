@@ -69,7 +69,7 @@ def getSanitizedQueryParams():
     month = request.args.get("month", default=now_date.month, type=int)
     
     # Sanitize values from query string
-    if re.search("^[A-Za-z]+$", game_id) is None:
+    if re.search("^[A-Za-z_]+$", game_id) is None:
         game_id = ""
 
     game_id = game_id.upper()
@@ -146,8 +146,9 @@ def get_game_file_info_by_month():
     # rangeKey format is GAMEID_YYYYMMDD_to_YYYYMMDD
     for rangeKey in file_list_json[sanitizedInput["game_id"]]:
             
-        rangeKeyParts = rangeKey.split("_")
-        
+        rangeKeyWithoutGame = rangeKey[len(sanitizedInput["game_id"]):]
+        rangeKeyParts = rangeKeyWithoutGame.split("_")
+
         # If this rangeKey matches the expected format
         if len(rangeKeyParts) == 4:
             fromYear = int(rangeKeyParts[1][0:4])
