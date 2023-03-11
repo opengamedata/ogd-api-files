@@ -7,6 +7,8 @@ on:
     - '.github/actions/**'
     - 'interfaces/**'
     - 'models/**'
+    - 'app.py'
+    - 'app.wsgi'
   workflow_dispatch: # Allow manual trigger of this workflow from the Actions tab
 
 env:
