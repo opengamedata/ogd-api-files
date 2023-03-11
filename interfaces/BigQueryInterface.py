@@ -1,6 +1,7 @@
 import os
 from calendar import monthrange
 from google.cloud import bigquery
+from typing import Dict
 
 class BigQueryInterface:
 
@@ -41,7 +42,7 @@ class BigQueryInterface:
             return row["mycount"] # row values can be accessed by index [0] or field name
 
     # Get the total number of sessions for each day in a given month
-    def GetSessionsPerDayForMonth(self, year: int, month: int) -> dict[str, int]:
+    def GetSessionsPerDayForMonth(self, year: int, month: int) -> Dict[str, int]:
 
         # Determine how many days are in the given month for the given year
         weekDayOfFirstDay, numDaysInMonth = monthrange(year, month)
