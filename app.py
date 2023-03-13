@@ -69,7 +69,7 @@ def getSanitizedQueryParams():
     month = request.args.get("month", default=now_date.month, type=int)
     
     # Sanitize values from query string
-    if re.search("^[A-Za-z]+$", game_id) is None:
+    if re.search("^[A-Za-z_]+$", game_id) is None:
         game_id = ""
 
     game_id = game_id.upper()
@@ -123,6 +123,7 @@ def get_game_file_info_by_month():
     file_list_response = urllib.request.urlopen(file_list_url)
     file_list_json = json.loads(file_list_response.read())
 
+    # If we couldn't find the given game in file_list.json, or the game didn't have any date ranges
     if not sanitizedInput["game_id"] in file_list_json or len(file_list_json[sanitizedInput["game_id"]]) == 0:
         return APIResponse(False, None).ToDict()
 
@@ -138,11 +139,16 @@ def get_game_file_info_by_month():
     file_info["population_template"] = templates_base_url
     file_info["sessions_template"] = templates_base_url
 
+   # If a year and month wasn't given, we'll default to returning files & info for the last range
+    if request.args.get("year") is None and request.args.get("month") is None:
+        lastRangeKey = list(file_list_json[sanitizedInput["game_id"]])[-1]
+
     # rangeKey format is GAMEID_YYYYMMDD_to_YYYYMMDD
     for rangeKey in file_list_json[sanitizedInput["game_id"]]:
             
-        rangeKeyParts = rangeKey.split("_")
-        
+        rangeKeyWithoutGame = rangeKey[len(sanitizedInput["game_id"]):]
+        rangeKeyParts = rangeKeyWithoutGame.split("_")
+
         # If this rangeKey matches the expected format
         if len(rangeKeyParts) == 4:
             fromYear = int(rangeKeyParts[1][0:4])
@@ -172,8 +178,10 @@ def get_game_file_info_by_month():
 
                 file_info["last_month"] = toMonth
 
-            # If this range contains the given year & month
-            if sanitizedInput["year"] >= fromYear and sanitizedInput["month"] >= fromMonth and sanitizedInput["year"] <= toYear and sanitizedInput["month"] <= toMonth:
+            # If a month & year wasn't actually given and this is the last range
+            # OR if this range contains the given year & month
+            if ((request.args.get("year") is None and request.args.get("month") is None and rangeKey == lastRangeKey) 
+                or (sanitizedInput["year"] >= fromYear and sanitizedInput["month"] >= fromMonth and sanitizedInput["year"] <= toYear and sanitizedInput["month"] <= toMonth)):
               
                 # Files
                 file_info["events_file"] = files_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["events_file"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["events_file"] else None
