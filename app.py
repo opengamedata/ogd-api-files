@@ -38,7 +38,7 @@ if "OGD_FLASK_APP_LOG_FILE" in os.environ:
 dictConfig({
     'version': 1,
     'formatters': {'default': {
-        'format': '%(levelname)s in %(module)s: %(message)s',
+        'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
     }},
     'handlers': logHandlers,
     'root': {
