@@ -13,7 +13,10 @@ class BigQueryInterface:
 
         # The BigQuery client expects our credential filepath to be defined in os.environ["GOOGLE_APPLICATION_CREDENTIALS"], do that now
         if "GITHUB_ACTIONS" not in os.environ:
-            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = self._config["CREDENTIALS_PATH"]
+            # Assumes the current file is in a directory one level below the app's root
+            APP_ROOT = os.path.join(os.path.realpath(os.path.dirname(__file__)), '..')
+            # Assumes the path specified in CREDENTIALS_PATH is a relative path from the app root
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(APP_ROOT, self._config["CREDENTIALS_PATH"])
 
         self._client: bigquery.Client = bigquery.Client()
 

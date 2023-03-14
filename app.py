@@ -22,35 +22,39 @@ logHandlers = {
 
 logRootHandlers = ['wsgi']
 
+# Commenting out the dedicated log file for this app. The code functions fine, but 
+# getting the permissions set correctly isn't a priority right now
+
 # If a dedicated log file is defined for this Flask app, we'll also log there
 # Ensure this is in a directory writable by the user executing the WSGI app (likely the web daemon - www-data or apache)
-if "OGD_FLASK_APP_LOG_FILE" in os.environ:
-    logHandlers['wsgi_app_file'] = {
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.environ["OGD_FLASK_APP_LOG_FILE"],
-            'maxBytes': 100000000, # 100 MB
-            'backupCount': 10, # Up to 10 rotated files
-            'formatter': 'default'
-    }
+# if "OGD_FLASK_APP_LOG_FILE" in os.environ:
+#     logHandlers['wsgi_app_file'] = {
+#             'class': 'logging.handlers.RotatingFileHandler',
+#             'filename': os.environ["OGD_FLASK_APP_LOG_FILE"],
+#             'maxBytes': 100000000, # 100 MB
+#             'backupCount': 10, # Up to 10 rotated files
+#             'formatter': 'default'
+#     }
 
-    logRootHandlers.append('wsgi_app_file')
+#     logRootHandlers.append('wsgi_app_file')
 
-dictConfig({
-    'version': 1,
-    'formatters': {'default': {
-        'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
-    }},
-    'handlers': logHandlers,
-    'root': {
-        'level': 'INFO',
-        'handlers': logRootHandlers
-    }
-})
+# dictConfig({
+#     'version': 1,
+#     'formatters': {'default': {
+#         'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
+#     }},
+#     'handlers': logHandlers,
+#     'root': {
+#         'level': 'INFO',
+#         'handlers': logRootHandlers
+#     }
+# })
 
 application = Flask(__name__)
 
 # Allow cross-origin requests from any origin by default
 # This presents minimal risk to visitors since the API merely retrieves non-sensitive data
+# Comment this out if the web server itself is configured to send an Access-Control-Allow-Origin header, so we don't have a duplicate header
 CORS(application)
 
 # TODO: Now that logging is set up, import our local config settings
