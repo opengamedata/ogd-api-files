@@ -12,7 +12,7 @@ env:
   CI: ""
 
 jobs:
-  test_export:
+  production_deploy:
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v2

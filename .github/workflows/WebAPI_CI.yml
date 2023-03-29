@@ -15,7 +15,7 @@ env:
   CI: ""
 
 jobs:
-  test_export:
+  ci_deploy:
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v2
