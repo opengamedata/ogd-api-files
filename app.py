@@ -57,9 +57,16 @@ application = Flask(__name__)
 # Comment this out if the web server itself is configured to send an Access-Control-Allow-Origin header, so we don't have a duplicate header
 CORS(application)
 
-# TODO: Now that logging is set up, import our local config settings
+# Now that logging is set up, import our local config settings
 from config.config import settings
 application.logger.setLevel(settings['DEBUG_LEVEL'])
+
+# If the given game_id contains allowed characters, return it in UPPERCASE, otherwise return empty string
+def sanitizeGameId(game_id: str) -> str:
+    if re.search("^[A-Za-z_]+$", game_id) is None:
+        game_id = ""
+
+    return game_id.upper()
 
 # Shared utility function to retrieve game_id, year, and month from the request's query string.
 # Defaults are used if a value was not given or is invalid
@@ -68,16 +75,10 @@ def getSanitizedQueryParams():
     now_date = datetime.date.today()
 
     # Extract query string parameters
-    game_id = request.args.get("game_id", default = "", type=str)
+    game_id = sanitizeGameId(request.args.get("game_id", default = "", type=str))
     year = request.args.get("year", default=now_date.year, type=int)
     month = request.args.get("month", default=now_date.month, type=int)
     
-    # Sanitize values from query string
-    if re.search("^[A-Za-z_]+$", game_id) is None:
-        game_id = ""
-
-    game_id = game_id.upper()
-
     if month < 1 or month > 12:
         month = now_date.month
 
@@ -85,6 +86,9 @@ def getSanitizedQueryParams():
         year = now_date.year
 
     return { "game_id": game_id, "year": year, "month": month }
+
+# TODO: Remove this action and dependencies (interfaces, config) if we're certain they won't be needed.
+# The SQL for BigQuery did take a bit of effort to compose, but could always be retrieved from old commits
 
 # Get game usage statistics for a given game, year, and month
 @application.route('/getGameUsageByMonth', methods=['GET'])
@@ -115,6 +119,77 @@ def get_game_usage_by_month():
     }
 
     return APIResponse(True, responseObj).ToDict()
+
+# Get the per-month number of sessions for a given game
+@application.route("/getMonthlyGameUsage", methods=['GET'])
+def get_monthly_game_usage():
+    
+    # Extract a sanitized game_id from the query string
+    game_id = sanitizeGameId(request.args.get("game_id", default = "", type=str))
+     
+    if game_id is None or game_id == "":
+        return APIResponse(False, None).ToDict()
+
+    # Pull the file list data into a dictionary
+    file_list_url = 'https://opengamedata.fielddaylab.wisc.edu/data/file_list.json'
+    file_list_response = urllib.request.urlopen(file_list_url)
+    file_list_json = json.loads(file_list_response.read())
+
+    # If the given game isn't in our dictionary, or our dictionary doesn't have any date ranges for this game
+    if not game_id in file_list_json or len(file_list_json[game_id]) == 0:
+        return APIResponse(False, None).ToDict()
+
+    firstMonth = None
+    firstYear = None
+    lastYear = None
+    lastMonth = None
+
+    total_sessions_by_yyyymm = {}
+
+     # rangeKey format is GAMEID_YYYYMMDD_to_YYYYMMDD or GAME_ID_YYYYMMDD_to_YYYYYMMDD
+    for rangeKey in file_list_json[game_id]:
+
+        rangeKeyWithoutGame = rangeKey[len(game_id):]
+        rangeKeyParts = rangeKeyWithoutGame.split("_")
+
+        # If this rangeKey matches the expected format
+        if len(rangeKeyParts) == 4:
+            year = rangeKeyParts[1][0:4]
+            month = rangeKeyParts[1][4:6]
+
+            # Capture the number of sessions for this YYYYMM
+            total_sessions_by_yyyymm[year + month] = file_list_json[game_id][rangeKey]["sessions"]
+
+            # The ranges in file_list_json should be chronologically ordered, but manually determining the first & last months here just in case
+            if firstYear is None or int(year) < firstYear:
+                firstYear = int(year)
+                firstMonth = int(month)
+            elif int(year) == firstYear and int(month) < firstMonth:
+                firstMonth = int(month)
+            
+            if lastYear is None or int(year) > lastYear:
+                lastYear = int(year)
+                lastMonth = int(month)
+            elif lastYear == int(year) and lastMonth < int(month):
+                lastMonth = int(month)
+
+    sessions = []
+    startRangeMonth = firstMonth
+
+    # Iterate through all of the months from the first month+year to last month+year, since the ranges have gaps
+    # Default the number of sessions to zero for months we don't have data
+    for year in range(firstYear, lastYear + 1):
+        endRangeMonth = lastMonth if year == lastYear else 12
+        for month in range(startRangeMonth, endRangeMonth + 1):
+            # If file_list.json has an entry for this month
+            if str(year) + str(month).zfill(2) in total_sessions_by_yyyymm:
+                sessions.append({ "year": year, "month": month, "total_sessions": total_sessions_by_yyyymm[str(year) + str(month).zfill(2)]})
+            else:
+                sessions.append({ "year": year, "month": month, "total_sessions": 0 })
+        startRangeMonth = 1
+
+    responseData = { "game_id": game_id, "sessions": sessions }
+    return APIResponse(True, responseData).ToDict()
 
 # Get info on the files that are available for the given game in the given month & year
 @application.route('/getGameFileInfoByMonth', methods=['GET'])
