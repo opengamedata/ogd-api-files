@@ -15,7 +15,7 @@ env:
   BRANCH_PATH: ${{ github.event.repository.name }}/${{ github.ref_name }}
 
 jobs:
-  test_export:
+  ci_deploy:
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
