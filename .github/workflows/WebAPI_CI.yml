@@ -12,32 +12,44 @@ on:
   workflow_dispatch: # Allow manual trigger of this workflow from the Actions tab
 
 env:
-  CI: ""
+  BRANCH_PATH: ${{ github.event.repository.name }}/${{ github.ref_name }}
 
 jobs:
   test_export:
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
+
     - name: Set up Config File
       uses: ./.github/actions/web_api_config
     #   with:
     #     db_host:
     #     db_user:
+
     - name: Get OpenConnect installed
       run: sudo apt-get -q update && sudo apt-get -q install openconnect
     - name: Connect VPN
       run: echo ${{ secrets.VPN_PASS }} | sudo openconnect --protocol=gp -u ${{ secrets.VPN_USER }} --passwd-on-stdin soe.vpn.wisc.edu &
+
     - name: Upload to web server via rsync
       uses: burnett01/rsync-deployments@5.2
       with:
         switches: -vrc --exclude-from rsync-exclude
         path: ./*
-        remote_path: ${{ secrets.WEBAPI_PATH_CI }}
-        remote_host: ${{ secrets.FILE_HOST }}
-        remote_user: ${{ secrets.FILE_USER }}
-        remote_key:  ${{ secrets.FILE_DEPLOY_KEY  }}
+        remote_path: ${{ vars.WSGI_PATH }${{ env.BRANCH_PATH }}
+        remote_host: ${{ vars.OGD_STAGING_HOST }}
+        remote_user: ${{ secrets.DEPLOY_USER }}
+        remote_key:  ${{ secrets.DEPLOY_KEY  }}
+
+    - name: Setup Access Key
+      run: |
+        mkdir -p ~/.ssh
+        echo '${{secrets.DEPLOY_KEY}}' >> ./key.txt
+        chmod 600 ./key.txt
+    - name: Restart httpd via ssh
+      run: ssh -o StrictHostKeyChecking=no -t -i ./key.txt ${{ secrets.DEPLOY_USER }}@${{ vars.OGD_STAGING_HOST }} "sudo /sbin/service httpd restart"
+
     - name: Upload logs as artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         path: ./*.log
