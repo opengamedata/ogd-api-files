@@ -25,6 +25,9 @@ jobs:
     - name: Connect VPN
       run: echo ${{ secrets.VPN_PASS }} | sudo openconnect --protocol=gp -u ${{ secrets.VPN_USER }} --passwd-on-stdin soe.vpn.wisc.edu &
 
+    - name: Try to list out the host name
+      run: echo host = ${{ vars.OGD_SERVICES_HOST }}
+
     - name: Upload to web server via rsync
       uses: burnett01/rsync-deployments@5.2
       with:
