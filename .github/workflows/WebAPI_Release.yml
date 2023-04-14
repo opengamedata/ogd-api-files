@@ -10,7 +10,12 @@ env:
 
 jobs:
   production_deploy:
+    name: Release Deploy of Website API
     runs-on: ubuntu-22.04
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+
     steps:
     - uses: actions/checkout@v3
 
