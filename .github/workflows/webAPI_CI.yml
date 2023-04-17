@@ -3,7 +3,7 @@ name: OGD-Website-API CI Script
 on:
   push:
     paths:
-    - '.github/workflows/WebAPI_CI.yml'
+    - '.github/workflows/webAPI_CI.yml'
     - '.github/actions/**'
     - 'interfaces/**'
     - 'models/**'
