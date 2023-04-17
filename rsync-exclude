@@ -1,5 +1,5 @@
 *__pycache__/*
-config/config.py
+config/config.py.template
 .DS_Store
 .gitignore
 .gitmodules
