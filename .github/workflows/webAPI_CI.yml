@@ -27,10 +27,11 @@ jobs:
 
     - name: Set up Config File
       uses: ./.github/actions/web_api_config
-      with:
-        home_folder: ${{ env.BRANCH_PATH }}
+    # with:
     #     db_host:
     #     db_user:
+    - name: Set the home folder variable
+      run: sed -i 's@placeholder home@${{ env.BRANCH_PATH }}@g' app.wsgi
 
     - name: Get OpenConnect installed
       run: sudo apt-get -q update && sudo apt-get -q install openconnect

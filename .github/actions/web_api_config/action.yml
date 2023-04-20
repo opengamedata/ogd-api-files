@@ -4,11 +4,7 @@ description: "Given a set of appropriate inputs, this action prepares a config.j
 branding:
   icon: 'clipboard'
   color: 'blue'
-inputs:
-  home_folder:
-    description: "Base folder for the deployed WSGI app"
-    required: true
-    default: 'home placeholder'
+# inputs:
 #   db_host:
 #     description: "Host of the database"
 #     required: true
@@ -22,9 +18,6 @@ runs:
   steps:
     - name: Set up config
       run: cp config/config.py.template config/config.py 
-      shell: bash
-    - name: Set home folder
-      run: sed -i 's@placeholder home@${{ inputs.hom_folder }}@g' app.wsgi
       shell: bash
     # - name: Set DB hostname
     #   run: sed -i 's@127.0.0.1@${{inputs.db_host}}@g' config/config.py
