@@ -27,7 +27,8 @@ jobs:
 
     - name: Set up Config File
       uses: ./.github/actions/web_api_config
-    #   with:
+      with:
+        home_folder: ${{ env.BRANCH_PATH }}
     #     db_host:
     #     db_user:
 
