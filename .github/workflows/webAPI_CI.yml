@@ -12,7 +12,7 @@ on:
   workflow_dispatch: # Allow manual trigger of this workflow from the Actions tab
 
 env:
-  TARGET_PATH:   ${{ vars.WSGI_PATH }}${{ github.event.repository.name }}/${{ github.ref_name }}
+  TARGET_PATH: ${{ vars.WSGI_PATH }}${{ github.event.repository.name }}/${{ github.ref_name }}
   TARGET_HOST: ${{ vars.OGD_STAGING_HOST }}
 
 jobs:
@@ -34,7 +34,7 @@ jobs:
     #     db_host:
     #     db_user:
     - name: Set the home folder variable
-      run: sed -i 's@placeholder home@${{ env.BRANCH_PATH }}@g' app.wsgi
+      run: sed -i 's@placeholder home@${{ env.TARGET_PATH }}@g' app.wsgi
 
     - name: Install OpenConnect
       run: sudo apt-get -q update && sudo apt-get -q install openconnect
