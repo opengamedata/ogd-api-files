@@ -1,6 +1,7 @@
 # Workflow to build and deploy designer dashboard to server.
 name: OGD-Website-API CI Script
 on:
+  workflow_dispatch: # Allow manual trigger of this workflow from the Actions tab
   push:
     paths:
     - '.github/workflows/webAPI_CI.yml'
@@ -9,7 +10,6 @@ on:
     - 'models/**'
     - 'app.py'
     - 'app.wsgi'
-  workflow_dispatch: # Allow manual trigger of this workflow from the Actions tab
 
 env:
   TARGET_PATH: ${{ vars.WSGI_PATH }}${{ github.event.repository.name }}/${{ github.ref_name }}
