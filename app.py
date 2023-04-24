@@ -90,6 +90,16 @@ def getSanitizedQueryParams():
 # TODO: Remove this action and dependencies (interfaces, config) if we're certain they won't be needed.
 # The SQL for BigQuery did take a bit of effort to compose, but could always be retrieved from old commits
 
+# Basic response if someone just hits the home path to say "hello"
+@application.route('/', methods=['GET'])
+def get_hello():
+
+    responseObj = {
+        "message": "hello, world"
+    }
+
+    return APIResponse(True, responseObj).ToDict()
+
 # Get game usage statistics for a given game, year, and month
 @application.route('/getGameUsageByMonth', methods=['GET'])
 def get_game_usage_by_month():
