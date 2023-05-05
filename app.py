@@ -281,10 +281,10 @@ def get_game_file_info_by_month():
 
                 # Templates
                 # TODO: Uncomment this section when we have non-null values in file_list.json
-                #file_info["events_template"] = templates_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["events_template"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["events_template"] else None
-                #file_info["players_template"] = templates_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["players_template"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["players_template"] else None
-                #file_info["population_template"] = templates_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["population_template"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["population_template"] else None
-                #file_info["sessions_template"] = templates_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["sessions_template"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["sessions_template"] else None
+                file_info["events_template"]     = templates_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["events_template"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["events_template"] else None
+                file_info["players_template"]    = templates_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["players_template"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["players_template"] else None
+                file_info["population_template"] = templates_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["population_template"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["population_template"] else None
+                file_info["sessions_template"]   = templates_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["sessions_template"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["sessions_template"] else None
                 
                 found_matching_range = True
 
@@ -296,10 +296,10 @@ def get_game_file_info_by_month():
         file_info["raw_file"] = None
         file_info["sessions_file"] = None
         # TODO: Uncomment this section when we have non-null values in file_list.json
-        #file_info["events_template"] = None
-        #file_info["players_template"] = None
-        #file_info["population_template"] = None
-        #file_info["sessions_template"] = None
+        file_info["events_template"] = None
+        file_info["players_template"] = None
+        file_info["population_template"] = None
+        file_info["sessions_template"] = None
     else:
         file_info["found_matching_range"] = True
 
