@@ -211,13 +211,6 @@ def get_game_file_info_by_month():
     templates_base_url = file_list_json["CONFIG"]["templates_base"]
     found_matching_range = False
 
-    # None of the paths in file_list.json are populated yet, so default to the base URL which is the Github repo root
-    # TODO: Remove this when we get non-null entries
-    file_info["events_template"] = templates_base_url
-    file_info["players_template"] = templates_base_url
-    file_info["population_template"] = templates_base_url
-    file_info["sessions_template"] = templates_base_url
-
    # If a year and month wasn't given, we'll default to returning files & info for the last range
     if request.args.get("year") is None and request.args.get("month") is None:
         lastRangeKey = list(file_list_json[sanitizedInput["game_id"]])[-1]
@@ -270,11 +263,15 @@ def get_game_file_info_by_month():
                 file_info["sessions_file"] = files_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["sessions_file"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["sessions_file"] else None
 
                 # Templates
-                # TODO: Uncomment this section when we have non-null values in file_list.json
-                #file_info["events_template"] = templates_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["events_template"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["events_template"] else None
-                #file_info["players_template"] = templates_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["players_template"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["players_template"] else None
-                #file_info["population_template"] = templates_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["population_template"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["population_template"] else None
-                #file_info["sessions_template"] = templates_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["sessions_template"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["sessions_template"] else None
+                file_info["events_template"] = templates_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["events_template"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["events_template"] != None else None
+                file_info["players_template"] = templates_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["players_template"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["players_template"] != None else None
+                file_info["population_template"] = templates_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["population_template"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["population_template"] != None else None
+                file_info["sessions_template"] = templates_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["sessions_template"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["sessions_template"] != None else None
+
+                file_info["detectors_link"] = "https://github.com/opengamedata/opengamedata-core/tree/" + file_list_json[sanitizedInput["game_id"]][rangeKey]["ogd_revision"] + "/games/" + sanitizedInput["game_id"] + "/detectors" \
+                    if file_list_json[sanitizedInput["game_id"]][rangeKey]["ogd_revision"] else None
+                file_info["features_link"] = "https://github.com/opengamedata/opengamedata-core/tree/" + file_list_json[sanitizedInput["game_id"]][rangeKey]["ogd_revision"] + "/games/" + sanitizedInput["game_id"] + "/features" \
+                    if file_list_json[sanitizedInput["game_id"]][rangeKey]["ogd_revision"] else None
                 
                 found_matching_range = True
 
@@ -285,11 +282,12 @@ def get_game_file_info_by_month():
         file_info["population_file"] = None
         file_info["raw_file"] = None
         file_info["sessions_file"] = None
-        # TODO: Uncomment this section when we have non-null values in file_list.json
-        #file_info["events_template"] = None
-        #file_info["players_template"] = None
-        #file_info["population_template"] = None
-        #file_info["sessions_template"] = None
+        file_info["events_template"] = None
+        file_info["players_template"] = None
+        file_info["population_template"] = None
+        file_info["sessions_template"] = None
+        file_info["detectors_link"] = None
+        file_info["features_link"] = None
     else:
         file_info["found_matching_range"] = True
 
