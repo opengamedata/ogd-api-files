@@ -9,8 +9,8 @@ on:
      branches: [ production ] 
 
 env:
-  TARGET_PATH: ${{ vars.WSGI_PATH }}${{ github.event.repository.name }}/${{ github.ref_name }}
   TARGET_HOST: ${{ vars.OGD_SERVICES_HOST }}
+  TARGET_PATH: ${{ vars.WSGI_PATH }}${{ github.event.repository.name }}/${{ github.ref_name }}
 
 jobs:
   production_deploy:
@@ -27,9 +27,8 @@ jobs:
 
     - name: Set up Config File
       uses: ./.github/actions/web_api_config
-    #   with:
-    #     db_host:
-    #     db_user:
+      with:
+          api_base: ${{ env.TARGET_PATH }}
 
     - name: Install OpenConnect
       run: sudo apt-get -q update && sudo apt-get -q install openconnect
