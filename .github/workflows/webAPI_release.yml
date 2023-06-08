@@ -47,7 +47,7 @@ jobs:
     - name: Upload to web server via rsync
       uses: burnett01/rsync-deployments@5.2
       with:
-        switches: -vrct --delete --exclude-from 'rsync-exclude'
+        switches: -vrc --delete --exclude-from 'rsync-exclude'
         path: ./*
         remote_path: ${{ env.TARGET_PATH }}
         remote_host: ${{ env.TARGET_HOST }}
