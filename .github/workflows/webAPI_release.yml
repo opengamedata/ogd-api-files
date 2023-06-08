@@ -58,4 +58,4 @@ jobs:
       run: echo "Deployed API to ${{ env.TARGET_HOST }}/${{ env.TARGET_PATH }}"
 
     - name: Restart httpd via ssh
-      run: ssh -o StrictHostKeyChecking=no -t -i ./key.txt ${{ secrets.DEPLOY_USER }}@${{ env.TARGET_HOST }} "sudo /sbin/service httpd restart"
+      run: ssh -o StrictHostKeyChecking=no -t -i ./key.txt ${{ secrets.DEPLOY_USER }}@${{ env.TARGET_HOST }} "sudo service apache2 restart"
