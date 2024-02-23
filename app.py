@@ -64,6 +64,8 @@ from config.config import settings
 application.logger.setLevel(settings['DEBUG_LEVEL'])
 
 class SanitizedParams:
+    """Dumb struct to store the sanitized params from a request
+    """
     def __init__(self, game_id:str, year:int, month:int):
         self._game_id : str = game_id
         self._year    : int = year
