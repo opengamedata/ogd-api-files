@@ -283,26 +283,25 @@ def get_game_file_info_by_month():
                 or (sanitizedInput.Year >= fromYear and sanitizedInput.Month >= fromMonth and sanitizedInput.Year <= toYear and sanitizedInput.Month <= toMonth)):
                 files_base_url     : str = file_list_json.get("CONFIG", {}).get("files_base")
                 templates_base_url : str = file_list_json.get("CONFIG", {}).get("templates_base")
+                _dataset_json = file_list_json.get(_game_id, {}).get(_dataset_key, {})
               
                 # Files
-                file_info["events_file"]     = files_base_url + file_list_json[_game_id][_dataset_key]["events_file"]     if file_list_json[_game_id][_dataset_key]["events_file"]     else None
-                file_info["players_file"]    = files_base_url + file_list_json[_game_id][_dataset_key]["players_file"]    if file_list_json[_game_id][_dataset_key]["players_file"]    else None
-                file_info["population_file"] = files_base_url + file_list_json[_game_id][_dataset_key]["population_file"] if file_list_json[_game_id][_dataset_key]["population_file"] else None
-                file_info["raw_file"]        = files_base_url + file_list_json[_game_id][_dataset_key]["raw_file"]        if file_list_json[_game_id][_dataset_key]["raw_file"]        else None
-                file_info["sessions_file"]   = files_base_url + file_list_json[_game_id][_dataset_key]["sessions_file"]   if file_list_json[_game_id][_dataset_key]["sessions_file"]   else None
+                file_info["events_file"]     = files_base_url + _dataset_json.get("events_file", None)
+                file_info["players_file"]    = files_base_url + _dataset_json.get("players_file", None)
+                file_info["population_file"] = files_base_url + _dataset_json.get("population_file", None)
+                file_info["raw_file"]        = files_base_url + _dataset_json.get("raw_file", None)
+                file_info["sessions_file"]   = files_base_url + _dataset_json.get("sessions_file", None)
 
                 # Templates
-                file_info["events_template"]     = templates_base_url + file_list_json[_game_id][_dataset_key]["events_template"]     if file_list_json[_game_id][_dataset_key]["events_template"]     is not None else None
-                file_info["players_template"]    = templates_base_url + file_list_json[_game_id][_dataset_key]["players_template"]    if file_list_json[_game_id][_dataset_key]["players_template"]    is not None else None
-                file_info["population_template"] = templates_base_url + file_list_json[_game_id][_dataset_key]["population_template"] if file_list_json[_game_id][_dataset_key]["population_template"] is not None else None
-                file_info["sessions_template"]   = templates_base_url + file_list_json[_game_id][_dataset_key]["sessions_template"]   if file_list_json[_game_id][_dataset_key]["sessions_template"]   is not None else None
+                file_info["events_template"]     = templates_base_url + _dataset_json.get("events_template", None)
+                file_info["players_template"]    = templates_base_url + _dataset_json.get("players_template", None)
+                file_info["population_template"] = templates_base_url + _dataset_json.get("population_template", None)
+                file_info["sessions_template"]   = templates_base_url + _dataset_json.get("sessions_template", None)
 
                 _git_base_url = "https://github.com/opengamedata/opengamedata-core/tree/"
-                _revision     = file_list_json[_game_id][_dataset_key]["ogd_revision"] or None
-                file_info["detectors_link"] = _git_base_url + _revision + "/games/" + _game_id + "/detectors" \
-                    if _revision else None
-                file_info["features_link"] = _git_base_url + _revision + "/games/" + _game_id + "/features" \
-                    if _revision else None
+                _revision     = _dataset_json.get("ogd_revision") or None
+                file_info["detectors_link"] = f"{_git_base_url}{_revision}/games/{_game_id}/detectors" if _revision else None
+                file_info["features_link"]  = f"{_git_base_url}{_revision}/games/{_game_id}/features"  if _revision else None
                 
                 found_matching_range = True
 
