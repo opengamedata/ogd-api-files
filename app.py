@@ -207,8 +207,8 @@ def get_game_file_info_by_month():
         return APIResponse(False, None).ToDict()
 
     file_info = {}
-    files_base_url = file_list_json["CONFIG"]["files_base"]
-    templates_base_url = file_list_json["CONFIG"]["templates_base"]
+    files_base_url       = file_list_json["CONFIG"]["files_base"]
+    templates_base_url   = file_list_json["CONFIG"]["templates_base"]
     found_matching_range = False
 
    # If a year and month wasn't given, we'll default to returning files & info for the last range
@@ -254,24 +254,26 @@ def get_game_file_info_by_month():
             # OR if this range contains the given year & month
             if ((request.args.get("year") is None and request.args.get("month") is None and rangeKey == lastRangeKey) 
                 or (sanitizedInput["year"] >= fromYear and sanitizedInput["month"] >= fromMonth and sanitizedInput["year"] <= toYear and sanitizedInput["month"] <= toMonth)):
+                _game_id = sanitizedInput["game_id"]
               
                 # Files
-                file_info["events_file"] = files_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["events_file"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["events_file"] else None
-                file_info["players_file"] = files_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["players_file"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["players_file"] else None
-                file_info["population_file"] = files_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["population_file"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["population_file"] else None
-                file_info["raw_file"] = files_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["raw_file"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["raw_file"] else None
-                file_info["sessions_file"] = files_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["sessions_file"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["sessions_file"] else None
+                file_info["events_file"]     = files_base_url + file_list_json[_game_id][rangeKey]["events_file"]     if file_list_json[_game_id][rangeKey]["events_file"]     else None
+                file_info["players_file"]    = files_base_url + file_list_json[_game_id][rangeKey]["players_file"]    if file_list_json[_game_id][rangeKey]["players_file"]    else None
+                file_info["population_file"] = files_base_url + file_list_json[_game_id][rangeKey]["population_file"] if file_list_json[_game_id][rangeKey]["population_file"] else None
+                file_info["raw_file"]        = files_base_url + file_list_json[_game_id][rangeKey]["raw_file"]        if file_list_json[_game_id][rangeKey]["raw_file"]        else None
+                file_info["sessions_file"]   = files_base_url + file_list_json[_game_id][rangeKey]["sessions_file"]   if file_list_json[_game_id][rangeKey]["sessions_file"]   else None
 
                 # Templates
-                file_info["events_template"] = templates_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["events_template"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["events_template"] != None else None
-                file_info["players_template"] = templates_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["players_template"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["players_template"] != None else None
-                file_info["population_template"] = templates_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["population_template"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["population_template"] != None else None
-                file_info["sessions_template"] = templates_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["sessions_template"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["sessions_template"] != None else None
+                file_info["events_template"]     = templates_base_url + file_list_json[_game_id][rangeKey]["events_template"]     if file_list_json[_game_id][rangeKey]["events_template"]     is not None else None
+                file_info["players_template"]    = templates_base_url + file_list_json[_game_id][rangeKey]["players_template"]    if file_list_json[_game_id][rangeKey]["players_template"]    is not None else None
+                file_info["population_template"] = templates_base_url + file_list_json[_game_id][rangeKey]["population_template"] if file_list_json[_game_id][rangeKey]["population_template"] is not None else None
+                file_info["sessions_template"]   = templates_base_url + file_list_json[_game_id][rangeKey]["sessions_template"]   if file_list_json[_game_id][rangeKey]["sessions_template"]   is not None else None
 
-                file_info["detectors_link"] = "https://github.com/opengamedata/opengamedata-core/tree/" + file_list_json[sanitizedInput["game_id"]][rangeKey]["ogd_revision"] + "/games/" + sanitizedInput["game_id"] + "/detectors" \
-                    if file_list_json[sanitizedInput["game_id"]][rangeKey]["ogd_revision"] else None
-                file_info["features_link"] = "https://github.com/opengamedata/opengamedata-core/tree/" + file_list_json[sanitizedInput["game_id"]][rangeKey]["ogd_revision"] + "/games/" + sanitizedInput["game_id"] + "/features" \
-                    if file_list_json[sanitizedInput["game_id"]][rangeKey]["ogd_revision"] else None
+                _git_base_url = "https://github.com/opengamedata/opengamedata-core/tree/"
+                file_info["detectors_link"] = _git_base_url + file_list_json[_game_id][rangeKey]["ogd_revision"] + "/games/" + _game_id + "/detectors" \
+                    if file_list_json[_game_id][rangeKey]["ogd_revision"] else None
+                file_info["features_link"] = _git_base_url + file_list_json[_game_id][rangeKey]["ogd_revision"] + "/games/" + _game_id + "/features" \
+                    if file_list_json[_game_id][rangeKey]["ogd_revision"] else None
                 
                 found_matching_range = True
 
