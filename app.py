@@ -1,7 +1,9 @@
 # import standard libraries
-import sys, os, re, datetime, urllib, json
-from logging.config import dictConfig
+import sys, os, re, datetime, json
 from calendar import monthrange
+from logging.config import dictConfig
+from typing import Any, Dict, LiteralString
+from urllib import request as url_request
 
 # import 3rd-party libraries
 from flask import Flask, send_file, request
@@ -61,22 +63,37 @@ CORS(application)
 from config.config import settings
 application.logger.setLevel(settings['DEBUG_LEVEL'])
 
+class SanitizedParams:
+    def __init__(self, game_id:str, year:int, month:int):
+        self._game_id : str = game_id
+        self._year    : int = year
+        self._month   : int = month
+    
+    @property
+    def GameID(self) -> str:
+        return self._game_id
+    @property
+    def Year(self) -> int:
+        return self._year
+    @property
+    def Month(self) -> int:
+        return self._month
+
 # If the given game_id contains allowed characters, return it in UPPERCASE, otherwise return empty string
 def sanitizeGameId(game_id: str) -> str:
     if re.search("^[A-Za-z_]+$", game_id) is None:
         game_id = ""
-
     return game_id.upper()
 
 # Shared utility function to retrieve game_id, year, and month from the request's query string.
 # Defaults are used if a value was not given or is invalid
-def getSanitizedQueryParams():
+def getSanitizedQueryParams() -> SanitizedParams:
 
     now_date = datetime.date.today()
 
     # Extract query string parameters
-    game_id = sanitizeGameId(request.args.get("game_id", default = "", type=str))
-    year = request.args.get("year", default=now_date.year, type=int)
+    game_id = sanitizeGameId(request.args.get("game_id", default ="", type=str))
+    year = request.args.get("year",   default=now_date.year, type=int)
     month = request.args.get("month", default=now_date.month, type=int)
     
     if month < 1 or month > 12:
@@ -85,6 +102,7 @@ def getSanitizedQueryParams():
     if year < 2000 or year > now_date.year:
         year = now_date.year
 
+    return SanitizedParams(game_id=game_id, year=year, month=month)
     return { "game_id": game_id, "year": year, "month": month }
 
 # TODO: Remove this action and dependencies (interfaces, config) if we're certain they won't be needed.
@@ -106,24 +124,24 @@ def get_game_usage_by_month():
 
     sanitizedInput = getSanitizedQueryParams()
 
-    if sanitizedInput["game_id"] is None or sanitizedInput["game_id"] == "":
+    if sanitizedInput.GameID is None or sanitizedInput.GameID == "":
         return APIResponse(False, None).ToDict()
 
     # If we don't have a mapping for the given game
-    if not sanitizedInput["game_id"] in settings["BIGQUERY_GAME_MAPPING"]:
+    if not sanitizedInput.GameID in settings["BIGQUERY_GAME_MAPPING"]:
         return APIResponse(False, None).ToDict()
 
     total_monthly_sessions = 0
     sessions_by_day = {}
 
-    bqInterface = BigQueryInterface(settings["BIGQUERY_GAME_MAPPING"][sanitizedInput["game_id"]])
-    total_monthly_sessions = bqInterface.GetTotalSessionsForMonth(sanitizedInput["year"], sanitizedInput["month"])
-    sessions_by_day = bqInterface.GetSessionsPerDayForMonth(sanitizedInput["year"], sanitizedInput["month"])
+    bqInterface = BigQueryInterface(settings["BIGQUERY_GAME_MAPPING"][sanitizedInput.GameID])
+    total_monthly_sessions = bqInterface.GetTotalSessionsForMonth(sanitizedInput.Year, sanitizedInput.Month)
+    sessions_by_day        = bqInterface.GetSessionsPerDayForMonth(sanitizedInput.Year, sanitizedInput.Month)
 
     responseObj = {
-        "game_id": sanitizedInput["game_id"],
-        "selected_month": sanitizedInput["month"],
-        "selected_year": sanitizedInput["year"],
+        "game_id": sanitizedInput.GameID,
+        "selected_month": sanitizedInput.Month,
+        "selected_year": sanitizedInput.Year,
         "total_monthly_sessions": total_monthly_sessions,
         "sessions_by_day": sessions_by_day
     }
@@ -142,7 +160,7 @@ def get_monthly_game_usage():
 
     # Pull the file list data into a dictionary
     file_list_url = 'https://opengamedata.fielddaylab.wisc.edu/data/file_list.json'
-    file_list_response = urllib.request.urlopen(file_list_url)
+    file_list_response = url_request.urlopen(file_list_url)
     file_list_json = json.loads(file_list_response.read())
 
     # If the given game isn't in our dictionary, or our dictionary doesn't have any date ranges for this game
@@ -206,37 +224,36 @@ def get_monthly_game_usage():
 def get_game_file_info_by_month():
 
     sanitizedInput = getSanitizedQueryParams()
+    _game_id = sanitizedInput.GameID # local var because `sanitizedInput.GameID` is loooong.
 
-    file_list_url = 'https://opengamedata.fielddaylab.wisc.edu/data/file_list.json'
-
-    file_list_response = urllib.request.urlopen(file_list_url)
-    file_list_json = json.loads(file_list_response.read())
+    FILE_LIST_URL      = 'https://opengamedata.fielddaylab.wisc.edu/data/file_list.json'
+    file_list_response = url_request.urlopen(FILE_LIST_URL)
+    file_list_json     = json.loads(file_list_response.read())
 
     # If we couldn't find the given game in file_list.json, or the game didn't have any date ranges
-    if not sanitizedInput["game_id"] in file_list_json or len(file_list_json[sanitizedInput["game_id"]]) == 0:
-        return APIResponse(False, None).ToDict()
+    if (_game_id is None) or (not _game_id in file_list_json) or (len(file_list_json[_game_id]) == 0):
+        return APIResponse(success=False, data=None).ToDict()
 
     file_info = {}
-    files_base_url = file_list_json["CONFIG"]["files_base"]
-    templates_base_url = file_list_json["CONFIG"]["templates_base"]
     found_matching_range = False
 
+    _game_datasets = file_list_json[_game_id]
    # If a year and month wasn't given, we'll default to returning files & info for the last range
-    if request.args.get("year") is None and request.args.get("month") is None:
-        lastRangeKey = list(file_list_json[sanitizedInput["game_id"]])[-1]
+    if sanitizedInput.Year is None or sanitizedInput.Month is None:
+        _last_dataset_key = list(_game_datasets)[-1]
 
     # rangeKey format is GAMEID_YYYYMMDD_to_YYYYMMDD
-    for rangeKey in file_list_json[sanitizedInput["game_id"]]:
+    for _dataset_key in _game_datasets:
             
-        rangeKeyWithoutGame = rangeKey[len(sanitizedInput["game_id"]):]
-        rangeKeyParts = rangeKeyWithoutGame.split("_")
+        _dataset_date_range = _dataset_key[len(_game_id):]
+        _dataset_date_range_parts = _dataset_date_range.split("_")
 
         # If this rangeKey matches the expected format
-        if len(rangeKeyParts) == 4:
-            fromYear = int(rangeKeyParts[1][0:4])
-            fromMonth = int(rangeKeyParts[1][4:6])
-            toYear = int(rangeKeyParts[3][0:4])
-            toMonth = int(rangeKeyParts[3][4:6])
+        if len(_dataset_date_range_parts) == 4:
+            fromYear  = int(_dataset_date_range_parts[1][0:4])
+            fromMonth = int(_dataset_date_range_parts[1][4:6])
+            toYear    = int(_dataset_date_range_parts[3][0:4])
+            toMonth   = int(_dataset_date_range_parts[3][4:6])
 
             # If this is the first range block in our loop, or this range block has an earlier year than our first_year
             if "first_year" not in file_info or file_info["first_year"] > fromYear:
@@ -262,26 +279,30 @@ def get_game_file_info_by_month():
 
             # If a month & year wasn't actually given and this is the last range
             # OR if this range contains the given year & month
-            if ((request.args.get("year") is None and request.args.get("month") is None and rangeKey == lastRangeKey) 
-                or (sanitizedInput["year"] >= fromYear and sanitizedInput["month"] >= fromMonth and sanitizedInput["year"] <= toYear and sanitizedInput["month"] <= toMonth)):
+            if ((request.args.get("year") is None and request.args.get("month") is None and _dataset_key == _last_dataset_key) 
+                or (sanitizedInput.Year >= fromYear and sanitizedInput.Month >= fromMonth and sanitizedInput.Year <= toYear and sanitizedInput.Month <= toMonth)):
+                files_base_url     : str = file_list_json.get("CONFIG", {}).get("files_base")
+                templates_base_url : str = file_list_json.get("CONFIG", {}).get("templates_base")
               
                 # Files
-                file_info["events_file"] = files_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["events_file"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["events_file"] else None
-                file_info["players_file"] = files_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["players_file"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["players_file"] else None
-                file_info["population_file"] = files_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["population_file"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["population_file"] else None
-                file_info["raw_file"] = files_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["raw_file"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["raw_file"] else None
-                file_info["sessions_file"] = files_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["sessions_file"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["sessions_file"] else None
+                file_info["events_file"]     = files_base_url + file_list_json[_game_id][_dataset_key]["events_file"]     if file_list_json[_game_id][_dataset_key]["events_file"]     else None
+                file_info["players_file"]    = files_base_url + file_list_json[_game_id][_dataset_key]["players_file"]    if file_list_json[_game_id][_dataset_key]["players_file"]    else None
+                file_info["population_file"] = files_base_url + file_list_json[_game_id][_dataset_key]["population_file"] if file_list_json[_game_id][_dataset_key]["population_file"] else None
+                file_info["raw_file"]        = files_base_url + file_list_json[_game_id][_dataset_key]["raw_file"]        if file_list_json[_game_id][_dataset_key]["raw_file"]        else None
+                file_info["sessions_file"]   = files_base_url + file_list_json[_game_id][_dataset_key]["sessions_file"]   if file_list_json[_game_id][_dataset_key]["sessions_file"]   else None
 
                 # Templates
-                file_info["events_template"] = templates_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["events_template"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["events_template"] != None else None
-                file_info["players_template"] = templates_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["players_template"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["players_template"] != None else None
-                file_info["population_template"] = templates_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["population_template"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["population_template"] != None else None
-                file_info["sessions_template"] = templates_base_url + file_list_json[sanitizedInput["game_id"]][rangeKey]["sessions_template"] if file_list_json[sanitizedInput["game_id"]][rangeKey]["sessions_template"] != None else None
+                file_info["events_template"]     = templates_base_url + file_list_json[_game_id][_dataset_key]["events_template"]     if file_list_json[_game_id][_dataset_key]["events_template"]     is not None else None
+                file_info["players_template"]    = templates_base_url + file_list_json[_game_id][_dataset_key]["players_template"]    if file_list_json[_game_id][_dataset_key]["players_template"]    is not None else None
+                file_info["population_template"] = templates_base_url + file_list_json[_game_id][_dataset_key]["population_template"] if file_list_json[_game_id][_dataset_key]["population_template"] is not None else None
+                file_info["sessions_template"]   = templates_base_url + file_list_json[_game_id][_dataset_key]["sessions_template"]   if file_list_json[_game_id][_dataset_key]["sessions_template"]   is not None else None
 
-                file_info["detectors_link"] = "https://github.com/opengamedata/opengamedata-core/tree/" + file_list_json[sanitizedInput["game_id"]][rangeKey]["ogd_revision"] + "/games/" + sanitizedInput["game_id"] + "/detectors" \
-                    if file_list_json[sanitizedInput["game_id"]][rangeKey]["ogd_revision"] else None
-                file_info["features_link"] = "https://github.com/opengamedata/opengamedata-core/tree/" + file_list_json[sanitizedInput["game_id"]][rangeKey]["ogd_revision"] + "/games/" + sanitizedInput["game_id"] + "/features" \
-                    if file_list_json[sanitizedInput["game_id"]][rangeKey]["ogd_revision"] else None
+                _git_base_url = "https://github.com/opengamedata/opengamedata-core/tree/"
+                _revision     = file_list_json[_game_id][_dataset_key]["ogd_revision"] or None
+                file_info["detectors_link"] = _git_base_url + _revision + "/games/" + _game_id + "/detectors" \
+                    if _revision else None
+                file_info["features_link"] = _git_base_url + _revision + "/games/" + _game_id + "/features" \
+                    if _revision else None
                 
                 found_matching_range = True
 
