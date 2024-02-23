@@ -5,8 +5,8 @@ on:
   #  tags:
   #    - '*'
   workflow_dispatch: # Allow manual trigger of this workflow from the Actions tab
-  push: # Trigger automatically when we do a merge to production
-     branches: [ production ] 
+  release:
+    types: released
 
 env:
   DEPLOY_HOST: ${{ vars.OGD_SERVICES_HOST }}
