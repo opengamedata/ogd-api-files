@@ -300,10 +300,17 @@ def get_game_file_info_by_month():
                 file_info["population_template"] = templates_base_url + _dataset_json.get("population_template", None)
                 file_info["sessions_template"]   = templates_base_url + _dataset_json.get("sessions_template", None)
 
-                _git_base_url = "https://github.com/opengamedata/opengamedata-core/tree/"
-                _revision     = _dataset_json.get("ogd_revision") or None
-                file_info["detectors_link"] = f"{_git_base_url}{_revision}/games/{_game_id}/detectors" if _revision else None
-                file_info["features_link"]  = f"{_git_base_url}{_revision}/games/{_game_id}/features"  if _revision else None
+                _git_base_url       = "https://github.com/opengamedata/opengamedata-core/tree/"
+                _codespace_base_url = "https://codespaces.new/opengamedata/opengamedata-samples/tree/"
+                _revision    = _dataset_json.get("ogd_revision") or None
+                # Convention for branch naming is lower-case with dashes,
+                # while game IDs are usually upper-case with underscores, so make sure we do the conversion
+                _branch_name = _game_id.lower().replace('_', '-')
+                file_info["detectors_link"] = f"{_git_base_url}{_revision}/games/{_branch_name}/detectors" if _revision else None
+                file_info["features_link"]  = f"{_git_base_url}{_revision}/games/{_branch_name}/features"  if _revision else None
+                file_info["events_codespace_link"]   = f"{_codespace_base_url}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fevent-template%2Fdevcontainer.json"
+                file_info["sessions_codespace_link"] = f"{_codespace_base_url}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fplayer-template%2Fdevcontainer.json"
+                file_info["players_codespace_link"]  = f"{_codespace_base_url}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fsession-template%2Fdevcontainer.json"
                 
                 found_matching_range = True
 
