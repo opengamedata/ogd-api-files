@@ -283,34 +283,37 @@ def get_game_file_info_by_month():
             # OR if this range contains the given year & month
             if ((request.args.get("year") is None and request.args.get("month") is None and _dataset_key == _last_dataset_key) 
                 or (sanitizedInput.Year >= fromYear and sanitizedInput.Month >= fromMonth and sanitizedInput.Year <= toYear and sanitizedInput.Month <= toMonth)):
-                files_base_url     : str = file_list_json.get("CONFIG", {}).get("files_base")
-                templates_base_url : str = file_list_json.get("CONFIG", {}).get("templates_base")
+                # Base URLs
+                FILEHOST_BASE_URL   : str = file_list_json.get("CONFIG", {}).get("files_base")
+                TEMPLATES_BASE_URL  : str = file_list_json.get("CONFIG", {}).get("templates_base")
+                CODESPACES_BASE_URL : str = "https://codespaces.new/opengamedata/opengamedata-samples/tree/"
+                GITHUB_BASE_URL     : str = "https://github.com/opengamedata/opengamedata-core/tree/"
+
+                _branch_name = _game_id.lower().replace('_', '-')
                 _dataset_json = file_list_json.get(_game_id, {}).get(_dataset_key, {})
+                _revision    = _dataset_json.get("ogd_revision") or None
               
                 # Files
-                file_info["events_file"]     = files_base_url + _dataset_json.get("events_file", None)
-                file_info["players_file"]    = files_base_url + _dataset_json.get("players_file", None)
-                file_info["population_file"] = files_base_url + _dataset_json.get("population_file", None)
-                file_info["raw_file"]        = files_base_url + _dataset_json.get("raw_file", None)
-                file_info["sessions_file"]   = files_base_url + _dataset_json.get("sessions_file", None)
+                file_info["events_file"]     = FILEHOST_BASE_URL + _dataset_json.get("events_file", None)
+                file_info["players_file"]    = FILEHOST_BASE_URL + _dataset_json.get("players_file", None)
+                file_info["population_file"] = FILEHOST_BASE_URL + _dataset_json.get("population_file", None)
+                file_info["raw_file"]        = FILEHOST_BASE_URL + _dataset_json.get("raw_file", None)
+                file_info["sessions_file"]   = FILEHOST_BASE_URL + _dataset_json.get("sessions_file", None)
 
                 # Templates
-                file_info["events_template"]     = templates_base_url + _dataset_json.get("events_template", None)
-                file_info["players_template"]    = templates_base_url + _dataset_json.get("players_template", None)
-                file_info["population_template"] = templates_base_url + _dataset_json.get("population_template", None)
-                file_info["sessions_template"]   = templates_base_url + _dataset_json.get("sessions_template", None)
+                file_info["events_template"]     = TEMPLATES_BASE_URL + _dataset_json.get("events_template", None)
+                file_info["sessions_template"]   = TEMPLATES_BASE_URL + _dataset_json.get("sessions_template", None)
+                file_info["players_template"]    = TEMPLATES_BASE_URL + _dataset_json.get("players_template", None)
+                file_info["population_template"] = TEMPLATES_BASE_URL + _dataset_json.get("population_template", None)
 
-                _git_base_url       = "https://github.com/opengamedata/opengamedata-core/tree/"
-                _codespace_base_url = "https://codespaces.new/opengamedata/opengamedata-samples/tree/"
-                _revision    = _dataset_json.get("ogd_revision") or None
+                file_info["events_codespace_link"]   = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fevent-template%2Fdevcontainer.json"
+                file_info["sessions_codespace_link"] = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fplayer-template%2Fdevcontainer.json"
+                file_info["players_codespace_link"]  = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fsession-template%2Fdevcontainer.json"
+
                 # Convention for branch naming is lower-case with dashes,
                 # while game IDs are usually upper-case with underscores, so make sure we do the conversion
-                _branch_name = _game_id.lower().replace('_', '-')
-                file_info["detectors_link"] = f"{_git_base_url}{_revision}/games/{_branch_name}/detectors" if _revision else None
-                file_info["features_link"]  = f"{_git_base_url}{_revision}/games/{_branch_name}/features"  if _revision else None
-                file_info["events_codespace_link"]   = f"{_codespace_base_url}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fevent-template%2Fdevcontainer.json"
-                file_info["sessions_codespace_link"] = f"{_codespace_base_url}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fplayer-template%2Fdevcontainer.json"
-                file_info["players_codespace_link"]  = f"{_codespace_base_url}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fsession-template%2Fdevcontainer.json"
+                file_info["detectors_link"] = f"{GITHUB_BASE_URL}{_revision}/games/{_branch_name}/detectors" if _revision else None
+                file_info["features_link"]  = f"{GITHUB_BASE_URL}{_revision}/games/{_branch_name}/features"  if _revision else None
                 
                 found_matching_range = True
 
