@@ -306,9 +306,9 @@ def get_game_file_info_by_month():
                 file_info["players_template"]    = TEMPLATES_BASE_URL + _dataset_json.get("players_template", None)
                 file_info["population_template"] = TEMPLATES_BASE_URL + _dataset_json.get("population_template", None)
 
-                file_info["events_codespace_link"]   = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fevent-template%2Fdevcontainer.json"
-                file_info["sessions_codespace_link"] = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fplayer-template%2Fdevcontainer.json"
-                file_info["players_codespace_link"]  = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fsession-template%2Fdevcontainer.json"
+                file_info["events_codespace"]   = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fevent-template%2Fdevcontainer.json"
+                file_info["sessions_codespace"] = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fplayer-template%2Fdevcontainer.json"
+                file_info["players_codespace"]  = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fsession-template%2Fdevcontainer.json"
 
                 # Convention for branch naming is lower-case with dashes,
                 # while game IDs are usually upper-case with underscores, so make sure we do the conversion
