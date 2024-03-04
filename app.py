@@ -280,7 +280,7 @@ def get_game_file_info_by_month():
 
             # If a month & year wasn't actually given and this is the last range
             # OR if this range contains the given year & month
-            if ((request.args.get("year") is None and request.args.get("month") is None and _dataset_key == _last_dataset_key) 
+            if ((sanitizedInput.Year is None and sanitizedInput.Month is None and _dataset_key == _last_dataset_key) 
                 or (sanitizedInput.Year >= fromYear and sanitizedInput.Month >= fromMonth and sanitizedInput.Year <= toYear and sanitizedInput.Month <= toMonth)):
                 # Base URLs
                 FILEHOST_BASE_URL   : str = file_list_json.get("CONFIG", {}).get("files_base")
