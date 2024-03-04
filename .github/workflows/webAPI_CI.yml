@@ -14,8 +14,8 @@ on:
 env:
   DEPLOY_HOST: ${{ vars.OGD_STAGING_HOST }}
   DEPLOY_DIR: ${{ vars.WSGI_PATH }}/${{ github.event.repository.name }}/${{ github.ref_name }}
-  DEPLOY_URL:  ${{ vars.OGD_STAGING_HOST }}/${{ github.event.repository.name }}/${{ github.ref_name }}
-  URL_PATH:    ${{ github.event.repository.name }}/${{ github.ref_name }}
+  DEPLOY_URL:  ${{ vars.OGD_STAGING_HOST }}/wsgi-bin/${{ github.event.repository.name }}/${{ github.ref_name }}
+  URL_PATH:    wsgi-bin/${{ github.event.repository.name }}/${{ github.ref_name }}
 
 jobs:
   ci_deploy:
