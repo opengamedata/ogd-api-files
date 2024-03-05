@@ -23,7 +23,7 @@ logHandlers = {
 
 logRootHandlers = ['wsgi']
 
-# Commenting out the dedicated log file for this app. The code functions fine, but 
+# NOTE: Commenting out the dedicated log file for this app. The code functions fine, but 
 # getting the permissions set correctly isn't a priority right now
 
 # If a dedicated log file is defined for this Flask app, we'll also log there
@@ -55,7 +55,7 @@ application = Flask(__name__)
 
 # Allow cross-origin requests from any origin by default
 # This presents minimal risk to visitors since the API merely retrieves non-sensitive data
-# Comment this out if the web server itself is configured to send an Access-Control-Allow-Origin header, so we don't have a duplicate header
+# NOTE: Comment this out if the web server itself is configured to send an Access-Control-Allow-Origin header, so we don't have a duplicate header
 CORS(application)
 
 # Now that logging is set up, import our local config settings
@@ -293,17 +293,17 @@ def get_game_file_info_by_month():
                 _revision    = _dataset_json.get("ogd_revision") or None
               
                 # Files
-                file_info["events_file"]     = FILEHOST_BASE_URL + _dataset_json.get("events_file", None)
-                file_info["players_file"]    = FILEHOST_BASE_URL + _dataset_json.get("players_file", None)
-                file_info["population_file"] = FILEHOST_BASE_URL + _dataset_json.get("population_file", None)
-                file_info["raw_file"]        = FILEHOST_BASE_URL + _dataset_json.get("raw_file", None)
-                file_info["sessions_file"]   = FILEHOST_BASE_URL + _dataset_json.get("sessions_file", None)
+                file_info["raw_file"]        = FILEHOST_BASE_URL + _dataset_json.get("raw_file", None)        if "raw_file"        in _dataset_json else None
+                file_info["events_file"]     = FILEHOST_BASE_URL + _dataset_json.get("events_file", None)     if "events_file"     in _dataset_json else None
+                file_info["sessions_file"]   = FILEHOST_BASE_URL + _dataset_json.get("sessions_file", None)   if "sessions_file"   in _dataset_json else None
+                file_info["players_file"]    = FILEHOST_BASE_URL + _dataset_json.get("players_file", None)    if "players_file"    in _dataset_json else None
+                file_info["population_file"] = FILEHOST_BASE_URL + _dataset_json.get("population_file", None) if "population_file" in _dataset_json else None
 
                 # Templates
-                file_info["events_template"]     = TEMPLATES_BASE_URL + _dataset_json.get("events_template", None)
-                file_info["sessions_template"]   = TEMPLATES_BASE_URL + _dataset_json.get("sessions_template", None)
-                file_info["players_template"]    = TEMPLATES_BASE_URL + _dataset_json.get("players_template", None)
-                file_info["population_template"] = TEMPLATES_BASE_URL + _dataset_json.get("population_template", None)
+                file_info["events_template"]     = TEMPLATES_BASE_URL + _dataset_json.get("events_template", None)     if "events_template"     in _dataset_json else None
+                file_info["sessions_template"]   = TEMPLATES_BASE_URL + _dataset_json.get("sessions_template", None)   if "sessions_template"   in _dataset_json else None
+                file_info["players_template"]    = TEMPLATES_BASE_URL + _dataset_json.get("players_template", None)    if "players_template"    in _dataset_json else None
+                file_info["population_template"] = TEMPLATES_BASE_URL + _dataset_json.get("population_template", None) if "population_template" in _dataset_json else None
 
                 file_info["events_codespace"]   = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fevent-template%2Fdevcontainer.json"
                 file_info["sessions_codespace"] = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fplayer-template%2Fdevcontainer.json"
