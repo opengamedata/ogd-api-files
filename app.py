@@ -63,6 +63,45 @@ CORS(application)
 from config.config import settings
 application.logger.setLevel(settings['DEBUG_LEVEL'])
 
+class DatasetKey:
+    """Simple little class to make logic with dataset keys easier
+    """
+    def __init__(self, key:str, game_id:str):
+        _dataset_date_range = key[len(game_id):]
+        _dataset_date_range_parts = _dataset_date_range.split("_")
+        # If this _dataset_key matches the expected format,
+        # i.e. spit is: ["", "YYYYMMDD", "to", "YYYYMMDD"]
+        if len(_dataset_date_range_parts) == 4:
+            self._fromYear  = int(_dataset_date_range_parts[1][0:4])
+            self._fromMonth = int(_dataset_date_range_parts[1][4:6])
+            self._toYear    = int(_dataset_date_range_parts[3][0:4])
+            self._toMonth   = int(_dataset_date_range_parts[3][4:6])
+        else:
+            self._fromYear  = None
+            self._fromMonth = None
+            self._toYear    = None
+            self._toMonth   = None
+    
+    @property
+    def IsValid(self) -> bool:
+        return  self._fromYear  is not None \
+            and self._fromMonth is not None \
+            and self._toYear    is not None \
+            and self._toMonth   is not None
+    @property
+    def FromYear(self) -> int:
+        return self._fromYear or -1
+    @property
+    def FromMonth(self) -> int:
+        return self._fromMonth or -1
+    @property
+    def ToYear(self) -> int:
+        return self._toYear or -1
+    @property
+    def ToMonth(self) -> int:
+        return self._toMonth or -1
+
+
 class SanitizedParams:
     """Dumb struct to store the sanitized params from a request
     """
@@ -232,14 +271,13 @@ def get_game_file_info_by_month():
     ret_val = APIResponse(success=False, data=None).ToDict()
 
     sanitizedRequestParams = SanitizedParams.FromRequest()
-    _requested_game = sanitizedRequestParams.GameID # local var because `sanitizedRequestParams.GameID` is loooong.
 
     file_list_response = url_request.urlopen(settings.get("FILE_LIST_URL", "https://opengamedata.fielddaylab.wisc.edu/data/file_list.json"))
     file_list_json     = json.loads(file_list_response.read())
 
     # If we couldn't find the requested game in file_list.json, or the game didn't have any date ranges, skip.
-    _game_datasets = file_list_json.get(_requested_game, {})
-    if (_requested_game is not None) and (len(_game_datasets) > 0):
+    _game_datasets = file_list_json.get(sanitizedRequestParams.GameID, {})
+    if (sanitizedRequestParams.GameID is not None) and (len(_game_datasets) > 0):
         file_info = {}
         found_matching_range = False
 
@@ -247,53 +285,42 @@ def get_game_file_info_by_month():
         if sanitizedRequestParams.Year is None or sanitizedRequestParams.Month is None:
             _last_dataset_key = list(_game_datasets)[-1]
 
-        # rangeKey format is GAMEID_YYYYMMDD_to_YYYYMMDD
-        for _dataset_key in _game_datasets:
-                
-            _dataset_date_range = _dataset_key[len(_requested_game):]
-            _dataset_date_range_parts = _dataset_date_range.split("_")
-
-            # If this rangeKey matches the expected format
-            if len(_dataset_date_range_parts) == 4:
-                fromYear  = int(_dataset_date_range_parts[1][0:4])
-                fromMonth = int(_dataset_date_range_parts[1][4:6])
-                toYear    = int(_dataset_date_range_parts[3][0:4])
-                toMonth   = int(_dataset_date_range_parts[3][4:6])
+        # _dataset_key format should be GAMEID_YYYYMMDD_to_YYYYMMDD
+        for _key in _game_datasets:
+            _dataset_key = DatasetKey(_key, sanitizedRequestParams.GameID)
+            if _dataset_key.IsValid:
 
                 # If this is the first range block in our loop, or this range block has an earlier year than our first_year
-                if "first_year" not in file_info or file_info["first_year"] > fromYear:
-
-                    file_info["first_year"] = fromYear
-                    file_info["first_month"] = fromMonth
+                if "first_year" not in file_info or file_info["first_year"] > _dataset_key.FromYear:
+                    file_info["first_year"] = _dataset_key.FromYear
+                    file_info["first_month"] = _dataset_key.FromMonth
 
                 # If this is range is for the same year but an earlier month
-                elif file_info["first_year"] == fromYear and file_info["first_month"] > fromMonth:
-
-                    file_info["first_month"] = fromMonth
+                elif file_info["first_year"] == _dataset_key.FromYear and file_info["first_month"] > _dataset_key.FromMonth:
+                    file_info["first_month"] = _dataset_key.FromMonth
 
                 # If this is the first range block, or this range block has a later year than the last_year
-                if "last_year" not in file_info or file_info["last_year"] < toYear:
-
-                    file_info["last_year"] = toYear
-                    file_info["last_month"] = toMonth
+                if "last_year" not in file_info or file_info["last_year"] < _dataset_key.ToYear:
+                    file_info["last_year"] = _dataset_key.ToYear
+                    file_info["last_month"] = _dataset_key.ToMonth
 
                 # If this is range is for the same year but with a later month
-                elif file_info["last_year"] == toYear and file_info["last_month"] < toMonth:
-
-                    file_info["last_month"] = toMonth
+                elif file_info["last_year"] == _dataset_key.ToYear \
+                 and file_info["last_month"] < _dataset_key.ToMonth:
+                    file_info["last_month"] = _dataset_key.ToMonth
 
                 # If a month & year wasn't actually given and this is the last range
                 # OR if this range contains the given year & month
                 if ((sanitizedRequestParams.Year is None and sanitizedRequestParams.Month is None and _dataset_key == _last_dataset_key) 
-                    or (sanitizedRequestParams.Year >= fromYear and sanitizedRequestParams.Month >= fromMonth and sanitizedRequestParams.Year <= toYear and sanitizedRequestParams.Month <= toMonth)):
+                    or (sanitizedRequestParams.Year >= _dataset_key.FromYear and sanitizedRequestParams.Month >= _dataset_key.FromMonth and sanitizedRequestParams.Year <= _dataset_key.ToYear and sanitizedRequestParams.Month <= _dataset_key.ToMonth)):
                     # Base URLs
                     FILEHOST_BASE_URL   : str = file_list_json.get("CONFIG", {}).get("files_base")
                     TEMPLATES_BASE_URL  : str = file_list_json.get("CONFIG", {}).get("templates_base")
                     CODESPACES_BASE_URL : str = "https://codespaces.new/opengamedata/opengamedata-samples/tree/"
                     GITHUB_BASE_URL     : str = "https://github.com/opengamedata/opengamedata-core/tree/"
 
-                    _branch_name = _requested_game.lower().replace('_', '-')
-                    _dataset_json = file_list_json.get(_requested_game, {}).get(_dataset_key, {})
+                    _branch_name = sanitizedRequestParams.GameID.lower().replace('_', '-')
+                    _dataset_json = file_list_json.get(sanitizedRequestParams.GameID, {}).get(_dataset_key, {})
                     _revision    = _dataset_json.get("ogd_revision") or None
                 
                     # Files
@@ -319,6 +346,8 @@ def get_game_file_info_by_month():
                     file_info["features_link"]  = f"{GITHUB_BASE_URL}{_revision}/games/{_branch_name}/features"  if _revision else None
                     
                     found_matching_range = True
+            else:
+                pass # leave `found_matching_range` as false
 
         if not found_matching_range:
             file_info["found_matching_range"] = False
