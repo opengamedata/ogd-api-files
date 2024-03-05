@@ -227,8 +227,7 @@ def get_game_file_info_by_month():
     sanitizedInput = getSanitizedQueryParams()
     _game_id = sanitizedInput.GameID # local var because `sanitizedInput.GameID` is loooong.
 
-    FILE_LIST_URL      = 'https://opengamedata.fielddaylab.wisc.edu/data/file_list.json'
-    file_list_response = url_request.urlopen(FILE_LIST_URL)
+    file_list_response = url_request.urlopen(settings.get("FILE_LIST_URL", "https://opengamedata.fielddaylab.wisc.edu/data/file_list.json"))
     file_list_json     = json.loads(file_list_response.read())
 
     # If we couldn't find the given game in file_list.json, or the game didn't have any date ranges

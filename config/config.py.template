@@ -7,4 +7,5 @@ settings = {
 		"SHADOWSPECT":   {"PROJECT_ID":"shadowspect-b8e63",	"DATASET_ID":"analytics_284091572",	"TABLE_PREFIX":"events_*",   "CREDENTIALS_PATH":"./config/shadowspect.json", "SCHEMA_TYPE": "EVENTS-FIREBASE"},
 		"SHIPWRECKS":    {"PROJECT_ID":"shipwrecks-8d142",	"DATASET_ID":"analytics_269167605",	"TABLE_PREFIX":"events_*",   "CREDENTIALS_PATH":"./config/shipwrecks.json",	"SCHEMA_TYPE": "EVENTS-FIREBASE"}
     },
+    "FILE_LIST_URL" : 'https://opengamedata.fielddaylab.wisc.edu/data/file_list.json'
 }
