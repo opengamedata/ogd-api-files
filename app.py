@@ -338,6 +338,7 @@ def get_game_file_info_by_month():
 
                 _branch_name = sanitizedRequestParams.GameID.lower().replace('_', '-')
                 _dataset_json = file_list_json.get(sanitizedRequestParams.GameID, {}).get(str(_dataset_key), {})
+                print(f"_dataset_json:\n{_dataset_json}")
                 _revision    = _dataset_json.get("ogd_revision") or None
             
                 # Files
