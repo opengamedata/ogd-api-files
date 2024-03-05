@@ -238,11 +238,11 @@ def get_game_file_info_by_month():
     file_list_json     = json.loads(file_list_response.read())
 
     # If we couldn't find the requested game in file_list.json, or the game didn't have any date ranges, skip.
-    if (_requested_game is not None) and (len(file_list_json.get(_requested_game, {})) > 0):
+    _game_datasets = file_list_json.get(_requested_game, {})
+    if (_requested_game is not None) and (len(_game_datasets) > 0):
         file_info = {}
         found_matching_range = False
 
-        _game_datasets = file_list_json.get(_requested_game, {})
         # If a year and month wasn't given, we'll default to returning files & info for the last range
         if sanitizedRequestParams.Year is None or sanitizedRequestParams.Month is None:
             _last_dataset_key = list(_game_datasets)[-1]
