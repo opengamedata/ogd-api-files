@@ -342,17 +342,17 @@ def get_game_file_info_by_month():
                 _revision    = _dataset_json.get("ogd_revision") or None
             
                 # Files
-                file_info["raw_file"]        = FILEHOST_BASE_URL + _dataset_json.get("raw_file", None)        if "raw_file"        in _dataset_json else None
-                file_info["events_file"]     = FILEHOST_BASE_URL + _dataset_json.get("events_file", None)     if "events_file"     in _dataset_json else None
-                file_info["sessions_file"]   = FILEHOST_BASE_URL + _dataset_json.get("sessions_file", None)   if "sessions_file"   in _dataset_json else None
-                file_info["players_file"]    = FILEHOST_BASE_URL + _dataset_json.get("players_file", None)    if "players_file"    in _dataset_json else None
-                file_info["population_file"] = FILEHOST_BASE_URL + _dataset_json.get("population_file", None) if "population_file" in _dataset_json else None
+                file_info["raw_file"]        = f"{FILEHOST_BASE_URL}{_dataset_json.get('raw_file', None)}"        if "raw_file"        in _dataset_json else None
+                file_info["events_file"]     = f"{FILEHOST_BASE_URL}{_dataset_json.get('events_file', None)}"     if "events_file"     in _dataset_json else None
+                file_info["sessions_file"]   = f"{FILEHOST_BASE_URL}{_dataset_json.get('sessions_file', None)}"   if "sessions_file"   in _dataset_json else None
+                file_info["players_file"]    = f"{FILEHOST_BASE_URL}{_dataset_json.get('players_file', None)}"    if "players_file"    in _dataset_json else None
+                file_info["population_file"] = f"{FILEHOST_BASE_URL}{_dataset_json.get('population_file', None)}" if "population_file" in _dataset_json else None
 
                 # Templates
-                file_info["events_template"]     = TEMPLATES_BASE_URL + _dataset_json.get("events_template", None)     if "events_template"     in _dataset_json else None
-                file_info["sessions_template"]   = TEMPLATES_BASE_URL + _dataset_json.get("sessions_template", None)   if "sessions_template"   in _dataset_json else None
-                file_info["players_template"]    = TEMPLATES_BASE_URL + _dataset_json.get("players_template", None)    if "players_template"    in _dataset_json else None
-                file_info["population_template"] = TEMPLATES_BASE_URL + _dataset_json.get("population_template", None) if "population_template" in _dataset_json else None
+                file_info["events_template"]     = f"{TEMPLATES_BASE_URL}{_dataset_json.get('events_template', None)}"     if "events_template"     in _dataset_json else None
+                file_info["sessions_template"]   = f"{TEMPLATES_BASE_URL}{_dataset_json.get('sessions_template', None)}"   if "sessions_template"   in _dataset_json else None
+                file_info["players_template"]    = f"{TEMPLATES_BASE_URL}{_dataset_json.get('players_template', None)}"    if "players_template"    in _dataset_json else None
+                file_info["population_template"] = f"{TEMPLATES_BASE_URL}{_dataset_json.get('population_template', None)}" if "population_template" in _dataset_json else None
 
                 file_info["events_codespace"]   = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fevent-template%2Fdevcontainer.json"
                 file_info["sessions_codespace"] = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fplayer-template%2Fdevcontainer.json"
