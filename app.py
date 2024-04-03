@@ -1,8 +1,7 @@
 # import standard libraries
-import sys, os, re, datetime, json
+import json
 from calendar import monthrange
 from logging.config import dictConfig
-from typing import Optional
 from urllib import request as url_request
 
 # import 3rd-party libraries
@@ -11,6 +10,8 @@ from flask_cors import CORS
 
 # import our app libraries
 from models.APIResponse import APIResponse
+from schemas.DatasetSchema import DatasetKey
+from models.SanitizedParams import SanitizedParams
 from interfaces.BigQueryInterface import BigQueryInterface
 
 # By default we'll log to the WSGI errors stream which ends up in the Apache error log
@@ -63,97 +64,6 @@ CORS(application)
 from config.config import settings
 application.logger.setLevel(settings['DEBUG_LEVEL'])
 
-class DatasetKey:
-    """Simple little class to make logic with dataset keys easier
-    """
-    def __init__(self, key:str, game_id:str):
-        _dataset_date_range = key[len(game_id):]
-        _dataset_date_range_parts = _dataset_date_range.split("_")
-        # If this _dataset_key matches the expected format,
-        # i.e. spit is: ["", "YYYYMMDD", "to", "YYYYMMDD"]
-        if len(_dataset_date_range_parts) == 4:
-            self._fromYear  = int(_dataset_date_range_parts[1][0:4])
-            self._fromMonth = int(_dataset_date_range_parts[1][4:6])
-            self._toYear    = int(_dataset_date_range_parts[3][0:4])
-            self._toMonth   = int(_dataset_date_range_parts[3][4:6])
-        else:
-            self._fromYear  = None
-            self._fromMonth = None
-            self._toYear    = None
-            self._toMonth   = None
-        self._original_key = key
-
-    def __str__(self):
-        return self._original_key
-    
-    @property
-    def IsValid(self) -> bool:
-        return  self._fromYear  is not None \
-            and self._fromMonth is not None \
-            and self._toYear    is not None \
-            and self._toMonth   is not None
-    @property
-    def FromYear(self) -> int:
-        return self._fromYear or -1
-    @property
-    def FromMonth(self) -> int:
-        return self._fromMonth or -1
-    @property
-    def ToYear(self) -> int:
-        return self._toYear or -1
-    @property
-    def ToMonth(self) -> int:
-        return self._toMonth or -1
-
-
-class SanitizedParams:
-    """Dumb struct to store the sanitized params from a request
-    """
-    def __init__(self, game_id:Optional[str], year:int, month:int):
-        self._game_id : Optional[str] = game_id
-        self._year    : int           = year
-        self._month   : int           = month
-    
-    @property
-    def GameID(self) -> Optional[str]:
-        return self._game_id
-    @property
-    def Year(self) -> int:
-        return self._year
-    @property
-    def Month(self) -> int:
-        return self._month
-
-    # If the given game_id contains allowed characters, return it in UPPERCASE, otherwise return empty string
-    @staticmethod
-    def sanitizeGameId(game_id: str) -> str:
-        if re.search("^[A-Za-z_]+$", game_id) is None:
-            game_id = ""
-        return game_id.upper()
-
-    # Shared utility function to retrieve game_id, year, and month from the request's query string.
-    # Defaults are used if a value was not given or is invalid
-    @staticmethod
-    def FromRequest() -> 'SanitizedParams':
-
-        now_date = datetime.date.today()
-
-        # Extract query string parameters
-        game_id = SanitizedParams.sanitizeGameId(request.args.get("game_id", default ="", type=str))
-        year = request.args.get("year",   default=now_date.year, type=int)
-        month = request.args.get("month", default=now_date.month, type=int)
-
-        if game_id == "":
-            game_id = None
-        
-        if month < 1 or month > 12:
-            month = now_date.month
-
-        if year < 2000 or year > now_date.year:
-            year = now_date.year
-
-        return SanitizedParams(game_id=game_id, year=year, month=month)
-        return { "game_id": game_id, "year": year, "month": month }
 
 # TODO: Remove this action and dependencies (interfaces, config) if we're certain they won't be needed.
 # The SQL for BigQuery did take a bit of effort to compose, but could always be retrieved from old commits
