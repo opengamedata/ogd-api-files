@@ -178,20 +178,21 @@ def getMonthlyGameUsage():
             elif lastYear == _dataset_schema.Key.FromYear and lastMonth < _dataset_schema.Key.FromMonth:
                 lastMonth = _dataset_schema.Key.FromMonth
 
-    sessions = []
-    startRangeMonth = first_month
 
     # Iterate through all of the months from the first month+year to last month+year, since the ranges have gaps
     # Default the number of sessions to zero for months we don't have data
-    for year in range(first_year, lastYear + 1):
-        endRangeMonth = lastMonth if year == lastYear else 12
-        for month in range(startRangeMonth, endRangeMonth + 1):
-            # If file_list.json has an entry for this month
-            if str(year) + str(month).zfill(2) in total_sessions_by_yyyymm:
-                sessions.append({ "year": year, "month": month, "total_sessions": total_sessions_by_yyyymm[str(year) + str(month).zfill(2)]})
-            else:
-                sessions.append({ "year": year, "month": month, "total_sessions": 0 })
-        startRangeMonth = 1
+    sessions = []
+    if first_year is not None and first_month is not None and lastYear is not None and lastMonth is not None:
+        startRangeMonth = first_month
+        for year in range(first_year, lastYear + 1):
+            endRangeMonth = lastMonth if year == lastYear else 12
+            for month in range(startRangeMonth, endRangeMonth + 1):
+                # If file_list.json has an entry for this month
+                if str(year) + str(month).zfill(2) in total_sessions_by_yyyymm:
+                    sessions.append({ "year": year, "month": month, "total_sessions": total_sessions_by_yyyymm[str(year) + str(month).zfill(2)]})
+                else:
+                    sessions.append({ "year": year, "month": month, "total_sessions": 0 })
+            startRangeMonth = 1
 
     responseData = { "game_id": game_id, "sessions": sessions }
     return APIResponse(True, responseData).ToDict()
