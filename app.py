@@ -149,46 +149,41 @@ def getMonthlyGameUsage():
     if not game_id in file_list_json or len(file_list_json[game_id]) == 0:
         return APIResponse(False, None).ToDict()
 
-    firstMonth = None
-    firstYear = None
+    first_month = None
+    first_year = None
     lastYear = None
     lastMonth = None
 
     total_sessions_by_yyyymm = {}
 
      # rangeKey format is GAMEID_YYYYMMDD_to_YYYYMMDD or GAME_ID_YYYYMMDD_to_YYYYYMMDD
-    for rangeKey in game_datasets:
-
-        rangeKeyWithoutGame = rangeKey[len(game_id):]
-        rangeKeyParts = rangeKeyWithoutGame.split("_")
+    for _key in game_datasets:
+        _dataset_schema = DatasetSchema(name=_key, all_elements=game_datasets[_key])
 
         # If this rangeKey matches the expected format
-        if len(rangeKeyParts) == 4:
-            year = rangeKeyParts[1][0:4]
-            month = rangeKeyParts[1][4:6]
-
+        if _dataset_schema.Key.IsValid: # len(rangeKeyParts) == 4:
             # Capture the number of sessions for this YYYYMM
-            total_sessions_by_yyyymm[year + month] = file_list_json[game_id][rangeKey]["sessions"]
+            total_sessions_by_yyyymm[_dataset_schema.Key.FromYear + _dataset_schema.Key.FromMonth] = _dataset_schema.SessionCount
 
             # The ranges in file_list_json should be chronologically ordered, but manually determining the first & last months here just in case
-            if firstYear is None or int(year) < firstYear:
-                firstYear = int(year)
-                firstMonth = int(month)
-            elif int(year) == firstYear and int(month) < firstMonth:
-                firstMonth = int(month)
+            if first_year is None or first_month is None or _dataset_schema.Key.FromYear < first_year:
+                first_year = _dataset_schema.Key.FromYear
+                first_month = _dataset_schema.Key.FromMonth
+            elif _dataset_schema.Key.FromYear == first_year and _dataset_schema.Key.FromMonth < first_month:
+                first_month = _dataset_schema.Key.FromMonth
             
-            if lastYear is None or int(year) > lastYear:
-                lastYear = int(year)
-                lastMonth = int(month)
-            elif lastYear == int(year) and lastMonth < int(month):
-                lastMonth = int(month)
+            if lastYear is None or lastMonth is None or _dataset_schema.Key.FromYear > lastYear:
+                lastYear = _dataset_schema.Key.FromYear
+                lastMonth = _dataset_schema.Key.FromMonth
+            elif lastYear == _dataset_schema.Key.FromYear and lastMonth < _dataset_schema.Key.FromMonth:
+                lastMonth = _dataset_schema.Key.FromMonth
 
     sessions = []
-    startRangeMonth = firstMonth
+    startRangeMonth = first_month
 
     # Iterate through all of the months from the first month+year to last month+year, since the ranges have gaps
     # Default the number of sessions to zero for months we don't have data
-    for year in range(firstYear, lastYear + 1):
+    for year in range(first_year, lastYear + 1):
         endRangeMonth = lastMonth if year == lastYear else 12
         for month in range(startRangeMonth, endRangeMonth + 1):
             # If file_list.json has an entry for this month
