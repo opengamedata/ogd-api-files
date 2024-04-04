@@ -68,19 +68,31 @@ application.logger.setLevel(settings['DEBUG_LEVEL'])
 # TODO: Remove this action and dependencies (interfaces, config) if we're certain they won't be needed.
 # The SQL for BigQuery did take a bit of effort to compose, but could always be retrieved from old commits
 
-# Basic response if someone just hits the home path to say "hello"
 @application.route('/', methods=['GET'])
-def get_hello():
+def Hello():
+    """
+    Basic response if someone just hits the home path to say "hello"
+    """
 
     responseObj = {
         "message": "hello, world"
     }
 
-    return APIResponse(True, responseObj).ToDict()
+    return APIResponse(success=True, data=responseObj).ToDict()
 
-# Get game usage statistics for a given game, year, and month
 @application.route('/getGameUsageByMonth', methods=['GET'])
-def get_game_usage_by_month():
+def getGameUsageByMonth():
+    """
+    Get game usage statistics for a given game, year, and month
+    
+    Inputs:
+    - Game ID
+    - Month
+    - Year
+    Outputs:
+    - Month's session count
+    - Daily session counts for month
+    """
 
     sanitizedInput = SanitizedParams.FromRequest()
 
@@ -108,9 +120,18 @@ def get_game_usage_by_month():
 
     return APIResponse(True, responseObj).ToDict()
 
-# Get the per-month number of sessions for a given game
 @application.route("/getMonthlyGameUsage", methods=['GET'])
-def get_monthly_game_usage():
+def getMonthlyGameUsage():
+    """
+    Get the per-month number of sessions for a given game
+
+    Inputs:
+    - Game ID
+    Uses:
+    - Index file list
+    Outputs:
+    - Session count for each month of game's data
+    """
     
     # Extract a sanitized game_id from the query string
     game_id = SanitizedParams.sanitizeGameId(request.args.get("game_id", default = "", type=str))
@@ -122,6 +143,7 @@ def get_monthly_game_usage():
     file_list_url      = settings.get("FILE_LIST_URL", "https://opengamedata.fielddaylab.wisc.edu/data/file_list.json")
     file_list_response = url_request.urlopen(file_list_url)
     file_list_json     = json.loads(file_list_response.read())
+    game_datasets      = file_list_json.get(game_id, {})
 
     # If the given game isn't in our dictionary, or our dictionary doesn't have any date ranges for this game
     if not game_id in file_list_json or len(file_list_json[game_id]) == 0:
@@ -135,7 +157,7 @@ def get_monthly_game_usage():
     total_sessions_by_yyyymm = {}
 
      # rangeKey format is GAMEID_YYYYMMDD_to_YYYYMMDD or GAME_ID_YYYYMMDD_to_YYYYYMMDD
-    for rangeKey in file_list_json[game_id]:
+    for rangeKey in game_datasets:
 
         rangeKeyWithoutGame = rangeKey[len(game_id):]
         rangeKeyParts = rangeKeyWithoutGame.split("_")
@@ -179,9 +201,18 @@ def get_monthly_game_usage():
     responseData = { "game_id": game_id, "sessions": sessions }
     return APIResponse(True, responseData).ToDict()
 
-# Get info on the files that are available for the given game in the given month & year
 @application.route('/getGameFileInfoByMonth', methods=['GET'])
-def get_game_file_info_by_month():
+def getGameFileInfoByMonth():
+    """
+    Get info on the files that are available for the given game in the given month & year
+
+    Inputs:
+    - Game ID
+    - Year
+    - Month
+    Outputs:
+    - DatasetSchema of most recently-exported dataset for game in month
+    """
     sanitizedRequestParams = SanitizedParams.FromRequest()
 
     file_list_url      = settings.get("FILE_LIST_URL", "https://opengamedata.fielddaylab.wisc.edu/data/file_list.json")
