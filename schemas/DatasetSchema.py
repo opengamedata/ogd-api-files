@@ -1,15 +1,18 @@
 # standard imports
+import logging
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any, Dict, Optional
 
 # local imports
 from ogd.core.schemas.Schema import Schema
+from ogd.core.utils.Logger import Logger
 
 class DatasetSchema(Schema):
     # *** BUILT-INS & PROPERTIES ***
 
     def __init__(self, name:str, all_elements:Dict[str, Any]):
+        self._game_id             : str
         self._date_modified       : date | str
         self._start_date          : date | str
         self._end_date            : date | str
@@ -28,6 +31,7 @@ class DatasetSchema(Schema):
 
         if not isinstance(all_elements, dict):
             all_elements = {}
+        self._game_id = DatasetSchema._parseGameID(name)
     # 1. Parse dates
         if "date_modified" in all_elements.keys():
             self._date_modified = DatasetSchema._parseDateModified(all_elements["date_modified"])
@@ -156,7 +160,19 @@ class DatasetSchema(Schema):
         return self._population_template
 
     @property
-    def FileSet(self):
+    def FileSet(self) -> str:
+        """
+        The list of data files associated with the dataset.
+
+        r -> Raw events file (no generated events)
+        e -> All events file (with generated events)
+        s -> Session features file
+        p -> Player features file
+        P -> Popoulation features file
+
+        :return: The list of data files associated with the dataset.
+        :rtype: str
+        """
         _fset = [
            "r" if self.RawFile is not None else "",
            "e" if self.EventsFile is not None else "",
@@ -167,7 +183,18 @@ class DatasetSchema(Schema):
         return "".join(_fset)
 
     @property
-    def TemplateSet(self):
+    def TemplateSet(self) -> str:
+        """
+        The list of template files associated with the dataset.
+
+        e -> Events template
+        s -> Session features template
+        p -> Player features template
+        P -> Popoulation features template
+
+        :return: The list of template files associated with the dataset.
+        :rtype: str
+        """
         _tset = [
            "e" if self.EventsTemplate is not None else "",
            "s" if self.SessionsTemplate is not None else "",
@@ -195,13 +222,23 @@ Last modified {self.DateModified.strftime('%m/%d/%Y') if type(self.DateModified)
     # we just want to have one bit of code to parse each piece of the schema, even if most do the same thing.
 
     @staticmethod
+    def _parseGameID(dataset_name) -> str:
+        ret_val : str
+        if isinstance(dataset_name, str):
+            ret_val = dataset_name.split('_')[0]
+        else:
+            ret_val = str(dataset_name).split('_')[0]
+            Logger.Log(f"Dataset name was unexpected type {type(dataset_name)}, defaulting to str(dataset_name).split('_')[0]={ret_val}.", logging.WARN)
+        return ret_val
+
+    @staticmethod
     def _parseDateModified(date_modified) -> date:
         ret_val : date
         if isinstance(date_modified, date):
             ret_val = date_modified
         else:
             ret_val = datetime.strptime(date_modified, "%m/5d/%Y").date()
-            # Logger.Log(f"Dataset modified date was unexpected type {type(date_modified)}, defaulting to strptime(date_modified)={ret_val}.", logging.WARN)
+            Logger.Log(f"Dataset modified date was unexpected type {type(date_modified)}, defaulting to strptime(date_modified)={ret_val}.", logging.WARN)
         return ret_val
 
     @staticmethod
@@ -211,7 +248,7 @@ Last modified {self.DateModified.strftime('%m/%d/%Y') if type(self.DateModified)
             ret_val = start_date
         else:
             ret_val = datetime.strptime(start_date, "%m/5d/%Y").date()
-            # Logger.Log(f"Dataset start date was unexpected type {type(start_date)}, defaulting to strptime(start_date)={ret_val}.", logging.WARN)
+            Logger.Log(f"Dataset start date was unexpected type {type(start_date)}, defaulting to strptime(start_date)={ret_val}.", logging.WARN)
         return ret_val
 
     @staticmethod
@@ -221,7 +258,7 @@ Last modified {self.DateModified.strftime('%m/%d/%Y') if type(self.DateModified)
             ret_val = end_date
         else:
             ret_val = datetime.strptime(end_date, "%m/5d/%Y").date()
-            # Logger.Log(f"Dataset end date was unexpected type {type(end_date)}, defaulting to strptime(end_date)={ret_val}.", logging.WARN)
+            Logger.Log(f"Dataset end date was unexpected type {type(end_date)}, defaulting to strptime(end_date)={ret_val}.", logging.WARN)
         return ret_val
 
     @staticmethod
@@ -231,5 +268,138 @@ Last modified {self.DateModified.strftime('%m/%d/%Y') if type(self.DateModified)
             ret_val = revision
         else:
             ret_val = str(revision)
-            # Logger.Log(f"Dataset OGD revision was unexpected type {type(revision)}, defaulting to str(revision)={ret_val}.", logging.WARN)
+            Logger.Log(f"Dataset OGD revision was unexpected type {type(revision)}, defaulting to str(revision)={ret_val}.", logging.WARN)
+        return ret_val
+
+    @staticmethod
+    def _parseSessionCount(sess_ct) -> Optional[int]:
+        ret_val : Optional[int]
+        if isinstance(sess_ct, int):
+            ret_val = sess_ct
+        elif sess_ct == None:
+            ret_val = None
+        else:
+            ret_val = int(sess_ct)
+            Logger.Log(f"Dataset session count was unexpected type {type(sess_ct)}, defaulting to int(sess_ct)={ret_val}.", logging.WARN)
+        return ret_val
+
+    @staticmethod
+    def _parsePlayerCount(player_ct) -> Optional[int]:
+        ret_val : Optional[int]
+        if isinstance(player_ct, int):
+            ret_val = player_ct
+        elif player_ct == None:
+            ret_val = None
+        else:
+            ret_val = int(player_ct)
+            Logger.Log(f"Dataset player count was unexpected type {type(player_ct)}, defaulting to int(player_ct)={ret_val}.", logging.WARN)
+        return ret_val
+
+    @staticmethod
+    def _parseRawFile(raw_file) -> Optional[Path]:
+        ret_val : Optional[Path]
+        if isinstance(raw_file, Path):
+            ret_val = raw_file
+        elif isinstance(raw_file, str):
+            ret_val = Path(raw_file) if raw_file != "" else None
+        else:
+            ret_val = Path(str(raw_file))
+            Logger.Log(f"Dataset raw event file was unexpected type {type(raw_file)}, defaulting to Path(str(raw_file))={ret_val}.", logging.WARN)
+        return ret_val
+
+    @staticmethod
+    def _parseEventsFile(events_file) -> Optional[Path]:
+        ret_val : Optional[Path]
+        if isinstance(events_file, Path):
+            ret_val = events_file
+        elif isinstance(events_file, str):
+            ret_val = Path(events_file) if events_file != "" else None
+        else:
+            ret_val = Path(str(events_file))
+            Logger.Log(f"Dataset all event file was unexpected type {type(events_file)}, defaulting to Path(str(events_file))={ret_val}.", logging.WARN)
+        return ret_val
+
+    @staticmethod
+    def _parseSessionsFile(sessions_file) -> Optional[Path]:
+        ret_val : Optional[Path]
+        if isinstance(sessions_file, Path):
+            ret_val = sessions_file
+        elif isinstance(sessions_file, str):
+            ret_val = Path(sessions_file) if sessions_file != "" else None
+        else:
+            ret_val = Path(str(sessions_file))
+            Logger.Log(f"Dataset session feature file was unexpected type {type(sessions_file)}, defaulting to Path(str(sessions_file))={ret_val}.", logging.WARN)
+        return ret_val
+
+    @staticmethod
+    def _parsePlayersFile(players_file) -> Optional[Path]:
+        ret_val : Optional[Path]
+        if isinstance(players_file, Path):
+            ret_val = players_file
+        elif isinstance(players_file, str):
+            ret_val = Path(players_file) if players_file != "" else None
+        else:
+            ret_val = Path(str(players_file))
+            Logger.Log(f"Dataset player feature file was unexpected type {type(players_file)}, defaulting to Path(str(players_file))={ret_val}.", logging.WARN)
+        return ret_val
+
+    @staticmethod
+    def _parsePopulationFile(pop_file) -> Optional[Path]:
+        ret_val : Optional[Path]
+        if isinstance(pop_file, Path):
+            ret_val = pop_file
+        elif isinstance(pop_file, str):
+            ret_val = Path(pop_file) if pop_file != "" else None
+        else:
+            ret_val = Path(str(pop_file))
+            Logger.Log(f"Dataset population feature file was unexpected type {type(pop_file)}, defaulting to Path(str(pop_file))={ret_val}.", logging.WARN)
+        return ret_val
+
+
+    @staticmethod
+    def _parseEventsTemplate(events_tplate) -> Optional[Path]:
+        ret_val : Optional[Path]
+        if isinstance(events_tplate, Path):
+            ret_val = events_tplate
+        elif isinstance(events_tplate, str):
+            ret_val = Path(events_tplate) if events_tplate != "" else None
+        else:
+            ret_val = Path(str(events_tplate))
+            Logger.Log(f"Dataset events template was unexpected type {type(events_tplate)}, defaulting to Path(str(events_tplate))={ret_val}.", logging.WARN)
+        return ret_val
+
+    @staticmethod
+    def _parseSessionsTemplate(sessions_tplate) -> Optional[Path]:
+        ret_val : Optional[Path]
+        if isinstance(sessions_tplate, Path):
+            ret_val = sessions_tplate
+        elif isinstance(sessions_tplate, str):
+            ret_val = Path(sessions_tplate) if sessions_tplate != "" else None
+        else:
+            ret_val = Path(str(sessions_tplate))
+            Logger.Log(f"Dataset session template file was unexpected type {type(sessions_tplate)}, defaulting to Path(str(sessions_tplate))={ret_val}.", logging.WARN)
+        return ret_val
+
+    @staticmethod
+    def _parsePlayersTemplate(players_tplate) -> Optional[Path]:
+        ret_val : Optional[Path]
+        if isinstance(players_tplate, Path):
+            ret_val = players_tplate
+        elif isinstance(players_tplate, str):
+            ret_val = Path(players_tplate) if players_tplate != "" else None
+        else:
+            ret_val = Path(str(players_tplate))
+            Logger.Log(f"Dataset players template file was unexpected type {type(players_tplate)}, defaulting to Path(str(players_tplate))={ret_val}.", logging.WARN)
+        return ret_val
+
+    @staticmethod
+    def _parsePopulationTemplate(pop_tplate) -> Optional[Path]:
+        ret_val : Optional[Path]
+        if isinstance(pop_tplate, Path):
+            ret_val = pop_tplate
+        elif isinstance(pop_tplate, str):
+            ret_val = Path(pop_tplate) if pop_tplate != "" else None
+        else:
+            ret_val = Path(str(pop_tplate))
+            Logger.Log(f"Dataset population template file was unexpected type {type(pop_tplate)}, defaulting to Path(str(pop_tplate))={ret_val}.", logging.WARN)
         return ret_val
