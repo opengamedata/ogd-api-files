@@ -8,11 +8,61 @@ from typing import Any, Dict, Optional
 from ogd.core.schemas.Schema import Schema
 from ogd.core.utils.Logger import Logger
 
+class DatasetKey:
+    """Simple little class to make logic with dataset keys easier
+    """
+    def __init__(self, key:str, game_id:str):
+    # 1. Get Game ID from key
+        if key[:len(game_id)] != game_id:
+            Logger.Log(f"Got a mismatch between expected game ID and ID in the dataset key: {key[:len(game_id)]} != {game_id}. Defaulting to {game_id}")
+        self._game_id = game_id
+    # 2. Get Dates from key
+        _date_range = key[len(game_id):]
+        _date_range_parts = _date_range.split("_")
+        # If this _dataset_key matches the expected format,
+        # i.e. spit is: ["", "YYYYMMDD", "to", "YYYYMMDD"]
+        if len(_date_range_parts) == 4:
+            self._from_year  = int(_date_range_parts[1][0:4])
+            self._from_month = int(_date_range_parts[1][4:6])
+            self._to_year    = int(_date_range_parts[3][0:4])
+            self._to_month   = int(_date_range_parts[3][4:6])
+        else:
+            self._from_year  = None
+            self._from_month = None
+            self._to_year    = None
+            self._to_month   = None
+        self._original_key = key
+
+    def __str__(self):
+        return self._original_key
+    
+    @property
+    def IsValid(self) -> bool:
+        return  self._from_year  is not None \
+            and self._from_month is not None \
+            and self._to_year    is not None \
+            and self._to_month   is not None
+    @property
+    def GameID(self) -> str:
+        return self._game_id
+    @property
+    def FromYear(self) -> int:
+        return self._from_year or -1
+    @property
+    def FromMonth(self) -> int:
+        return self._from_month or -1
+    @property
+    def ToYear(self) -> int:
+        return self._to_year or -1
+    @property
+    def ToMonth(self) -> int:
+        return self._to_month or -1
+
 class DatasetSchema(Schema):
     # *** BUILT-INS & PROPERTIES ***
 
     def __init__(self, name:str, all_elements:Dict[str, Any]):
-        self._game_id             : str
+        self._key                 : DatasetKey
         self._date_modified       : date | str
         self._start_date          : date | str
         self._end_date            : date | str
@@ -31,7 +81,8 @@ class DatasetSchema(Schema):
 
         if not isinstance(all_elements, dict):
             all_elements = {}
-        self._game_id = DatasetSchema._parseGameID(name)
+        _game_id = DatasetSchema._parseGameID(name)
+        self._key = DatasetKey(key=name, game_id=_game_id)
     # 1. Parse dates
         if "date_modified" in all_elements.keys():
             self._date_modified = DatasetSchema._parseDateModified(all_elements["date_modified"])
@@ -105,6 +156,9 @@ class DatasetSchema(Schema):
 
     # *** Properties ***
 
+    @property
+    def Key(self) -> DatasetKey:
+        return self._key
     @property
     def DateModified(self) -> date | str:
         return self._date_modified

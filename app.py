@@ -10,7 +10,7 @@ from flask_cors import CORS
 
 # import our app libraries
 from models.APIResponse import APIResponse
-from schemas.DatasetSchema import DatasetKey
+from schemas.DatasetSchema import DatasetSchema
 from models.SanitizedParams import SanitizedParams
 from interfaces.BigQueryInterface import BigQueryInterface
 
@@ -214,33 +214,33 @@ def get_game_file_info_by_month():
 
     # _dataset_key format should be GAMEID_YYYYMMDD_to_YYYYMMDD
     for _key in game_datasets:
-        _dataset_key = DatasetKey(_key, sanitizedRequestParams.GameID)
-        if _dataset_key.IsValid:
+        _dataset_schema = DatasetSchema(_key, game_datasets[_key])
+        if _dataset_schema.Key.IsValid:
 
             # If this is the first range block in our loop, or this range block has an earlier year than our first_year
-            if "first_year" not in file_info or file_info["first_year"] > _dataset_key.FromYear:
-                file_info["first_year"] = _dataset_key.FromYear
-                file_info["first_month"] = _dataset_key.FromMonth
+            if "first_year" not in file_info or file_info["first_year"] > _dataset_schema.Key.FromYear:
+                file_info["first_year"] = _dataset_schema.Key.FromYear
+                file_info["first_month"] = _dataset_schema.Key.FromMonth
 
             # If this is range is for the same year but an earlier month
-            elif file_info["first_year"] == _dataset_key.FromYear and file_info["first_month"] > _dataset_key.FromMonth:
-                file_info["first_month"] = _dataset_key.FromMonth
+            elif file_info["first_year"] == _dataset_schema.Key.FromYear and file_info["first_month"] > _dataset_schema.Key.FromMonth:
+                file_info["first_month"] = _dataset_schema.Key.FromMonth
 
             # If this is the first range block, or this range block has a later year than the last_year
-            if "last_year" not in file_info or file_info["last_year"] < _dataset_key.ToYear:
-                file_info["last_year"] = _dataset_key.ToYear
-                file_info["last_month"] = _dataset_key.ToMonth
+            if "last_year" not in file_info or file_info["last_year"] < _dataset_schema.Key.ToYear:
+                file_info["last_year"] = _dataset_schema.Key.ToYear
+                file_info["last_month"] = _dataset_schema.Key.ToMonth
 
             # If this is range is for the same year but with a later month
-            elif file_info["last_year"] == _dataset_key.ToYear \
-                and file_info["last_month"] < _dataset_key.ToMonth:
-                file_info["last_month"] = _dataset_key.ToMonth
+            elif file_info["last_year"] == _dataset_schema.Key.ToYear \
+                and file_info["last_month"] < _dataset_schema.Key.ToMonth:
+                file_info["last_month"] = _dataset_schema.Key.ToMonth
 
             # If this range contains the given year & month
-            if (sanitizedRequestParams.Year >= _dataset_key.FromYear \
-            and sanitizedRequestParams.Month >= _dataset_key.FromMonth \
-            and sanitizedRequestParams.Year <= _dataset_key.ToYear \
-            and sanitizedRequestParams.Month <= _dataset_key.ToMonth):
+            if (sanitizedRequestParams.Year >= _dataset_schema.Key.FromYear \
+            and sanitizedRequestParams.Month >= _dataset_schema.Key.FromMonth \
+            and sanitizedRequestParams.Year <= _dataset_schema.Key.ToYear \
+            and sanitizedRequestParams.Month <= _dataset_schema.Key.ToMonth):
                 # Base URLs
                 FILEHOST_BASE_URL   : str = file_list_json.get("CONFIG", {}).get("files_base")
                 TEMPLATES_BASE_URL  : str = file_list_json.get("CONFIG", {}).get("templates_base")
@@ -248,7 +248,7 @@ def get_game_file_info_by_month():
                 GITHUB_BASE_URL     : str = "https://github.com/opengamedata/opengamedata-core/tree/"
 
                 _branch_name = sanitizedRequestParams.GameID.lower().replace('_', '-')
-                _dataset_json = file_list_json.get(sanitizedRequestParams.GameID, {}).get(str(_dataset_key), {})
+                _dataset_json = file_list_json.get(sanitizedRequestParams.GameID, {}).get(str(_dataset_schema), {})
                 _revision    = _dataset_json.get("ogd_revision") or None
             
                 # Files
