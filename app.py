@@ -119,9 +119,9 @@ def get_monthly_game_usage():
         return APIResponse(False, None).ToDict()
 
     # Pull the file list data into a dictionary
-    file_list_url = 'https://opengamedata.fielddaylab.wisc.edu/data/file_list.json'
+    file_list_url      = settings.get("FILE_LIST_URL", "https://opengamedata.fielddaylab.wisc.edu/data/file_list.json")
     file_list_response = url_request.urlopen(file_list_url)
-    file_list_json = json.loads(file_list_response.read())
+    file_list_json     = json.loads(file_list_response.read())
 
     # If the given game isn't in our dictionary, or our dictionary doesn't have any date ranges for this game
     if not game_id in file_list_json or len(file_list_json[game_id]) == 0:
@@ -184,7 +184,8 @@ def get_monthly_game_usage():
 def get_game_file_info_by_month():
     sanitizedRequestParams = SanitizedParams.FromRequest()
 
-    file_list_response = url_request.urlopen(settings.get("FILE_LIST_URL", "https://opengamedata.fielddaylab.wisc.edu/data/file_list.json"))
+    file_list_url      = settings.get("FILE_LIST_URL", "https://opengamedata.fielddaylab.wisc.edu/data/file_list.json")
+    file_list_response = url_request.urlopen(file_list_url)
     file_list_json     = json.loads(file_list_response.read())
     game_datasets      = file_list_json.get(sanitizedRequestParams.GameID, {})
 
