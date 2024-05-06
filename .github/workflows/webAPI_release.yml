@@ -10,7 +10,7 @@ on:
 
 env:
   DEPLOY_HOST: ${{ vars.OGD_SERVICES_HOST }}
-  DEPLOY_DIR: ${{ vars.WSGI_PATH }}/${{ github.event.repository.name }}/${{ github.ref_name }}
+  DEPLOY_DIR: ${{ vars.WSGI_PATH }}/${{ github.event.repository.name }}/production
   DEPLOY_URL:  ${{ vars.OGD_SERVICES_HOST }}/${{ github.event.repository.name }}/${{ github.ref_name }}
   URL_PATH:    ${{ github.event.repository.name }}/${{ github.ref_name }}
 
