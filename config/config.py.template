@@ -1,4 +1,5 @@
 settings = {
+    "API_VERSION":"VERSION_PLACEHOLDER",
     "DEBUG_LEVEL":"INFO",
 	"BIGQUERY_GAME_MAPPING":
     {
