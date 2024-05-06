@@ -2,7 +2,7 @@
 import sys, os, re, datetime, json
 from calendar import monthrange
 from logging.config import dictConfig
-from typing import Any, Dict, LiteralString
+from typing import Any, Dict
 from urllib import request as url_request
 
 # import 3rd-party libraries
