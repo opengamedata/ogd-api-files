@@ -120,6 +120,15 @@ def get_hello():
 
     return APIResponse(True, responseObj).ToDict()
 
+@application.route('/version', methods=['GET'])
+def get_api_version():
+
+    responseObj = {
+        "message": settings["API_VERSION"]
+    }
+
+    return APIResponse(True, responseObj).ToDict()
+
 # Get game usage statistics for a given game, year, and month
 @application.route('/getGameUsageByMonth', methods=['GET'])
 def get_game_usage_by_month():
