@@ -30,6 +30,7 @@ jobs:
     - name: Set up Config File
       uses: ./.github/actions/web_api_config
       with:
+          api_version: ${{ github.event.release.tag_name }}
           api_base: ${{ env.DEPLOY_DIR }}
 
   # 2. Build 

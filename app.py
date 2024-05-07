@@ -2,6 +2,7 @@
 import json
 from calendar import monthrange
 from logging.config import dictConfig
+from typing import Any, Dict
 from urllib import request as url_request
 
 # import 3rd-party libraries
@@ -80,6 +81,16 @@ def Hello():
 
     return APIResponse(success=True, data=responseObj).ToDict()
 
+@application.route('/version', methods=['GET'])
+def get_api_version():
+
+    responseObj = {
+        "message": settings["API_VERSION"]
+    }
+
+    return APIResponse(True, responseObj).ToDict()
+
+# Get game usage statistics for a given game, year, and month
 @application.route('/getGameUsageByMonth', methods=['GET'])
 def getGameUsageByMonth():
     """
