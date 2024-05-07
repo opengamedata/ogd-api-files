@@ -291,7 +291,7 @@ Last modified {self.DateModified.strftime('%m/%d/%Y') if type(self.DateModified)
         if isinstance(date_modified, date):
             ret_val = date_modified
         else:
-            ret_val = datetime.strptime(date_modified, "%m/5d/%Y").date()
+            ret_val = datetime.strptime(date_modified, "%m/%d/%Y").date()
             Logger.Log(f"Dataset modified date was unexpected type {type(date_modified)}, defaulting to strptime(date_modified)={ret_val}.", logging.WARN)
         return ret_val
 
@@ -301,7 +301,7 @@ Last modified {self.DateModified.strftime('%m/%d/%Y') if type(self.DateModified)
         if isinstance(start_date, date):
             ret_val = start_date
         else:
-            ret_val = datetime.strptime(start_date, "%m/5d/%Y").date()
+            ret_val = datetime.strptime(start_date, "%m/%d/%Y").date()
             Logger.Log(f"Dataset start date was unexpected type {type(start_date)}, defaulting to strptime(start_date)={ret_val}.", logging.WARN)
         return ret_val
 
@@ -311,7 +311,7 @@ Last modified {self.DateModified.strftime('%m/%d/%Y') if type(self.DateModified)
         if isinstance(end_date, date):
             ret_val = end_date
         else:
-            ret_val = datetime.strptime(end_date, "%m/5d/%Y").date()
+            ret_val = datetime.strptime(end_date, "%m/%d/%Y").date()
             Logger.Log(f"Dataset end date was unexpected type {type(end_date)}, defaulting to strptime(end_date)={ret_val}.", logging.WARN)
         return ret_val
 
