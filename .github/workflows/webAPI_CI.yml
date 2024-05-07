@@ -8,6 +8,7 @@ on:
     - '.github/actions/**'
     - 'interfaces/**'
     - 'models/**'
+    - 'schemas/**'
     - 'app.py'
     - 'app.wsgi'
 
