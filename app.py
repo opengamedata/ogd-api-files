@@ -222,15 +222,20 @@ def getGameFileInfoByMonth():
     """
     sanitizedRequestParams = SanitizedParams.FromRequest()
 
-    file_list_url      = settings.get("FILE_LIST_URL", "https://opengamedata.fielddaylab.wisc.edu/data/file_list.json")
-    file_list_response = url_request.urlopen(file_list_url)
-    file_list_json     = json.loads(file_list_response.read())
-    game_datasets      = file_list_json.get(sanitizedRequestParams.GameID, {})
+# 1. Get the list of datasets available on the server, for given game.
+    file_list_url      : str                       = settings.get("FILE_LIST_URL", "https://opengamedata.fielddaylab.wisc.edu/data/file_list.json")
+    file_list_response                             = url_request.urlopen(file_list_url)
+    file_list_json     : Dict[str, Dict[str, Any]] = json.loads(file_list_response.read())
+    game_datasets_json : Dict[str, Any]            = file_list_json.get(sanitizedRequestParams.GameID or "NO GAME REQUESTED", {})
+    game_datasets      : Dict[str, DatasetSchema]  = { key : DatasetSchema(key, val) for key, val in game_datasets_json.items() }
 
     # If we couldn't find the requested game in file_list.json, or the game didn't have any date ranges, skip.
     if (sanitizedRequestParams.GameID is None) or (len(game_datasets) == 0):
         return APIResponse(success=False, data=None).ToDict()
     # Else, continue on.
+
+# 2. Set up file_info, which will contain our metadata about the dataset that matches requested month-year.
+    _matched_dataset = list(game_datasets)[-1]
     file_info = {
         "found_matching_range" : False,
         "events_file" : None,
@@ -246,73 +251,70 @@ def getGameFileInfoByMonth():
         "features_link" : None
     }
 
-    # If a year and month wasn't given, we'll default to returning files & info for the last range
-    if sanitizedRequestParams.Year is None or sanitizedRequestParams.Month is None:
-        _last_dataset_key = list(game_datasets)[-1]
+# Find the best match of a dataset to the requested month-year.
+# If there was no requested month-year, we skip this step.
+    if sanitizedRequestParams.Year is not None and sanitizedRequestParams.Month is not None:
+        for _key, _dataset_schema in game_datasets.items():
+            if _dataset_schema.Key.IsValid:
 
-    # _dataset_key format should be GAMEID_YYYYMMDD_to_YYYYMMDD
-    for _key in game_datasets:
-        _dataset_schema = DatasetSchema(_key, game_datasets[_key])
-        if _dataset_schema.Key.IsValid:
+                # If this is the first range block in our loop, or this range block has an earlier year than our first_year
+                if "first_year" not in file_info or file_info["first_year"] > _dataset_schema.Key.FromYear:
+                    file_info["first_year"] = _dataset_schema.Key.FromYear
+                    file_info["first_month"] = _dataset_schema.Key.FromMonth
 
-            # If this is the first range block in our loop, or this range block has an earlier year than our first_year
-            if "first_year" not in file_info or file_info["first_year"] > _dataset_schema.Key.FromYear:
-                file_info["first_year"] = _dataset_schema.Key.FromYear
-                file_info["first_month"] = _dataset_schema.Key.FromMonth
+                # If this is range is for the same year but an earlier month
+                elif file_info["first_year"] == _dataset_schema.Key.FromYear and file_info["first_month"] > _dataset_schema.Key.FromMonth:
+                    file_info["first_month"] = _dataset_schema.Key.FromMonth
 
-            # If this is range is for the same year but an earlier month
-            elif file_info["first_year"] == _dataset_schema.Key.FromYear and file_info["first_month"] > _dataset_schema.Key.FromMonth:
-                file_info["first_month"] = _dataset_schema.Key.FromMonth
+                # If this is the first range block, or this range block has a later year than the last_year
+                if "last_year" not in file_info or file_info["last_year"] < _dataset_schema.Key.ToYear:
+                    file_info["last_year"] = _dataset_schema.Key.ToYear
+                    file_info["last_month"] = _dataset_schema.Key.ToMonth
 
-            # If this is the first range block, or this range block has a later year than the last_year
-            if "last_year" not in file_info or file_info["last_year"] < _dataset_schema.Key.ToYear:
-                file_info["last_year"] = _dataset_schema.Key.ToYear
-                file_info["last_month"] = _dataset_schema.Key.ToMonth
+                # If this is range is for the same year but with a later month
+                elif file_info["last_year"] == _dataset_schema.Key.ToYear \
+                    and file_info["last_month"] < _dataset_schema.Key.ToMonth:
+                    file_info["last_month"] = _dataset_schema.Key.ToMonth
 
-            # If this is range is for the same year but with a later month
-            elif file_info["last_year"] == _dataset_schema.Key.ToYear \
-                and file_info["last_month"] < _dataset_schema.Key.ToMonth:
-                file_info["last_month"] = _dataset_schema.Key.ToMonth
+                # If this range contains the given year & month
+                if (sanitizedRequestParams.Year >= _dataset_schema.Key.FromYear \
+                and sanitizedRequestParams.Month >= _dataset_schema.Key.FromMonth \
+                and sanitizedRequestParams.Year <= _dataset_schema.Key.ToYear \
+                and sanitizedRequestParams.Month <= _dataset_schema.Key.ToMonth):
+                    # Base URLs
+                    FILEHOST_BASE_URL   : str = file_list_json.get("CONFIG", {}).get("files_base")
+                    TEMPLATES_BASE_URL  : str = file_list_json.get("CONFIG", {}).get("templates_base")
+                    CODESPACES_BASE_URL : str = "https://codespaces.new/opengamedata/opengamedata-samples/tree/"
+                    GITHUB_BASE_URL     : str = "https://github.com/opengamedata/opengamedata-core/tree/"
 
-            # If this range contains the given year & month
-            if (sanitizedRequestParams.Year >= _dataset_schema.Key.FromYear \
-            and sanitizedRequestParams.Month >= _dataset_schema.Key.FromMonth \
-            and sanitizedRequestParams.Year <= _dataset_schema.Key.ToYear \
-            and sanitizedRequestParams.Month <= _dataset_schema.Key.ToMonth):
-                # Base URLs
-                FILEHOST_BASE_URL   : str = file_list_json.get("CONFIG", {}).get("files_base")
-                TEMPLATES_BASE_URL  : str = file_list_json.get("CONFIG", {}).get("templates_base")
-                CODESPACES_BASE_URL : str = "https://codespaces.new/opengamedata/opengamedata-samples/tree/"
-                GITHUB_BASE_URL     : str = "https://github.com/opengamedata/opengamedata-core/tree/"
+                    _branch_name = sanitizedRequestParams.GameID.lower().replace('_', '-')
+                    _dataset_json = file_list_json.get(sanitizedRequestParams.GameID, {}).get(str(_dataset_schema), {})
+                    _revision    = _dataset_json.get("ogd_revision") or None
+                
+                    # Files
+                    file_info["raw_file"]        = f"{FILEHOST_BASE_URL}{_dataset_json.get('raw_file', None)}"        if "raw_file"        in _dataset_json else None
+                    file_info["events_file"]     = f"{FILEHOST_BASE_URL}{_dataset_json.get('events_file', None)}"     if "events_file"     in _dataset_json else None
+                    file_info["sessions_file"]   = f"{FILEHOST_BASE_URL}{_dataset_json.get('sessions_file', None)}"   if "sessions_file"   in _dataset_json else None
+                    file_info["players_file"]    = f"{FILEHOST_BASE_URL}{_dataset_json.get('players_file', None)}"    if "players_file"    in _dataset_json else None
+                    file_info["population_file"] = f"{FILEHOST_BASE_URL}{_dataset_json.get('population_file', None)}" if "population_file" in _dataset_json else None
 
-                _branch_name = sanitizedRequestParams.GameID.lower().replace('_', '-')
-                _dataset_json = file_list_json.get(sanitizedRequestParams.GameID, {}).get(str(_dataset_schema), {})
-                _revision    = _dataset_json.get("ogd_revision") or None
-            
-                # Files
-                file_info["raw_file"]        = f"{FILEHOST_BASE_URL}{_dataset_json.get('raw_file', None)}"        if "raw_file"        in _dataset_json else None
-                file_info["events_file"]     = f"{FILEHOST_BASE_URL}{_dataset_json.get('events_file', None)}"     if "events_file"     in _dataset_json else None
-                file_info["sessions_file"]   = f"{FILEHOST_BASE_URL}{_dataset_json.get('sessions_file', None)}"   if "sessions_file"   in _dataset_json else None
-                file_info["players_file"]    = f"{FILEHOST_BASE_URL}{_dataset_json.get('players_file', None)}"    if "players_file"    in _dataset_json else None
-                file_info["population_file"] = f"{FILEHOST_BASE_URL}{_dataset_json.get('population_file', None)}" if "population_file" in _dataset_json else None
+                    # Templates
+                    file_info["events_template"]     = f"{TEMPLATES_BASE_URL}{_dataset_json.get('events_template', None)}"     if "events_template"     in _dataset_json else None
+                    file_info["sessions_template"]   = f"{TEMPLATES_BASE_URL}{_dataset_json.get('sessions_template', None)}"   if "sessions_template"   in _dataset_json else None
+                    file_info["players_template"]    = f"{TEMPLATES_BASE_URL}{_dataset_json.get('players_template', None)}"    if "players_template"    in _dataset_json else None
+                    file_info["population_template"] = f"{TEMPLATES_BASE_URL}{_dataset_json.get('population_template', None)}" if "population_template" in _dataset_json else None
 
-                # Templates
-                file_info["events_template"]     = f"{TEMPLATES_BASE_URL}{_dataset_json.get('events_template', None)}"     if "events_template"     in _dataset_json else None
-                file_info["sessions_template"]   = f"{TEMPLATES_BASE_URL}{_dataset_json.get('sessions_template', None)}"   if "sessions_template"   in _dataset_json else None
-                file_info["players_template"]    = f"{TEMPLATES_BASE_URL}{_dataset_json.get('players_template', None)}"    if "players_template"    in _dataset_json else None
-                file_info["population_template"] = f"{TEMPLATES_BASE_URL}{_dataset_json.get('population_template', None)}" if "population_template" in _dataset_json else None
+                    file_info["events_codespace"]   = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fevent-template%2Fdevcontainer.json"
+                    file_info["sessions_codespace"] = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fplayer-template%2Fdevcontainer.json"
+                    file_info["players_codespace"]  = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fsession-template%2Fdevcontainer.json"
 
-                file_info["events_codespace"]   = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fevent-template%2Fdevcontainer.json"
-                file_info["sessions_codespace"] = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fplayer-template%2Fdevcontainer.json"
-                file_info["players_codespace"]  = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fsession-template%2Fdevcontainer.json"
-
-                # Convention for branch naming is lower-case with dashes,
-                # while game IDs are usually upper-case with underscores, so make sure we do the conversion
-                file_info["detectors_link"] = f"{GITHUB_BASE_URL}{_revision}/games/{_branch_name}/detectors" if _revision else None
-                file_info["features_link"]  = f"{GITHUB_BASE_URL}{_revision}/games/{_branch_name}/features"  if _revision else None
-                file_info["found_matching_range"] = True
-        else:
-            pass # leave `found_matching_range` as false
+                    # Convention for branch naming is lower-case with dashes,
+                    # while game IDs are usually upper-case with underscores, so make sure we do the conversion
+                    file_info["detectors_link"] = f"{GITHUB_BASE_URL}{_revision}/games/{_branch_name}/detectors" if _revision else None
+                    file_info["features_link"]  = f"{GITHUB_BASE_URL}{_revision}/games/{_branch_name}/features"  if _revision else None
+                    file_info["found_matching_range"] = True
+            else:
+                pass # leave `found_matching_range` as false
 
     return APIResponse(True, file_info).ToDict()
 
