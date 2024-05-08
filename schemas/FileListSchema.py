@@ -42,6 +42,7 @@ class FileListConfigSchema(Schema):
     def AsMarkdown(self) -> str:
         ret_val : str = self.Name
         return ret_val
+
     @staticmethod
     def EmptySchema() -> "FileListConfigSchema":
         return FileListConfigSchema(name="CONFIG NOT FOUND", all_elements={})
@@ -89,6 +90,10 @@ class GameDatasetCollectionSchema(Schema):
     def AsMarkdown(self) -> str:
         ret_val : str = self.Name
         return ret_val
+
+    @staticmethod
+    def EmptySchema() -> "GameDatasetCollectionSchema":
+        return GameDatasetCollectionSchema(name="DATASET COLLECTION NOT FOUND", all_elements={})
 
     @staticmethod
     def _parseGameDatasets(datasets:Dict[str, Any]) -> Dict[str, DatasetSchema]:
