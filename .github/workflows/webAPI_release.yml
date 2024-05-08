@@ -10,8 +10,9 @@ on:
 
 env:
   DEPLOY_HOST: ${{ vars.OGD_SERVICES_HOST }}
-  DEPLOY_DIR:  ${{ vars.WSGI_PATH }}/${{ github.event.repository.name }}/${{ github.ref_name }}
-  DEPLOY_URL:  ${{ vars.OGD_SERVICES_HOST }}/wsgi-bin/${{ github.event.repository.name }}/${{ github.ref_name }}
+  DEPLOY_DIR:  ${{ vars.WSGI_PATH }}/${{ github.event.repository.name }}/production
+  DEPLOY_URL:  ${{ vars.OGD_SERVICES_HOST }}/wsgi-bin/${{ github.event.repository.name }}/production
+  # TODO : Someday, switch this to just opengamedata-website-api, leave out production from path on services.
   URL_PATH:    wsgi-bin/${{ github.event.repository.name }}/${{ github.ref_name }}
 
 jobs:
