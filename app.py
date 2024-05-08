@@ -154,11 +154,11 @@ def getMonthlyGameUsage():
         return APIResponse(False, None).ToDict()
 
     # Pull the file list data into a dictionary
-    file_list_url      = settings.get("FILE_LIST_URL", "https://opengamedata.fielddaylab.wisc.edu/data/file_list.json")
-    file_list_response = url_request.urlopen(file_list_url)
-    file_list_json     = json.loads(file_list_response.read())
+    file_list_url      : str                       = settings.get("FILE_LIST_URL", "https://opengamedata.fielddaylab.wisc.edu/data/file_list.json")
+    file_list_response                             = url_request.urlopen(file_list_url)
+    file_list_json     : Dict[str, Dict[str, Any]] = json.loads(file_list_response.read())
     file_list          : FileListSchema              = FileListSchema(name="file_list", all_elements=file_list_json)
-    game_datasets      : GameDatasetCollectionSchema = file_list.Games.get(game_id, GameDatasetCollectionSchema.EmptySchema())
+    game_datasets      : GameDatasetCollectionSchema = file_list.Games.get(game_id or "NO GAME REQUESTED", GameDatasetCollectionSchema.EmptySchema())
 
     # If the given game isn't in our dictionary, or our dictionary doesn't have any date ranges for this game
     if not game_id in file_list_json or len(file_list_json[game_id]) == 0:
@@ -177,7 +177,8 @@ def getMonthlyGameUsage():
         # If this rangeKey matches the expected format
         if _dataset.Key.IsValid: # len(rangeKeyParts) == 4:
             # Capture the number of sessions for this YYYYMM
-            total_sessions_by_yyyymm[_dataset.Key.FromYear + _dataset.Key.FromMonth] = _dataset.SessionCount
+            _year_month = str(_dataset.Key.FromYear) + str(_dataset.Key.FromMonth).zfill(2)
+            total_sessions_by_yyyymm[_year_month] = _dataset.SessionCount
 
             # The ranges in file_list_json should be chronologically ordered, but manually determining the first & last months here just in case
             if first_year is None or first_month is None or _dataset.Key.FromYear < first_year:
@@ -202,10 +203,8 @@ def getMonthlyGameUsage():
             endRangeMonth = lastMonth if year == lastYear else 12
             for month in range(startRangeMonth, endRangeMonth + 1):
                 # If file_list.json has an entry for this month
-                if str(year) + str(month).zfill(2) in total_sessions_by_yyyymm:
-                    sessions.append({ "year": year, "month": month, "total_sessions": total_sessions_by_yyyymm[str(year) + str(month).zfill(2)]})
-                else:
-                    sessions.append({ "year": year, "month": month, "total_sessions": 0 })
+                _year_month = str(year) + str(month).zfill(2)
+                sessions.append({ "year": year, "month": month, "total_sessions": total_sessions_by_yyyymm.get(_year_month, 0)})
             startRangeMonth = 1
 
     responseData = { "game_id": game_id, "sessions": sessions }
