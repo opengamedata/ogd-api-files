@@ -270,6 +270,7 @@ Last modified {self.DateModified.strftime('%m/%d/%Y') if type(self.DateModified)
     def EmptySchema() -> "DatasetSchema":
         return DatasetSchema(name="NOT FOUND", all_elements={})
 
+    # TODO : once we have official minimum Python up to 3.11, import Self and set other:Optional[Self]
     def IsNewerThan(self, other) -> bool | None:
         """
         Check if `self` has a more recent "modified on" date than `other`.
