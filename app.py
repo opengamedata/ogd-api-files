@@ -153,10 +153,11 @@ def getMonthlyGameUsage():
         return APIResponse(False, None).ToDict()
 
     # Pull the file list data into a dictionary
-    file_list_url      = settings.get("FILE_LIST_URL", "https://opengamedata.fielddaylab.wisc.edu/data/file_list.json")
-    file_list_response = url_request.urlopen(file_list_url)
-    file_list_json     = json.loads(file_list_response.read())
-    game_datasets      = file_list_json.get(game_id, {})
+    file_list_url      : str                       = settings.get("FILE_LIST_URL", "https://opengamedata.fielddaylab.wisc.edu/data/file_list.json")
+    file_list_response                             = url_request.urlopen(file_list_url)
+    file_list_json     : Dict[str, Dict[str, Any]] = json.loads(file_list_response.read())
+    game_datasets_json : Dict[str, Any]            = file_list_json.get(game_id, {})
+    game_datasets      : Dict[str, DatasetSchema]  = { key : DatasetSchema(key, val) for key, val in game_datasets_json.items() }
 
     # If the given game isn't in our dictionary, or our dictionary doesn't have any date ranges for this game
     if not game_id in file_list_json or len(file_list_json[game_id]) == 0:
@@ -169,16 +170,14 @@ def getMonthlyGameUsage():
 
     total_sessions_by_yyyymm = {}
 
-     # rangeKey format is GAMEID_YYYYMMDD_to_YYYYMMDD or GAME_ID_YYYYMMDD_to_YYYYYMMDD
-    for _key in game_datasets:
-        _dataset_schema = DatasetSchema(name=_key, all_elements=game_datasets[_key])
-
-        # If this rangeKey matches the expected format
-        if _dataset_schema.Key.IsValid: # len(rangeKeyParts) == 4:
+    # The ranges in file_list_json should be chronologically ordered, but manually determining the first & last months here just in case
+    for _key, _dataset_schema in game_datasets.items():
+        # If this dataset key matches the expected format
+        if _dataset_schema.Key.IsValid:
             # Capture the number of sessions for this YYYYMM
-            total_sessions_by_yyyymm[_dataset_schema.Key.FromYear + _dataset_schema.Key.FromMonth] = _dataset_schema.SessionCount
+            _year_month = str(_dataset_schema.Key.FromYear) + str(_dataset_schema.Key.FromMonth).zfill(2)
+            total_sessions_by_yyyymm[_year_month] = _dataset_schema.SessionCount
 
-            # The ranges in file_list_json should be chronologically ordered, but manually determining the first & last months here just in case
             if first_year is None or first_month is None or _dataset_schema.Key.FromYear < first_year:
                 first_year = _dataset_schema.Key.FromYear
                 first_month = _dataset_schema.Key.FromMonth
