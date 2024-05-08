@@ -253,6 +253,7 @@ def getGameFileInfoByMonth():
                 application.logger.debug(f"Dataset key {_dataset_schema.Key} was invalid.")
     else:
         _, _matched_dataset = list(game_datasets.items())[-1]
+        application.logger.warning(f"Received request for file info by month, but no month/year was given. Using last dataset in list ({_matched_dataset})")
 
     if _matched_dataset is not None:
         file_info = {}
