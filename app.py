@@ -241,21 +241,17 @@ def getGameFileInfoByMonth():
     _matched_dataset : Optional[DatasetSchema] = None
     # Find the best match of a dataset to the requested month-year.
     # If there was no requested month-year, we skip this step.
-    if sanitized_request.Year is not None and sanitized_request.Month is not None:
-        for _key, _dataset_schema in game_datasets.items():
-            if _dataset_schema.Key.IsValid:
-                # If this range contains the given year & month
-                if (sanitized_request.Year >= _dataset_schema.Key.FromYear \
-                and sanitized_request.Month >= _dataset_schema.Key.FromMonth \
-                and sanitized_request.Year <= _dataset_schema.Key.ToYear \
-                and sanitized_request.Month <= _dataset_schema.Key.ToMonth):
-                    if _dataset_schema.IsNewerThan(_matched_dataset):
-                        _matched_dataset = _dataset_schema
-            else:
-                application.logger.debug(f"Dataset key {_dataset_schema.Key} was invalid.")
-    else:
-        _, _matched_dataset = list(game_datasets.items())[-1]
-        application.logger.warning(f"Received request for file info by month, but no month/year was given. Using last dataset in list ({_matched_dataset})")
+    for _key, _dataset_schema in game_datasets.items():
+        if _dataset_schema.Key.IsValid:
+            # If this range contains the given year & month
+            if (sanitized_request.Year >= _dataset_schema.Key.FromYear \
+            and sanitized_request.Month >= _dataset_schema.Key.FromMonth \
+            and sanitized_request.Year <= _dataset_schema.Key.ToYear \
+            and sanitized_request.Month <= _dataset_schema.Key.ToMonth):
+                if _dataset_schema.IsNewerThan(_matched_dataset):
+                    _matched_dataset = _dataset_schema
+        else:
+            application.logger.debug(f"Dataset key {_dataset_schema.Key} was invalid.")
 
     if _matched_dataset is not None:
         file_info = {}
