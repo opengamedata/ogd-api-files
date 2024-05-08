@@ -154,6 +154,9 @@ class DatasetSchema(Schema):
         _leftovers = { key : val for key,val in all_elements.items() if key not in _used }
         super().__init__(name=name, other_elements=_leftovers)
 
+    def __str__(self) -> str:
+        return str(self.Key)
+
     # *** Properties ***
 
     @property
