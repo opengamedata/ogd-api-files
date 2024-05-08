@@ -4,7 +4,7 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-# local imports
+# ogd imports
 from ogd.core.schemas.Schema import Schema
 from ogd.core.utils.Logger import Logger
 
