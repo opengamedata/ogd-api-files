@@ -200,10 +200,8 @@ def getMonthlyGameUsage():
             endRangeMonth = lastMonth if year == lastYear else 12
             for month in range(startRangeMonth, endRangeMonth + 1):
                 # If file_list.json has an entry for this month
-                if str(year) + str(month).zfill(2) in total_sessions_by_yyyymm:
-                    sessions.append({ "year": year, "month": month, "total_sessions": total_sessions_by_yyyymm[str(year) + str(month).zfill(2)]})
-                else:
-                    sessions.append({ "year": year, "month": month, "total_sessions": 0 })
+                _year_month = str(year) + str(month).zfill(2)
+                sessions.append({ "year": year, "month": month, "total_sessions": total_sessions_by_yyyymm.get(_year_month, 0)})
             startRangeMonth = 1
 
     responseData = { "game_id": game_id, "sessions": sessions }
