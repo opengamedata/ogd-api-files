@@ -2,7 +2,7 @@
 import logging
 from datetime import date, datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Self
 
 # local imports
 from ogd.core.schemas.Schema import Schema
@@ -269,6 +269,25 @@ Last modified {self.DateModified.strftime('%m/%d/%Y') if type(self.DateModified)
     @staticmethod
     def EmptySchema() -> "DatasetSchema":
         return DatasetSchema(name="NOT FOUND", all_elements={})
+
+    def IsNewerThan(self, other:Optional[Self]) -> bool | None:
+        """
+        Check if `self` has a more recent "modified on" date than `other`.
+
+        If `other` is None, returns True by default.  
+        If both `self` and `other` are DatasetSchemas, but one (or both) is missing a "modified" date, returns None, because it is indeterminate. 
+
+        :param other: The DatasetSchema to be compared with `self`.
+        :type other: Optional[Self]
+        :return: True if `self` has a more recent "modified" date than `other`, otherwise False. If one (or both) are missing "modified" date, then None. If `other` is None, True by default.
+        :rtype: bool | None
+        """
+        if other == None:
+            return True
+        if isinstance(self.DateModified, date) and isinstance(other.DateModified, date):
+            return self.DateModified > other.DateModified
+        else:
+            return None
 
     # *** Private Functions ***
 
