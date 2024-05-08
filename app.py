@@ -161,13 +161,13 @@ def getMonthlyGameUsage():
     game_datasets      : GameDatasetCollectionSchema = file_list.Games.get(game_id or "NO GAME REQUESTED", GameDatasetCollectionSchema.EmptySchema())
 
     # If the given game isn't in our dictionary, or our dictionary doesn't have any date ranges for this game
-    if not game_id in file_list_json or len(file_list_json[game_id]) == 0:
+    if not game_id in file_list.Games or len(file_list.Games[game_id].Datasets) == 0:
         return APIResponse(False, None).ToDict()
 
     first_month = None
-    first_year = None
-    lastYear = None
-    lastMonth = None
+    first_year  = None
+    lastYear    = None
+    lastMonth   = None
 
     total_sessions_by_yyyymm = {}
 
