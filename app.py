@@ -1,7 +1,7 @@
 # import standard libraries
 import json
 from calendar import monthrange
-from datetime import date
+from datetime import date, timedelta
 from logging.config import dictConfig
 from typing import Any, Dict, Optional
 from urllib import request as url_request
@@ -106,26 +106,27 @@ def getGameUsageByMonth():
     - Daily session counts for month
     """
 
-    sanitizedInput = SanitizedParams.FromRequest()
+    last_month = date.today().replace(day=1) - timedelta(days=1)
+    sanitized_request = SanitizedParams.FromRequest(default_date=last_month)
 
-    if sanitizedInput.GameID is None or sanitizedInput.GameID == "":
+    if sanitized_request.GameID is None or sanitized_request.GameID == "":
         return APIResponse(False, None).ToDict()
 
     # If we don't have a mapping for the given game
-    if not sanitizedInput.GameID in settings["BIGQUERY_GAME_MAPPING"]:
+    if not sanitized_request.GameID in settings["BIGQUERY_GAME_MAPPING"]:
         return APIResponse(False, None).ToDict()
 
     total_monthly_sessions = 0
     sessions_by_day = {}
 
-    bqInterface = BigQueryInterface(settings["BIGQUERY_GAME_MAPPING"][sanitizedInput.GameID])
-    total_monthly_sessions = bqInterface.GetTotalSessionsForMonth(sanitizedInput.Year, sanitizedInput.Month)
-    sessions_by_day        = bqInterface.GetSessionsPerDayForMonth(sanitizedInput.Year, sanitizedInput.Month)
+    bqInterface = BigQueryInterface(settings["BIGQUERY_GAME_MAPPING"][sanitized_request.GameID])
+    total_monthly_sessions = bqInterface.GetTotalSessionsForMonth(sanitized_request.Year, sanitized_request.Month)
+    sessions_by_day        = bqInterface.GetSessionsPerDayForMonth(sanitized_request.Year, sanitized_request.Month)
 
     responseObj = {
-        "game_id": sanitizedInput.GameID,
-        "selected_month": sanitizedInput.Month,
-        "selected_year": sanitizedInput.Year,
+        "game_id": sanitized_request.GameID,
+        "selected_month": sanitized_request.Month,
+        "selected_year": sanitized_request.Year,
         "total_monthly_sessions": total_monthly_sessions,
         "sessions_by_day": sessions_by_day
     }
@@ -221,17 +222,18 @@ def getGameFileInfoByMonth():
     Outputs:
     - DatasetSchema of most recently-exported dataset for game in month
     """
-    sanitizedRequestParams = SanitizedParams.FromRequest()
+    last_month = date.today().replace(day=1) - timedelta(days=1)
+    sanitized_request = SanitizedParams.FromRequest(default_date=last_month)
 
 # 1. Get the list of datasets available on the server, for given game.
     file_list_url      : str                       = settings.get("FILE_LIST_URL", "https://opengamedata.fielddaylab.wisc.edu/data/file_list.json")
     file_list_response                             = url_request.urlopen(file_list_url)
     file_list_json     : Dict[str, Dict[str, Any]] = json.loads(file_list_response.read())
-    game_datasets_json : Dict[str, Any]            = file_list_json.get(sanitizedRequestParams.GameID or "NO GAME REQUESTED", {})
+    game_datasets_json : Dict[str, Any]            = file_list_json.get(sanitized_request.GameID or "NO GAME REQUESTED", {})
     game_datasets      : Dict[str, DatasetSchema]  = { key : DatasetSchema(key, val) for key, val in game_datasets_json.items() }
 
     # If we couldn't find the requested game in file_list.json, or the game didn't have any date ranges, skip.
-    if (sanitizedRequestParams.GameID is None) or (len(game_datasets) == 0):
+    if (sanitized_request.GameID is None) or (len(game_datasets) == 0):
         return APIResponse(success=False, data=None).ToDict()
     # Else, continue on.
 
@@ -239,14 +241,14 @@ def getGameFileInfoByMonth():
     _matched_dataset : Optional[DatasetSchema] = None
     # Find the best match of a dataset to the requested month-year.
     # If there was no requested month-year, we skip this step.
-    if sanitizedRequestParams.Year is not None and sanitizedRequestParams.Month is not None:
+    if sanitized_request.Year is not None and sanitized_request.Month is not None:
         for _key, _dataset_schema in game_datasets.items():
             if _dataset_schema.Key.IsValid:
                 # If this range contains the given year & month
-                if (sanitizedRequestParams.Year >= _dataset_schema.Key.FromYear \
-                and sanitizedRequestParams.Month >= _dataset_schema.Key.FromMonth \
-                and sanitizedRequestParams.Year <= _dataset_schema.Key.ToYear \
-                and sanitizedRequestParams.Month <= _dataset_schema.Key.ToMonth):
+                if (sanitized_request.Year >= _dataset_schema.Key.FromYear \
+                and sanitized_request.Month >= _dataset_schema.Key.FromMonth \
+                and sanitized_request.Year <= _dataset_schema.Key.ToYear \
+                and sanitized_request.Month <= _dataset_schema.Key.ToMonth):
                     if _dataset_schema.IsNewerThan(_matched_dataset):
                         _matched_dataset = _dataset_schema
             else:
@@ -270,7 +272,7 @@ def getGameFileInfoByMonth():
         file_info["first_month"] = _matched_dataset.Key.FromMonth
         file_info["last_year"]   = _matched_dataset.Key.ToYear
         file_info["last_month"]  = _matched_dataset.Key.ToMonth
-        _branch_name     = sanitizedRequestParams.GameID.lower().replace('_', '-')
+        _branch_name     = sanitized_request.GameID.lower().replace('_', '-')
         _revision        = _matched_dataset.OGDRevision or None
 
         # Files
