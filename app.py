@@ -1,8 +1,9 @@
 # import standard libraries
-import sys, os, re, datetime, json
+import json
 from calendar import monthrange
+from datetime import date, timedelta
 from logging.config import dictConfig
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 from urllib import request as url_request
 
 # import 3rd-party libraries
@@ -11,6 +12,8 @@ from flask_cors import CORS
 
 # import our app libraries
 from models.APIResponse import APIResponse
+from schemas.DatasetSchema import DatasetSchema
+from models.SanitizedParams import SanitizedParams
 from interfaces.BigQueryInterface import BigQueryInterface
 
 # By default we'll log to the WSGI errors stream which ends up in the Apache error log
@@ -24,7 +27,7 @@ logHandlers = {
 
 logRootHandlers = ['wsgi']
 
-# Commenting out the dedicated log file for this app. The code functions fine, but 
+# NOTE: Commenting out the dedicated log file for this app. The code functions fine, but 
 # getting the permissions set correctly isn't a priority right now
 
 # If a dedicated log file is defined for this Flask app, we'll also log there
@@ -56,69 +59,28 @@ application = Flask(__name__)
 
 # Allow cross-origin requests from any origin by default
 # This presents minimal risk to visitors since the API merely retrieves non-sensitive data
-# Comment this out if the web server itself is configured to send an Access-Control-Allow-Origin header, so we don't have a duplicate header
+# NOTE: Comment this out if the web server itself is configured to send an Access-Control-Allow-Origin header, so we don't have a duplicate header
 CORS(application)
 
 # Now that logging is set up, import our local config settings
 from config.config import settings
 application.logger.setLevel(settings['DEBUG_LEVEL'])
 
-class SanitizedParams:
-    """Dumb struct to store the sanitized params from a request
-    """
-    def __init__(self, game_id:str, year:int, month:int):
-        self._game_id : str = game_id
-        self._year    : int = year
-        self._month   : int = month
-    
-    @property
-    def GameID(self) -> str:
-        return self._game_id
-    @property
-    def Year(self) -> int:
-        return self._year
-    @property
-    def Month(self) -> int:
-        return self._month
-
-# If the given game_id contains allowed characters, return it in UPPERCASE, otherwise return empty string
-def sanitizeGameId(game_id: str) -> str:
-    if re.search("^[A-Za-z_]+$", game_id) is None:
-        game_id = ""
-    return game_id.upper()
-
-# Shared utility function to retrieve game_id, year, and month from the request's query string.
-# Defaults are used if a value was not given or is invalid
-def getSanitizedQueryParams() -> SanitizedParams:
-
-    now_date = datetime.date.today()
-
-    # Extract query string parameters
-    game_id = sanitizeGameId(request.args.get("game_id", default ="", type=str))
-    year = request.args.get("year",   default=now_date.year, type=int)
-    month = request.args.get("month", default=now_date.month, type=int)
-    
-    if month < 1 or month > 12:
-        month = now_date.month
-
-    if year < 2000 or year > now_date.year:
-        year = now_date.year
-
-    return SanitizedParams(game_id=game_id, year=year, month=month)
-    return { "game_id": game_id, "year": year, "month": month }
 
 # TODO: Remove this action and dependencies (interfaces, config) if we're certain they won't be needed.
 # The SQL for BigQuery did take a bit of effort to compose, but could always be retrieved from old commits
 
-# Basic response if someone just hits the home path to say "hello"
 @application.route('/', methods=['GET'])
-def get_hello():
+def Hello():
+    """
+    Basic response if someone just hits the home path to say "hello"
+    """
 
     responseObj = {
         "message": "hello, world"
     }
 
-    return APIResponse(True, responseObj).ToDict()
+    return APIResponse(success=True, data=responseObj).ToDict()
 
 @application.route('/version', methods=['GET'])
 def get_api_version():
@@ -131,206 +93,208 @@ def get_api_version():
 
 # Get game usage statistics for a given game, year, and month
 @application.route('/getGameUsageByMonth', methods=['GET'])
-def get_game_usage_by_month():
+def getGameUsageByMonth():
+    """
+    Get game usage statistics for a given game, year, and month
+    
+    Inputs:
+    - Game ID
+    - Month
+    - Year
+    Outputs:
+    - Month's session count
+    - Daily session counts for month
+    """
 
-    sanitizedInput = getSanitizedQueryParams()
+    last_month = date.today().replace(day=1) - timedelta(days=1)
+    sanitized_request = SanitizedParams.FromRequest(default_date=last_month)
 
-    if sanitizedInput.GameID is None or sanitizedInput.GameID == "":
+    if sanitized_request.GameID is None or sanitized_request.GameID == "":
         return APIResponse(False, None).ToDict()
 
     # If we don't have a mapping for the given game
-    if not sanitizedInput.GameID in settings["BIGQUERY_GAME_MAPPING"]:
+    if not sanitized_request.GameID in settings["BIGQUERY_GAME_MAPPING"]:
         return APIResponse(False, None).ToDict()
 
     total_monthly_sessions = 0
     sessions_by_day = {}
 
-    bqInterface = BigQueryInterface(settings["BIGQUERY_GAME_MAPPING"][sanitizedInput.GameID])
-    total_monthly_sessions = bqInterface.GetTotalSessionsForMonth(sanitizedInput.Year, sanitizedInput.Month)
-    sessions_by_day        = bqInterface.GetSessionsPerDayForMonth(sanitizedInput.Year, sanitizedInput.Month)
+    bqInterface = BigQueryInterface(settings["BIGQUERY_GAME_MAPPING"][sanitized_request.GameID])
+    total_monthly_sessions = bqInterface.GetTotalSessionsForMonth(sanitized_request.Year, sanitized_request.Month)
+    sessions_by_day        = bqInterface.GetSessionsPerDayForMonth(sanitized_request.Year, sanitized_request.Month)
 
     responseObj = {
-        "game_id": sanitizedInput.GameID,
-        "selected_month": sanitizedInput.Month,
-        "selected_year": sanitizedInput.Year,
+        "game_id": sanitized_request.GameID,
+        "selected_month": sanitized_request.Month,
+        "selected_year": sanitized_request.Year,
         "total_monthly_sessions": total_monthly_sessions,
         "sessions_by_day": sessions_by_day
     }
 
     return APIResponse(True, responseObj).ToDict()
 
-# Get the per-month number of sessions for a given game
 @application.route("/getMonthlyGameUsage", methods=['GET'])
-def get_monthly_game_usage():
+def getMonthlyGameUsage():
+    """
+    Get the per-month number of sessions for a given game
+
+    Inputs:
+    - Game ID
+    Uses:
+    - Index file list
+    Outputs:
+    - Session count for each month of game's data
+    """
     
     # Extract a sanitized game_id from the query string
-    game_id = sanitizeGameId(request.args.get("game_id", default = "", type=str))
+    game_id = SanitizedParams.sanitizeGameId(request.args.get("game_id", default = "", type=str))
      
     if game_id is None or game_id == "":
         return APIResponse(False, None).ToDict()
 
     # Pull the file list data into a dictionary
-    file_list_url = 'https://opengamedata.fielddaylab.wisc.edu/data/file_list.json'
+    file_list_url      = settings.get("FILE_LIST_URL", "https://opengamedata.fielddaylab.wisc.edu/data/file_list.json")
     file_list_response = url_request.urlopen(file_list_url)
-    file_list_json = json.loads(file_list_response.read())
+    file_list_json     = json.loads(file_list_response.read())
+    game_datasets      = file_list_json.get(game_id, {})
 
     # If the given game isn't in our dictionary, or our dictionary doesn't have any date ranges for this game
     if not game_id in file_list_json or len(file_list_json[game_id]) == 0:
         return APIResponse(False, None).ToDict()
 
-    firstMonth = None
-    firstYear = None
+    first_month = None
+    first_year = None
     lastYear = None
     lastMonth = None
 
     total_sessions_by_yyyymm = {}
 
      # rangeKey format is GAMEID_YYYYMMDD_to_YYYYMMDD or GAME_ID_YYYYMMDD_to_YYYYYMMDD
-    for rangeKey in file_list_json[game_id]:
-
-        rangeKeyWithoutGame = rangeKey[len(game_id):]
-        rangeKeyParts = rangeKeyWithoutGame.split("_")
+    for _key in game_datasets:
+        _dataset_schema = DatasetSchema(name=_key, all_elements=game_datasets[_key])
 
         # If this rangeKey matches the expected format
-        if len(rangeKeyParts) == 4:
-            year = rangeKeyParts[1][0:4]
-            month = rangeKeyParts[1][4:6]
-
+        if _dataset_schema.Key.IsValid: # len(rangeKeyParts) == 4:
             # Capture the number of sessions for this YYYYMM
-            total_sessions_by_yyyymm[year + month] = file_list_json[game_id][rangeKey]["sessions"]
+            total_sessions_by_yyyymm[_dataset_schema.Key.FromYear + _dataset_schema.Key.FromMonth] = _dataset_schema.SessionCount
 
             # The ranges in file_list_json should be chronologically ordered, but manually determining the first & last months here just in case
-            if firstYear is None or int(year) < firstYear:
-                firstYear = int(year)
-                firstMonth = int(month)
-            elif int(year) == firstYear and int(month) < firstMonth:
-                firstMonth = int(month)
+            if first_year is None or first_month is None or _dataset_schema.Key.FromYear < first_year:
+                first_year = _dataset_schema.Key.FromYear
+                first_month = _dataset_schema.Key.FromMonth
+            elif _dataset_schema.Key.FromYear == first_year and _dataset_schema.Key.FromMonth < first_month:
+                first_month = _dataset_schema.Key.FromMonth
             
-            if lastYear is None or int(year) > lastYear:
-                lastYear = int(year)
-                lastMonth = int(month)
-            elif lastYear == int(year) and lastMonth < int(month):
-                lastMonth = int(month)
+            if lastYear is None or lastMonth is None or _dataset_schema.Key.FromYear > lastYear:
+                lastYear = _dataset_schema.Key.FromYear
+                lastMonth = _dataset_schema.Key.FromMonth
+            elif lastYear == _dataset_schema.Key.FromYear and lastMonth < _dataset_schema.Key.FromMonth:
+                lastMonth = _dataset_schema.Key.FromMonth
 
-    sessions = []
-    startRangeMonth = firstMonth
 
     # Iterate through all of the months from the first month+year to last month+year, since the ranges have gaps
     # Default the number of sessions to zero for months we don't have data
-    for year in range(firstYear, lastYear + 1):
-        endRangeMonth = lastMonth if year == lastYear else 12
-        for month in range(startRangeMonth, endRangeMonth + 1):
-            # If file_list.json has an entry for this month
-            if str(year) + str(month).zfill(2) in total_sessions_by_yyyymm:
-                sessions.append({ "year": year, "month": month, "total_sessions": total_sessions_by_yyyymm[str(year) + str(month).zfill(2)]})
-            else:
-                sessions.append({ "year": year, "month": month, "total_sessions": 0 })
-        startRangeMonth = 1
+    sessions = []
+    if first_year is not None and first_month is not None and lastYear is not None and lastMonth is not None:
+        startRangeMonth = first_month
+        for year in range(first_year, lastYear + 1):
+            endRangeMonth = lastMonth if year == lastYear else 12
+            for month in range(startRangeMonth, endRangeMonth + 1):
+                # If file_list.json has an entry for this month
+                if str(year) + str(month).zfill(2) in total_sessions_by_yyyymm:
+                    sessions.append({ "year": year, "month": month, "total_sessions": total_sessions_by_yyyymm[str(year) + str(month).zfill(2)]})
+                else:
+                    sessions.append({ "year": year, "month": month, "total_sessions": 0 })
+            startRangeMonth = 1
 
     responseData = { "game_id": game_id, "sessions": sessions }
     return APIResponse(True, responseData).ToDict()
 
-# Get info on the files that are available for the given game in the given month & year
 @application.route('/getGameFileInfoByMonth', methods=['GET'])
-def get_game_file_info_by_month():
+def getGameFileInfoByMonth():
+    """
+    Get info on the files that are available for the given game in the given month & year
 
-    sanitizedInput = getSanitizedQueryParams()
-    _game_id = sanitizedInput.GameID # local var because `sanitizedInput.GameID` is loooong.
+    Inputs:
+    - Game ID
+    - Year
+    - Month
+    Outputs:
+    - DatasetSchema of most recently-exported dataset for game in month
+    """
+    last_month = date.today().replace(day=1) - timedelta(days=1)
+    sanitized_request = SanitizedParams.FromRequest(default_date=last_month)
 
-    FILE_LIST_URL      = 'https://opengamedata.fielddaylab.wisc.edu/data/file_list.json'
-    file_list_response = url_request.urlopen(FILE_LIST_URL)
-    file_list_json     = json.loads(file_list_response.read())
+# 1. Get the list of datasets available on the server, for given game.
+    file_list_url      : str                       = settings.get("FILE_LIST_URL", "https://opengamedata.fielddaylab.wisc.edu/data/file_list.json")
+    file_list_response                             = url_request.urlopen(file_list_url)
+    file_list_json     : Dict[str, Dict[str, Any]] = json.loads(file_list_response.read())
+    game_datasets_json : Dict[str, Any]            = file_list_json.get(sanitized_request.GameID or "NO GAME REQUESTED", {})
+    game_datasets      : Dict[str, DatasetSchema]  = { key : DatasetSchema(key, val) for key, val in game_datasets_json.items() }
 
-    # If we couldn't find the given game in file_list.json, or the game didn't have any date ranges
-    if (_game_id is None) or (not _game_id in file_list_json) or (len(file_list_json[_game_id]) == 0):
+    # If we couldn't find the requested game in file_list.json, or the game didn't have any date ranges, skip.
+    if (sanitized_request.GameID is None) or (len(game_datasets) == 0):
         return APIResponse(success=False, data=None).ToDict()
+    # Else, continue on.
 
-    file_info = {}
-    found_matching_range = False
+# 2. Search for the most recently modified dataset that contains the requested month and year
+    _matched_dataset : Optional[DatasetSchema] = None
+    # Find the best match of a dataset to the requested month-year.
+    # If there was no requested month-year, we skip this step.
+    for _key, _dataset_schema in game_datasets.items():
+        if _dataset_schema.Key.IsValid:
+            # If this range contains the given year & month
+            if (sanitized_request.Year >= _dataset_schema.Key.FromYear \
+            and sanitized_request.Month >= _dataset_schema.Key.FromMonth \
+            and sanitized_request.Year <= _dataset_schema.Key.ToYear \
+            and sanitized_request.Month <= _dataset_schema.Key.ToMonth):
+                if _dataset_schema.IsNewerThan(_matched_dataset):
+                    _matched_dataset = _dataset_schema
+        else:
+            application.logger.debug(f"Dataset key {_dataset_schema.Key} was invalid.")
 
-    _game_datasets = file_list_json[_game_id]
-   # If a year and month wasn't given, we'll default to returning files & info for the last range
-    if sanitizedInput.Year is None or sanitizedInput.Month is None:
-        _last_dataset_key = list(_game_datasets)[-1]
+    if _matched_dataset is not None:
+        file_info = {}
 
-    # rangeKey format is GAMEID_YYYYMMDD_to_YYYYMMDD
-    for _dataset_key in _game_datasets:
-            
-        _dataset_date_range = _dataset_key[len(_game_id):]
-        _dataset_date_range_parts = _dataset_date_range.split("_")
+        # If this range contains the given year & month
+        # Base URLs
+        FILEHOST_BASE_URL   : Optional[str] = file_list_json.get("CONFIG", {}).get("files_base")
+        TEMPLATES_BASE_URL  : Optional[str] = file_list_json.get("CONFIG", {}).get("templates_base")
+        CODESPACES_BASE_URL : str           = "https://codespaces.new/opengamedata/opengamedata-samples/tree/"
+        GITHUB_BASE_URL     : str           = "https://github.com/opengamedata/opengamedata-core/tree/"
+        
+        # Date information
+        file_info["first_year"]  = _matched_dataset.Key.FromYear
+        file_info["first_month"] = _matched_dataset.Key.FromMonth
+        file_info["last_year"]   = _matched_dataset.Key.ToYear
+        file_info["last_month"]  = _matched_dataset.Key.ToMonth
+        _branch_name     = sanitized_request.GameID.lower().replace('_', '-')
+        _revision        = _matched_dataset.OGDRevision or None
 
-        # If this rangeKey matches the expected format
-        if len(_dataset_date_range_parts) == 4:
-            fromYear  = int(_dataset_date_range_parts[1][0:4])
-            fromMonth = int(_dataset_date_range_parts[1][4:6])
-            toYear    = int(_dataset_date_range_parts[3][0:4])
-            toMonth   = int(_dataset_date_range_parts[3][4:6])
+        # Files
+        file_info["raw_file"]        = f"{FILEHOST_BASE_URL}{_matched_dataset.RawFile}"        if _matched_dataset.RawFile        is not None else None
+        file_info["events_file"]     = f"{FILEHOST_BASE_URL}{_matched_dataset.EventsFile}"     if _matched_dataset.EventsFile     is not None else None
+        file_info["sessions_file"]   = f"{FILEHOST_BASE_URL}{_matched_dataset.SessionsFile}"   if _matched_dataset.SessionsFile   is not None else None
+        file_info["players_file"]    = f"{FILEHOST_BASE_URL}{_matched_dataset.PlayersFile}"    if _matched_dataset.PlayersFile    is not None else None
+        file_info["population_file"] = f"{FILEHOST_BASE_URL}{_matched_dataset.PopulationFile}" if _matched_dataset.PopulationFile is not None else None
 
-            # If this is the first range block in our loop, or this range block has an earlier year than our first_year
-            if "first_year" not in file_info or file_info["first_year"] > fromYear:
+        # Templates
+        file_info["events_template"]     = f"{TEMPLATES_BASE_URL}{_matched_dataset.EventsTemplate}"     if _matched_dataset.EventsTemplate     is not None else None
+        file_info["sessions_template"]   = f"{TEMPLATES_BASE_URL}{_matched_dataset.SessionsTemplate}"   if _matched_dataset.SessionsTemplate   is not None else None
+        file_info["players_template"]    = f"{TEMPLATES_BASE_URL}{_matched_dataset.PlayersTemplate}"    if _matched_dataset.PlayersTemplate    is not None else None
+        file_info["population_template"] = f"{TEMPLATES_BASE_URL}{_matched_dataset.PopulationTemplate}" if _matched_dataset.PopulationTemplate is not None else None
 
-                file_info["first_year"] = fromYear
-                file_info["first_month"] = fromMonth
+        file_info["events_codespace"]   = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fevent-template%2Fdevcontainer.json"
+        file_info["sessions_codespace"] = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fplayer-template%2Fdevcontainer.json"
+        file_info["players_codespace"]  = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fsession-template%2Fdevcontainer.json"
 
-            # If this is range is for the same year but an earlier month
-            elif file_info["first_year"] == fromYear and file_info["first_month"] > fromMonth:
-
-                file_info["first_month"] = fromMonth
-
-            # If this is the first range block, or this range block has a later year than the last_year
-            if "last_year" not in file_info or file_info["last_year"] < toYear:
-
-                file_info["last_year"] = toYear
-                file_info["last_month"] = toMonth
-
-            # If this is range is for the same year but with a later month
-            elif file_info["last_year"] == toYear and file_info["last_month"] < toMonth:
-
-                file_info["last_month"] = toMonth
-
-            # If a month & year wasn't actually given and this is the last range
-            # OR if this range contains the given year & month
-            if ((request.args.get("year") is None and request.args.get("month") is None and _dataset_key == _last_dataset_key) 
-                or (sanitizedInput.Year >= fromYear and sanitizedInput.Month >= fromMonth and sanitizedInput.Year <= toYear and sanitizedInput.Month <= toMonth)):
-                files_base_url     : str = file_list_json.get("CONFIG", {}).get("files_base")
-                templates_base_url : str = file_list_json.get("CONFIG", {}).get("templates_base")
-                _dataset_json = file_list_json.get(_game_id, {}).get(_dataset_key, {})
-              
-                # Files
-                file_info["events_file"]     = files_base_url + _dataset_json.get("events_file", None)
-                file_info["players_file"]    = files_base_url + _dataset_json.get("players_file", None)
-                file_info["population_file"] = files_base_url + _dataset_json.get("population_file", None)
-                file_info["raw_file"]        = files_base_url + _dataset_json.get("raw_file", None)
-                file_info["sessions_file"]   = files_base_url + _dataset_json.get("sessions_file", None)
-
-                # Templates
-                file_info["events_template"]     = templates_base_url + _dataset_json.get("events_template", None)
-                file_info["players_template"]    = templates_base_url + _dataset_json.get("players_template", None)
-                file_info["population_template"] = templates_base_url + _dataset_json.get("population_template", None)
-                file_info["sessions_template"]   = templates_base_url + _dataset_json.get("sessions_template", None)
-
-                _git_base_url = "https://github.com/opengamedata/opengamedata-core/tree/"
-                _revision     = _dataset_json.get("ogd_revision") or None
-                file_info["detectors_link"] = f"{_git_base_url}{_revision}/games/{_game_id}/detectors" if _revision else None
-                file_info["features_link"]  = f"{_git_base_url}{_revision}/games/{_game_id}/features"  if _revision else None
-                
-                found_matching_range = True
-
-    if not found_matching_range:
-        file_info["found_matching_range"] = False
-        file_info["events_file"] = None
-        file_info["players_file"] = None
-        file_info["population_file"] = None
-        file_info["raw_file"] = None
-        file_info["sessions_file"] = None
-        file_info["events_template"] = None
-        file_info["players_template"] = None
-        file_info["population_template"] = None
-        file_info["sessions_template"] = None
-        file_info["detectors_link"] = None
-        file_info["features_link"] = None
-    else:
+        # Convention for branch naming is lower-case with dashes,
+        # while game IDs are usually upper-case with underscores, so make sure we do the conversion
+        file_info["detectors_link"] = f"{GITHUB_BASE_URL}{_revision}/games/{_branch_name}/detectors" if _revision else None
+        file_info["features_link"]  = f"{GITHUB_BASE_URL}{_revision}/games/{_branch_name}/features"  if _revision else None
         file_info["found_matching_range"] = True
+    else:
+        return APIResponse(success=False, data=None).ToDict()
 
     return APIResponse(True, file_info).ToDict()
 
