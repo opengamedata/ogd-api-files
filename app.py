@@ -253,46 +253,45 @@ def getGameFileInfoByMonth():
         else:
             application.logger.debug(f"Dataset key {_dataset_schema.Key} was invalid.")
 
-    if _matched_dataset is not None:
-        file_info = {}
+    if _matched_dataset is None:
+        _matched_dataset = list(game_datasets.Datasets.values())[-1]
+    file_info = {}
 
-        # If this range contains the given year & month
-        # Base URLs
-        CODESPACES_BASE_URL : str           = "https://codespaces.new/opengamedata/opengamedata-samples/tree/"
-        GITHUB_BASE_URL     : str           = "https://github.com/opengamedata/opengamedata-core/tree/"
-        
-        # Date information
-        file_info["first_year"]  = _matched_dataset.Key.FromYear
-        file_info["first_month"] = _matched_dataset.Key.FromMonth
-        file_info["last_year"]   = _matched_dataset.Key.ToYear
-        file_info["last_month"]  = _matched_dataset.Key.ToMonth
-        _branch_name     = sanitized_request.GameID.lower().replace('_', '-')
-        _revision        = _matched_dataset.OGDRevision or None
+    # If this range contains the given year & month
+    # Base URLs
+    CODESPACES_BASE_URL : str           = "https://codespaces.new/opengamedata/opengamedata-samples/tree/"
+    GITHUB_BASE_URL     : str           = "https://github.com/opengamedata/opengamedata-core/tree/"
+    
+    # Date information
+    file_info["first_year"]  = _matched_dataset.Key.FromYear
+    file_info["first_month"] = _matched_dataset.Key.FromMonth
+    file_info["last_year"]   = _matched_dataset.Key.ToYear
+    file_info["last_month"]  = _matched_dataset.Key.ToMonth
+    _branch_name     = sanitized_request.GameID.lower().replace('_', '-')
+    _revision        = _matched_dataset.OGDRevision or None
 
-        # Files
-        file_info["raw_file"]        = f"{file_list.Config.FilesBase}{_matched_dataset.RawFile}"        if _matched_dataset.RawFile        is not None else None
-        file_info["events_file"]     = f"{file_list.Config.FilesBase}{_matched_dataset.EventsFile}"     if _matched_dataset.EventsFile     is not None else None
-        file_info["sessions_file"]   = f"{file_list.Config.FilesBase}{_matched_dataset.SessionsFile}"   if _matched_dataset.SessionsFile   is not None else None
-        file_info["players_file"]    = f"{file_list.Config.FilesBase}{_matched_dataset.PlayersFile}"    if _matched_dataset.PlayersFile    is not None else None
-        file_info["population_file"] = f"{file_list.Config.FilesBase}{_matched_dataset.PopulationFile}" if _matched_dataset.PopulationFile is not None else None
+    # Files
+    file_info["raw_file"]        = f"{file_list.Config.FilesBase}{_matched_dataset.RawFile}"        if _matched_dataset.RawFile        is not None else None
+    file_info["events_file"]     = f"{file_list.Config.FilesBase}{_matched_dataset.EventsFile}"     if _matched_dataset.EventsFile     is not None else None
+    file_info["sessions_file"]   = f"{file_list.Config.FilesBase}{_matched_dataset.SessionsFile}"   if _matched_dataset.SessionsFile   is not None else None
+    file_info["players_file"]    = f"{file_list.Config.FilesBase}{_matched_dataset.PlayersFile}"    if _matched_dataset.PlayersFile    is not None else None
+    file_info["population_file"] = f"{file_list.Config.FilesBase}{_matched_dataset.PopulationFile}" if _matched_dataset.PopulationFile is not None else None
 
-        # Templates
-        file_info["events_template"]     = f"{file_list.Config.TemplatesBase}{_matched_dataset.EventsTemplate}"     if _matched_dataset.EventsTemplate     is not None else None
-        file_info["sessions_template"]   = f"{file_list.Config.TemplatesBase}{_matched_dataset.SessionsTemplate}"   if _matched_dataset.SessionsTemplate   is not None else None
-        file_info["players_template"]    = f"{file_list.Config.TemplatesBase}{_matched_dataset.PlayersTemplate}"    if _matched_dataset.PlayersTemplate    is not None else None
-        file_info["population_template"] = f"{file_list.Config.TemplatesBase}{_matched_dataset.PopulationTemplate}" if _matched_dataset.PopulationTemplate is not None else None
+    # Templates
+    file_info["events_template"]     = f"{file_list.Config.TemplatesBase}{_matched_dataset.EventsTemplate}"     if _matched_dataset.EventsTemplate     is not None else None
+    file_info["sessions_template"]   = f"{file_list.Config.TemplatesBase}{_matched_dataset.SessionsTemplate}"   if _matched_dataset.SessionsTemplate   is not None else None
+    file_info["players_template"]    = f"{file_list.Config.TemplatesBase}{_matched_dataset.PlayersTemplate}"    if _matched_dataset.PlayersTemplate    is not None else None
+    file_info["population_template"] = f"{file_list.Config.TemplatesBase}{_matched_dataset.PopulationTemplate}" if _matched_dataset.PopulationTemplate is not None else None
 
-        file_info["events_codespace"]   = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fevent-template%2Fdevcontainer.json"
-        file_info["sessions_codespace"] = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fplayer-template%2Fdevcontainer.json"
-        file_info["players_codespace"]  = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fsession-template%2Fdevcontainer.json"
+    file_info["events_codespace"]   = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fevent-template%2Fdevcontainer.json"
+    file_info["sessions_codespace"] = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fplayer-template%2Fdevcontainer.json"
+    file_info["players_codespace"]  = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fsession-template%2Fdevcontainer.json"
 
-        # Convention for branch naming is lower-case with dashes,
-        # while game IDs are usually upper-case with underscores, so make sure we do the conversion
-        file_info["detectors_link"] = f"{GITHUB_BASE_URL}{_revision}/games/{_branch_name}/detectors" if _revision else None
-        file_info["features_link"]  = f"{GITHUB_BASE_URL}{_revision}/games/{_branch_name}/features"  if _revision else None
-        file_info["found_matching_range"] = True
-    else:
-        return APIResponse(success=False, data=None).ToDict()
+    # Convention for branch naming is lower-case with dashes,
+    # while game IDs are usually upper-case with underscores, so make sure we do the conversion
+    file_info["detectors_link"] = f"{GITHUB_BASE_URL}{_revision}/games/{_branch_name}/detectors" if _revision else None
+    file_info["features_link"]  = f"{GITHUB_BASE_URL}{_revision}/games/{_branch_name}/features"  if _revision else None
+    file_info["found_matching_range"] = True
 
     return APIResponse(True, file_info).ToDict()
 
