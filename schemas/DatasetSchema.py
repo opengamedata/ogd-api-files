@@ -373,8 +373,10 @@ Last modified {self.DateModified.strftime('%m/%d/%Y') if type(self.DateModified)
         return ret_val
 
     @staticmethod
-    def _parseRawFile(raw_file) -> Optional[Path]:
+    def _parseRawFile(raw_file:Optional[Path | str]) -> Optional[Path]:
         ret_val : Optional[Path]
+        if raw_file == None:
+            ret_val = None
         if isinstance(raw_file, Path):
             ret_val = raw_file
         elif isinstance(raw_file, str):
@@ -385,8 +387,10 @@ Last modified {self.DateModified.strftime('%m/%d/%Y') if type(self.DateModified)
         return ret_val
 
     @staticmethod
-    def _parseEventsFile(events_file) -> Optional[Path]:
+    def _parseEventsFile(events_file:Optional[Path | str]) -> Optional[Path]:
         ret_val : Optional[Path]
+        if events_file == None:
+            ret_val = None
         if isinstance(events_file, Path):
             ret_val = events_file
         elif isinstance(events_file, str):
@@ -397,8 +401,10 @@ Last modified {self.DateModified.strftime('%m/%d/%Y') if type(self.DateModified)
         return ret_val
 
     @staticmethod
-    def _parseSessionsFile(sessions_file) -> Optional[Path]:
+    def _parseSessionsFile(sessions_file:Optional[Path | str]) -> Optional[Path]:
         ret_val : Optional[Path]
+        if sessions_file == None:
+            ret_val = None
         if isinstance(sessions_file, Path):
             ret_val = sessions_file
         elif isinstance(sessions_file, str):
@@ -409,8 +415,10 @@ Last modified {self.DateModified.strftime('%m/%d/%Y') if type(self.DateModified)
         return ret_val
 
     @staticmethod
-    def _parsePlayersFile(players_file) -> Optional[Path]:
+    def _parsePlayersFile(players_file:Optional[Path | str]) -> Optional[Path]:
         ret_val : Optional[Path]
+        if players_file == None:
+            ret_val = None
         if isinstance(players_file, Path):
             ret_val = players_file
         elif isinstance(players_file, str):
@@ -421,8 +429,10 @@ Last modified {self.DateModified.strftime('%m/%d/%Y') if type(self.DateModified)
         return ret_val
 
     @staticmethod
-    def _parsePopulationFile(pop_file) -> Optional[Path]:
+    def _parsePopulationFile(pop_file:Optional[Path | str]) -> Optional[Path]:
         ret_val : Optional[Path]
+        if pop_file == None:
+            ret_val = None
         if isinstance(pop_file, Path):
             ret_val = pop_file
         elif isinstance(pop_file, str):
@@ -434,8 +444,10 @@ Last modified {self.DateModified.strftime('%m/%d/%Y') if type(self.DateModified)
 
 
     @staticmethod
-    def _parseEventsTemplate(events_tplate) -> Optional[Path]:
+    def _parseEventsTemplate(events_tplate:Optional[Path | str]) -> Optional[Path]:
         ret_val : Optional[Path]
+        if events_tplate == None:
+            ret_val = None
         if isinstance(events_tplate, Path):
             ret_val = events_tplate
         elif isinstance(events_tplate, str):
@@ -446,8 +458,10 @@ Last modified {self.DateModified.strftime('%m/%d/%Y') if type(self.DateModified)
         return ret_val
 
     @staticmethod
-    def _parseSessionsTemplate(sessions_tplate) -> Optional[Path]:
+    def _parseSessionsTemplate(sessions_tplate:Optional[Path | str]) -> Optional[Path]:
         ret_val : Optional[Path]
+        if sessions_tplate == None:
+            ret_val = None
         if isinstance(sessions_tplate, Path):
             ret_val = sessions_tplate
         elif isinstance(sessions_tplate, str):
@@ -458,8 +472,10 @@ Last modified {self.DateModified.strftime('%m/%d/%Y') if type(self.DateModified)
         return ret_val
 
     @staticmethod
-    def _parsePlayersTemplate(players_tplate) -> Optional[Path]:
+    def _parsePlayersTemplate(players_tplate:Optional[Path | str]) -> Optional[Path]:
         ret_val : Optional[Path]
+        if players_tplate == None:
+            ret_val = None
         if isinstance(players_tplate, Path):
             ret_val = players_tplate
         elif isinstance(players_tplate, str):
@@ -470,8 +486,10 @@ Last modified {self.DateModified.strftime('%m/%d/%Y') if type(self.DateModified)
         return ret_val
 
     @staticmethod
-    def _parsePopulationTemplate(pop_tplate) -> Optional[Path]:
+    def _parsePopulationTemplate(pop_tplate:Optional[Path | str]) -> Optional[Path]:
         ret_val : Optional[Path]
+        if pop_tplate == None:
+            ret_val = None
         if isinstance(pop_tplate, Path):
             ret_val = pop_tplate
         elif isinstance(pop_tplate, str):
