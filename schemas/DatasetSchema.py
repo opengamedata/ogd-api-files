@@ -377,7 +377,7 @@ Last modified {self.DateModified.strftime('%m/%d/%Y') if type(self.DateModified)
         ret_val : Optional[Path]
         if raw_file == None:
             ret_val = None
-        if isinstance(raw_file, Path):
+        elif isinstance(raw_file, Path):
             ret_val = raw_file
         elif isinstance(raw_file, str):
             ret_val = Path(raw_file) if raw_file != "" else None
@@ -391,7 +391,7 @@ Last modified {self.DateModified.strftime('%m/%d/%Y') if type(self.DateModified)
         ret_val : Optional[Path]
         if events_file == None:
             ret_val = None
-        if isinstance(events_file, Path):
+        elif isinstance(events_file, Path):
             ret_val = events_file
         elif isinstance(events_file, str):
             ret_val = Path(events_file) if events_file != "" else None
@@ -405,7 +405,7 @@ Last modified {self.DateModified.strftime('%m/%d/%Y') if type(self.DateModified)
         ret_val : Optional[Path]
         if sessions_file == None:
             ret_val = None
-        if isinstance(sessions_file, Path):
+        elif isinstance(sessions_file, Path):
             ret_val = sessions_file
         elif isinstance(sessions_file, str):
             ret_val = Path(sessions_file) if sessions_file != "" else None
@@ -419,7 +419,7 @@ Last modified {self.DateModified.strftime('%m/%d/%Y') if type(self.DateModified)
         ret_val : Optional[Path]
         if players_file == None:
             ret_val = None
-        if isinstance(players_file, Path):
+        elif isinstance(players_file, Path):
             ret_val = players_file
         elif isinstance(players_file, str):
             ret_val = Path(players_file) if players_file != "" else None
@@ -433,7 +433,7 @@ Last modified {self.DateModified.strftime('%m/%d/%Y') if type(self.DateModified)
         ret_val : Optional[Path]
         if pop_file == None:
             ret_val = None
-        if isinstance(pop_file, Path):
+        elif isinstance(pop_file, Path):
             ret_val = pop_file
         elif isinstance(pop_file, str):
             ret_val = Path(pop_file) if pop_file != "" else None
@@ -448,7 +448,7 @@ Last modified {self.DateModified.strftime('%m/%d/%Y') if type(self.DateModified)
         ret_val : Optional[Path]
         if events_tplate == None:
             ret_val = None
-        if isinstance(events_tplate, Path):
+        elif isinstance(events_tplate, Path):
             ret_val = events_tplate
         elif isinstance(events_tplate, str):
             ret_val = Path(events_tplate) if events_tplate != "" else None
@@ -476,7 +476,7 @@ Last modified {self.DateModified.strftime('%m/%d/%Y') if type(self.DateModified)
         ret_val : Optional[Path]
         if players_tplate == None:
             ret_val = None
-        if isinstance(players_tplate, Path):
+        elif isinstance(players_tplate, Path):
             ret_val = players_tplate
         elif isinstance(players_tplate, str):
             ret_val = Path(players_tplate) if players_tplate != "" else None
@@ -490,7 +490,7 @@ Last modified {self.DateModified.strftime('%m/%d/%Y') if type(self.DateModified)
         ret_val : Optional[Path]
         if pop_tplate == None:
             ret_val = None
-        if isinstance(pop_tplate, Path):
+        elif isinstance(pop_tplate, Path):
             ret_val = pop_tplate
         elif isinstance(pop_tplate, str):
             ret_val = Path(pop_tplate) if pop_tplate != "" else None
