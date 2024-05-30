@@ -10,10 +10,12 @@ from urllib import request as url_request
 from flask import Flask, send_file, request
 from flask_cors import CORS
 
-# import our app libraries
+# import ogd libraries
+from ogd.core.schemas.DatasetSchema import DatasetSchema
+from ogd.core.schemas.FileListSchema import FileListSchema, GameDatasetCollectionSchema
+
+# import local files
 from models.APIResponse import APIResponse
-from schemas.DatasetSchema import DatasetSchema
-from schemas.FileListSchema import FileListSchema, GameDatasetCollectionSchema
 from models.SanitizedParams import SanitizedParams
 from interfaces.BigQueryInterface import BigQueryInterface
 
