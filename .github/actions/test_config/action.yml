@@ -1,0 +1,34 @@
+name: "Configure t_config.py file for testing a deploy"
+author: Luke Swanson
+description: "Given a set of appropriate inputs, this action prepares the t_config.py file for running the API testbed."
+branding:
+  icon: 'clipboard'
+  color: 'blue'
+inputs:
+  endpoint:
+    description: "The external endpoint where the app is deployed"
+    required: true
+    default: 'https://ogd-staging.fielddaylab.wisc.edu/wsgi-bin/app.wsgi'
+  verbose_output:
+    description: "Whether to output extra debugging lines from tests."
+    required: false
+    default: False
+  with_hello_api:
+    description: "Whether to run the HelloAPI tests."
+    required: false
+    default: True
+runs:
+  using: "composite"
+  steps:
+    - name: Set up config
+      run: cp tests/config/t_config.py.template tests/config/t_config.py 
+      shell: bash
+    - name: Set Endpoint Location
+      run: sed -i 's@ENDPOINT_PLACEHOLDER@${{inputs.endpoint}}@g' tests/config/t_config.py
+      shell: bash
+    - name: Set Output Verbosity
+      run: sed -i 's@"VERBOSE":False@"VERBOSE":${{inputs.verbose_output}}@g' tests/config/t_config.py
+      shell: bash
+    - name: Set HelloAPI test to run or not
+      run: sed -i 's@"HELLO":True@"HELLO":${{inputs.with_hello_api}}@g' tests/config/t_config.py
+      shell: bash
