@@ -2,7 +2,7 @@
 import requests
 from unittest import TestCase, TestSuite
 # import locals
-from tests.t_config import settings
+from tests.config.t_config import settings
 
 class t_HelloAPI(TestSuite):
     def RunAll(self):
