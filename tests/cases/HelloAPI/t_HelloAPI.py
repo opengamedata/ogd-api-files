@@ -6,7 +6,8 @@ from tests.schemas.TestConfigSchema import TestConfigSchema
 from tests.config.t_config import settings
 
 _config = TestConfigSchema.FromDict(name="HelloAPITestConfig", all_elements=settings, logger=None)
-class t_HelloAPI(TestSuite):
+
+class t_Hello(TestCase):
     def RunAll(self):
         t = t_Hello()
         t.test_home()
@@ -14,7 +15,6 @@ class t_HelloAPI(TestSuite):
         t.test_post()
         t.test_put()
 
-class t_Hello(TestCase):
     def test_home(self):
         result : requests.Response
         print("Running test of home")
