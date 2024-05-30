@@ -33,7 +33,7 @@ jobs:
       uses: ./.github/actions/test_config
       with:
           endpoint: ${{ env.DEPLOY_URL }}
-          verbose_output: True
+          verbose_output: "True"
     - name: Verify config file
       run: cat tests/config/t_config.py
 
