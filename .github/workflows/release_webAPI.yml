@@ -92,7 +92,7 @@ jobs:
 
   # 4. Cleanup & complete
     - name: Announce test completed
-      run: echo "Tested endpoint at ${{ env.DEPLOY_URL }}"
+      run: echo "Tested HelloAPI endpoint at ${{ env.DEPLOY_URL }}"
     - name: Upload logs as artifacts
       uses: actions/upload-artifact@v3
       with:
