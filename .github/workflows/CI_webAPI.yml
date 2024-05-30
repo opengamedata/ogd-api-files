@@ -12,6 +12,7 @@ on:
     - 'src/app.py'
     - 'src/app.wsgi'
     - 'tests/**'
+    - 'requirements.txt'
 
 env:
   DEPLOY_HOST: ${{ vars.OGD_STAGING_HOST }}

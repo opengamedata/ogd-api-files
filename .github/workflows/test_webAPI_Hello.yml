@@ -7,6 +7,7 @@ on:
     - '.github/workflows/test_webAPI_Hello.yml'
     - '.github/actions/test_config/**'
     - 'tests/**'
+    - 'requirements.txt'
 
 env:
   DEPLOY_HOST: ${{ vars.OGD_STAGING_HOST }}
