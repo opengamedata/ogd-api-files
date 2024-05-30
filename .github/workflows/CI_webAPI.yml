@@ -92,7 +92,7 @@ jobs:
   # 2. Build & configure remote environments
 
   # 3. Perform export
-    - name: Run Utils testbed
+    - name: Execute testbed
       run: python -m unittest discover -s ./tests/cases/HelloAPI -p "t_*.py" 
 
   # 4. Cleanup & complete
