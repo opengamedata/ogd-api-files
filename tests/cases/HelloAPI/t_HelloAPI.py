@@ -17,14 +17,15 @@ class t_HelloAPI(TestCase):
 
     def test_home(self):
         result : requests.Response
-        print("Running test of home")
 
+        _url = _config.ExternEndpoint
         try:
-            result = requests.get(url=_config.ExternEndpoint)
+            result = requests.get(url=_url)
         except Exception as err:
             raise err
         else:
             if _config.Verbose:
+                print(f"Sent request to {_url}")
                 if result is not None:
                     print(f"Result of get:\n{result.text}")
                 else:
@@ -35,7 +36,6 @@ class t_HelloAPI(TestCase):
 
     def test_get(self):
         result : requests.Response
-        print("Running test of get")
 
         _url = f"{_config.ExternEndpoint}/hello"
         try:
@@ -44,6 +44,7 @@ class t_HelloAPI(TestCase):
             raise err
         else:
             if _config.Verbose:
+                print(f"Sent request to {_url}")
                 if result is not None:
                     print(f"Result of get:\n{result.text}")
                 else:
@@ -53,7 +54,6 @@ class t_HelloAPI(TestCase):
 
     def test_post(self):
         result : requests.Response
-        print("Running test of post")
 
         _url = f"{_config.ExternEndpoint}/hello"
         try:
@@ -62,6 +62,7 @@ class t_HelloAPI(TestCase):
             raise err
         else:
             if _config.Verbose:
+                print(f"Sent request to {_url}")
                 if result is not None:
                     print(f"Result of post:\n{result.text}")
                 else:
@@ -71,7 +72,6 @@ class t_HelloAPI(TestCase):
 
     def test_put(self):
         result : requests.Response
-        print("Running test of put")
 
         _url = f"{_config.ExternEndpoint}/hello"
         try:
@@ -80,6 +80,7 @@ class t_HelloAPI(TestCase):
             raise err
         else:
             if _config.Verbose:
+                print(f"Sent request to {_url}")
                 if result is not None:
                     print(f"Result of put:\n{result.text}")
                 else:
