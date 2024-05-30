@@ -17,6 +17,7 @@ class t_HelloAPI(TestSuite):
     class t_Hello(TestCase):
         def test_home(self):
             result : requests.Response
+            print("Running test of home")
 
             _cfg = t_HelloAPI._config
             try:
@@ -24,7 +25,7 @@ class t_HelloAPI(TestSuite):
             except Exception as err:
                 raise err
             else:
-                if settings.get("VERBOSE", False):
+                if _cfg.Verbose:
                     if result is not None:
                         print(f"Result of get:\n{result.text}")
                     else:
@@ -35,6 +36,7 @@ class t_HelloAPI(TestSuite):
 
         def test_get(self):
             result : requests.Response
+            print("Running test of get")
 
             _cfg = t_HelloAPI._config
             _url = f"{_cfg.ExternEndpoint}/hello"
@@ -53,6 +55,7 @@ class t_HelloAPI(TestSuite):
 
         def test_post(self):
             result : requests.Response
+            print("Running test of post")
 
             _cfg = t_HelloAPI._config
             _url = f"{_cfg.ExternEndpoint}/hello"
@@ -71,6 +74,7 @@ class t_HelloAPI(TestSuite):
 
         def test_put(self):
             result : requests.Response
+            print("Running test of put")
 
             _cfg = t_HelloAPI._config
             _url = f"{_cfg.ExternEndpoint}/hello"
