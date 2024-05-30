@@ -1,7 +1,7 @@
 # Workflow to build and deploy designer dashboard to server.
 name: OGD-Website-API CI Script
 on:
-  workflow_dispatch: # Allow manual trigger of this workflow from the Actions tab
+  workflow_dispatch:
   push:
     paths:
     - '.github/workflows/webAPI_CI.yml'
@@ -11,11 +11,12 @@ on:
     - 'schemas/**'
     - 'app.py'
     - 'app.wsgi'
+    - 'tests/**'
 
 env:
   DEPLOY_HOST: ${{ vars.OGD_STAGING_HOST }}
   DEPLOY_DIR: ${{ vars.WSGI_PATH }}/${{ github.event.repository.name }}/${{ github.ref_name }}
-  DEPLOY_URL:  ${{ vars.OGD_STAGING_HOST }}/wsgi-bin/${{ github.event.repository.name }}/${{ github.ref_name }}
+  DEPLOY_URL:  ${{ vars.OGD_STAGING_HOST }}/wsgi-bin/${{ github.event.repository.name }}/${{ github.ref_name }}/app.wsgi
   URL_PATH:    wsgi-bin/${{ github.event.repository.name }}/${{ github.ref_name }}
 
 jobs:
@@ -67,3 +68,33 @@ jobs:
       run: ssh -o StrictHostKeyChecking=no -T -i ./key.txt ${{ secrets.DEPLOY_USER }}@${{ env.DEPLOY_HOST }} "sudo systemctl restart apache2"
     - name: Announce deploy
       run: echo "Deployed to ${{ env.DEPLOY_URL }}"
+
+  run_testbed_hello:
+    name: Run HelloAPI Testbed
+    runs-on: ubuntu-22.04
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+
+  # 1. Local checkout 
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: Set up Config File
+      uses: ./.github/actions/test_config
+      with:
+          endpoint: ${{ env.DEPLOY_URL }}
+          verbose_output: True
+
+  # 2. Build & configure remote environments
+
+  # 3. Perform export
+    - name: Run Utils testbed
+      run: python -m unittest discover -s ./tests/t_utils -p "t_*.py" 
+
+  # 4. Cleanup & complete
+    - name: Upload logs as artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        path: ./*.log
