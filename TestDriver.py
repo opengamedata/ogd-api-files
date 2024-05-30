@@ -1,5 +1,5 @@
-from tests.t_HelloAPI import t_HelloAPI
-from tests.t_config import EnabledTests
+from tests.HelloAPI.t_HelloAPI import t_HelloAPI
+from tests.config.t_config import EnabledTests
 
 
 if EnabledTests.get('HELLO', False):
