@@ -1,5 +1,5 @@
 settings = {
-    "EXTERN_SERVER":"https://fieldday-web.wcer.wisc.edu/wsgi-bin/opengamedata.wsgi",
+    "EXTERN_ENDPOINT":"ENDPOINT_PLACEHOLDER",
     "VERBOSE":False,
     "ENABLED" : {
         "HELLO":True,
