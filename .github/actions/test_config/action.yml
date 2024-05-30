@@ -12,11 +12,11 @@ inputs:
   verbose_output:
     description: "Whether to output extra debugging lines from tests."
     required: false
-    default: False
+    default: "False"
   with_hello_api:
     description: "Whether to run the HelloAPI tests."
     required: false
-    default: True
+    default: "True"
 runs:
   using: "composite"
   steps:
