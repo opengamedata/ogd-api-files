@@ -8,7 +8,7 @@ inputs:
   endpoint:
     description: "The external endpoint where the app is deployed"
     required: true
-    default: 'https://ogd-staging.fielddaylab.wisc.edu/wsgi-bin/app.wsgi'
+    default: 'https://ogd-staging.fielddaylab.wisc.edu/wsgi-binopengamedata/apis/opengamedata-api-files/main/app.wsgi'
   verbose_output:
     description: "Whether to output extra debugging lines from tests."
     required: false
