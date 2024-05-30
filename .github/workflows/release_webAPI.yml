@@ -67,6 +67,7 @@ jobs:
 
   run_testbed_hello:
     name: Run HelloAPI Testbed
+    needs: production_deploy
     runs-on: ubuntu-22.04
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
