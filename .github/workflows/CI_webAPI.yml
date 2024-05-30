@@ -92,7 +92,7 @@ jobs:
 
   # 3. Perform export
     - name: Run Utils testbed
-      run: python -m unittest discover -s ./tests/ -p "t_*.py" 
+      run: python -m unittest discover -s ./tests/HelloAPI -p "t_*.py" 
 
   # 4. Cleanup & complete
     - name: Upload logs as artifacts
