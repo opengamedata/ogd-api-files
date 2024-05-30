@@ -23,5 +23,5 @@ runs:
       run: sed -i 's@VERSION_PLACEHOLDER@${{inputs.api_version}}@g' src/config/config.py
       shell: bash
     - name: Set API Base Path
-      run: sed -i 's@placeholder home@${{inputs.api_base}}@g' app.wsgi
+      run: sed -i 's@placeholder home@${{inputs.api_base}}@g' src/app.wsgi
       shell: bash
