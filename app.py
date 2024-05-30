@@ -11,8 +11,8 @@ from flask import Flask, send_file, request
 from flask_cors import CORS
 
 # import ogd libraries
-from ogd.core.schemas.DatasetSchema import DatasetSchema
-from ogd.core.schemas.FileListSchema import FileListSchema, GameDatasetCollectionSchema
+from ogd.core.schemas.datasets.DatasetSchema import DatasetSchema
+from ogd.core.schemas.datasets.FileListSchema import FileListSchema, GameDatasetCollectionSchema
 
 # import local files
 from models.APIResponse import APIResponse
