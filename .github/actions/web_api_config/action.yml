@@ -17,7 +17,7 @@ runs:
   using: "composite"
   steps:
     - name: Set up src/config
-      run: cp src/config/src/config.py.template src/config/src/config.py 
+      run: cp src/config/config.py.template src/config/config.py 
       shell: bash
     - name: Set API Version
       run: sed -i 's@VERSION_PLACEHOLDER@${{inputs.api_version}}@g' src/config/config.py
