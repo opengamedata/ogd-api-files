@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-    - '.github/workflows/webAPI_CI.yml'
+    - '.github/workflows/CI_webAPI.yml'
     - '.github/actions/**'
     - 'src/interfaces/**'
     - 'src/models/**'

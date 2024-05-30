@@ -4,6 +4,8 @@ on:
   workflow_dispatch:
   push:
     paths:
+    - '.github/workflows/test_webAPI_Hello.yml'
+    - '.github/actions/test_config/**'
     - 'tests/**'
 
 env:
