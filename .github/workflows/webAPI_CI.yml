@@ -6,11 +6,11 @@ on:
     paths:
     - '.github/workflows/webAPI_CI.yml'
     - '.github/actions/**'
-    - 'interfaces/**'
-    - 'models/**'
-    - 'schemas/**'
-    - 'app.py'
-    - 'app.wsgi'
+    - 'src/interfaces/**'
+    - 'src/models/**'
+    - 'src/schemas/**'
+    - 'src/app.py'
+    - 'src/app.wsgi'
     - 'tests/**'
 
 env:
