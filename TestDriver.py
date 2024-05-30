@@ -4,7 +4,6 @@ from tests.cases.HelloAPI.t_HelloAPI import t_HelloAPI
 
 _cfg = TestConfigSchema.FromDict(name="TestDriverConfig", all_elements=settings, logger=None)
 if _cfg.EnabledTests.get('HELLO', False):
-    test_Hello = t_HelloAPI()
-    print("***\nRunning test_Hello:")
-    test_Hello.RunAll()
+    print("***\nRunning t_HelloAPI:")
+    t_HelloAPI.RunAll()
     print("Done\n***")
