@@ -1,0 +1,12 @@
+settings = {
+    "EXTERN_SERVER":"https://fieldday-web.wcer.wisc.edu/wsgi-bin/opengamedata.wsgi"
+}
+
+EnabledTests = {
+    "CLASS":True,
+    "CODE":True,
+    "DASH":True,
+    "GAME_STATE":True,
+    "HELLO":True,
+    "PLAYER":True
+}
