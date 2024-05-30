@@ -26,6 +26,8 @@ jobs:
   # 1. Local checkout 
     - name: Checkout repository
       uses: actions/checkout@v3
+    - name: Get Dependencies
+      uses: ./.github/actions/install_dependencies
     - name: Set up Config File
       uses: ./.github/actions/test_config
       with:
