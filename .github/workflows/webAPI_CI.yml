@@ -85,6 +85,8 @@ jobs:
       with:
           endpoint: ${{ env.DEPLOY_URL }}
           verbose_output: True
+    - name: Verify config file
+      run: cat tests/config/t_config.py
 
   # 2. Build & configure remote environments
 
