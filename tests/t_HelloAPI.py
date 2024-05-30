@@ -1,10 +1,10 @@
 # import libraries
 import requests
-from unittest import TestCase
+from unittest import TestCase, TestSuite
 # import locals
 from tests.t_config import settings
 
-class t_HelloAPI(TestCase):
+class t_HelloAPI(TestSuite):
     def RunAll(self):
         t = t_HelloAPI.t_Hello()
         t.test_home()
@@ -12,43 +12,75 @@ class t_HelloAPI(TestCase):
         t.test_post()
         t.test_put()
 
-    class t_Hello:
+    class t_Hello(TestCase):
         def test_home(self):
+            result : requests.Response
+
             base = settings['EXTERN_SERVER']
-            print(f"GET test at {base}")
-            result = requests.get(url=base)
-            if result is not None:
-                print(f"Result of get:\n{result.text}")
+            try:
+                result = requests.get(url=base)
+            except Exception as err:
+                raise err
             else:
-                print(f"No response to GET request.")
-            print()
+                if settings.get("VERBOSE", False):
+                    if result is not None:
+                        print(f"Result of get:\n{result.text}")
+                    else:
+                        print(f"No response to GET request.")
+                    print()
+            finally:
+                self.assertTrue(result.ok)
 
         def test_get(self):
+            result : requests.Response
+
             base = settings['EXTERN_SERVER']
             url = f"{base}/hello"
-            print(f"GET test at {url}")
-            result = requests.get(url=url)
-            if result is not None:
-                print(f"Result of get:\n{result.text}")
+            try:
+                result = requests.get(url=url)
+            except Exception as err:
+                raise err
             else:
-                print(f"No response to GET request.")
+                if settings.get("VERBOSE", False):
+                    if result is not None:
+                        print(f"Result of get:\n{result.text}")
+                    else:
+                        print(f"No response to GET request.")
+            finally:
+                self.assertTrue(result.ok)
 
         def test_post(self):
+            result : requests.Response
+
             base = settings['EXTERN_SERVER']
             url = f"{base}/hello"
-            print(f"POST test at {url}")
-            result = requests.post(url=url)
-            if result is not None:
-                print(f"Result of post:\n{result.text}")
+            try:
+                result = requests.post(url=url)
+            except Exception as err:
+                raise err
             else:
-                print(f"No response to POST request.")
+                if settings.get("VERBOSE", False):
+                    if result is not None:
+                        print(f"Result of post:\n{result.text}")
+                    else:
+                        print(f"No response to POST request.")
+            finally:
+                self.assertTrue(result.ok)
 
         def test_put(self):
+            result : requests.Response
+
             base = settings['EXTERN_SERVER']
             url = f"{base}/hello"
-            print(f"PUT test at {url}")
-            result = requests.put(url=url)
-            if result is not None:
-                print(f"Result of put:\n{result.text}")
+            try:
+                result = requests.put(url=url)
+            except Exception as err:
+                raise err
             else:
-                print(f"No response to PUT request.")
+                if settings.get("VERBOSE", False):
+                    if result is not None:
+                        print(f"Result of put:\n{result.text}")
+                    else:
+                        print(f"No response to PUT request.")
+            finally:
+                self.assertTrue(result.ok)
