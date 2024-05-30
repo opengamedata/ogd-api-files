@@ -20,7 +20,7 @@ runs:
       run: cp src/config/src/config.py.template src/config/src/config.py 
       shell: bash
     - name: Set API Version
-      run: sed -i 's@VERSION_PLACEHOLDER@${{inputs.api_version}}@g' src/config/src/config.py
+      run: sed -i 's@VERSION_PLACEHOLDER@${{inputs.api_version}}@g' src/config/config.py
       shell: bash
     - name: Set API Base Path
       run: sed -i 's@placeholder home@${{inputs.api_base}}@g' app.wsgi
