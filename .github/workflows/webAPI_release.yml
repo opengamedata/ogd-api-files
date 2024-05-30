@@ -66,3 +66,33 @@ jobs:
 
     - name: Announce deploy
       run: echo "Deployed API to ${{ env.DEPLOY_URL }}"
+
+  run_testbed_hello:
+    name: Run HelloAPI Testbed
+    runs-on: ubuntu-22.04
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+
+  # 1. Local checkout 
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: Set up Config File
+      uses: ./.github/actions/test_config
+      with:
+          endpoint: ${{ env.DEPLOY_URL }}
+          verbose_output: True
+
+  # 2. Build & configure remote environments
+
+  # 3. Perform export
+    - name: Run Utils testbed
+      run: python -m unittest discover -s ./tests/ -p "t_*.py" 
+
+  # 4. Cleanup & complete
+    - name: Upload logs as artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        path: ./*.log
