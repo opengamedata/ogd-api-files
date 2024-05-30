@@ -1,5 +1,6 @@
 # import libraries
 import requests
+from typing import Optional
 from unittest import TestCase, TestSuite
 # import locals
 from tests.schemas.TestConfigSchema import TestConfigSchema
@@ -15,75 +16,72 @@ class t_HelloAPI(TestCase):
         t.test_post()
         t.test_put()
 
-    def test_home(self):
-        result : requests.Response
-
-        _url = _config.ExternEndpoint
+    @staticmethod
+    def _sendTestRequest(url:str, request:str) -> Optional[requests.Response]:
+        result : Optional[requests.Response] = None
         try:
-            result = requests.get(url=_url)
+            if _config.Verbose:
+                print(f"Sending request to {url}")
+            match (request.upper()):
+                case "GET":
+                    result = requests.get(url)
+                case "POST":
+                    result = requests.post(url)
+                case "PUT":
+                    result = requests.put(url)
+                case _:
+                    print(f"Bad request type {request}, defaulting to GET")
+                    result = requests.get(url)
         except Exception as err:
+            if _config.Verbose:
+                print(f"Error on {request} request to {url} : {err}")
             raise err
         else:
             if _config.Verbose:
-                print(f"Sent request to {_url}")
                 if result is not None:
-                    print(f"Result of get:\n{result.text}")
+                    print(f"Result of {request} request:\n{result.text}")
                 else:
-                    print(f"No response to GET request.")
+                    print(f"No response to {request} request.")
                 print()
         finally:
+            return result
+
+    def test_home(self):
+        result : Optional[requests.Response]
+
+        _url = _config.ExternEndpoint
+        result = t_HelloAPI._sendTestRequest(url=_url, request="GET")
+        if result is not None:
             self.assertTrue(result.ok)
+        else:
+            self.fail(f"No result from request to {_url}")
 
     def test_get(self):
-        result : requests.Response
+        result : Optional[requests.Response]
 
         _url = f"{_config.ExternEndpoint}/hello"
-        try:
-            result = requests.get(url=_url)
-        except Exception as err:
-            raise err
-        else:
-            if _config.Verbose:
-                print(f"Sent request to {_url}")
-                if result is not None:
-                    print(f"Result of get:\n{result.text}")
-                else:
-                    print(f"No response to GET request.")
-        finally:
+        result = t_HelloAPI._sendTestRequest(url=_url, request="GET")
+        if result is not None:
             self.assertTrue(result.ok)
+        else:
+            self.fail(f"No result from request to {_url}")
 
     def test_post(self):
-        result : requests.Response
+        result : Optional[requests.Response]
 
         _url = f"{_config.ExternEndpoint}/hello"
-        try:
-            result = requests.post(url=_url)
-        except Exception as err:
-            raise err
-        else:
-            if _config.Verbose:
-                print(f"Sent request to {_url}")
-                if result is not None:
-                    print(f"Result of post:\n{result.text}")
-                else:
-                    print(f"No response to POST request.")
-        finally:
+        result = t_HelloAPI._sendTestRequest(url=_url, request="POST")
+        if result is not None:
             self.assertTrue(result.ok)
+        else:
+            self.fail(f"No result from request to {_url}")
 
     def test_put(self):
-        result : requests.Response
+        result : Optional[requests.Response]
 
         _url = f"{_config.ExternEndpoint}/hello"
-        try:
-            result = requests.put(url=_url)
-        except Exception as err:
-            raise err
-        else:
-            if _config.Verbose:
-                print(f"Sent request to {_url}")
-                if result is not None:
-                    print(f"Result of put:\n{result.text}")
-                else:
-                    print(f"No response to PUT request.")
-        finally:
+        result = t_HelloAPI._sendTestRequest(url=_url, request="PUT")
+        if result is not None:
             self.assertTrue(result.ok)
+        else:
+            self.fail(f"No result from request to {_url}")
