@@ -1,7 +1,7 @@
 # Specific files to ignore
 config/config.py
 config/*.json
-tests/t_config.py
+tests/config/t_config.py
 tests/Makefile
 .vscode
 .pylintrc
