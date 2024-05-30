@@ -7,9 +7,9 @@ from tests.config.t_config import settings
 
 _config = TestConfigSchema.FromDict(name="HelloAPITestConfig", all_elements=settings, logger=None)
 
-class t_Hello(TestCase):
+class t_HelloAPI(TestCase):
     def RunAll(self):
-        t = t_Hello()
+        t = t_HelloAPI()
         t.test_home()
         t.test_get()
         t.test_post()
