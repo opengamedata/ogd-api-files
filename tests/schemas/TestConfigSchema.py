@@ -21,7 +21,7 @@ class TestConfigSchema(Schema):
     def DEFAULT():
         return TestConfigSchema(
             name            = "DefaultTestConfig",
-            extern_endpoint = "https://ogd-staging.fielddaylab.wisc.edu/wsgi-bin/app.wsgi",
+            extern_endpoint = "https://ogd-staging.fielddaylab.wisc.edu/wsgi-binopengamedata/apis/opengamedata-api-files/main/app.wsgi",
             verbose         = False,
             enabled_tests   = {
                 "HELLO" : True
