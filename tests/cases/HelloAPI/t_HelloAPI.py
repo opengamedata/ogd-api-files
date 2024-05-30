@@ -16,36 +16,6 @@ class t_HelloAPI(TestCase):
         t.test_post()
         t.test_put()
 
-    @staticmethod
-    def _sendTestRequest(url:str, request:str) -> Optional[requests.Response]:
-        result : Optional[requests.Response] = None
-        try:
-            if _config.Verbose:
-                print(f"Sending request to {url}")
-            match (request.upper()):
-                case "GET":
-                    result = requests.get(url)
-                case "POST":
-                    result = requests.post(url)
-                case "PUT":
-                    result = requests.put(url)
-                case _:
-                    print(f"Bad request type {request}, defaulting to GET")
-                    result = requests.get(url)
-        except Exception as err:
-            if _config.Verbose:
-                print(f"Error on {request} request to {url} : {err}")
-            raise err
-        else:
-            if _config.Verbose:
-                if result is not None:
-                    print(f"Result of {request} request:\n{result.text}")
-                else:
-                    print(f"No response to {request} request.")
-                print()
-        finally:
-            return result
-
     def test_home(self):
         result : Optional[requests.Response]
 
@@ -85,3 +55,33 @@ class t_HelloAPI(TestCase):
             self.assertTrue(result.ok)
         else:
             self.fail(f"No result from request to {_url}")
+
+    @staticmethod
+    def _sendTestRequest(url:str, request:str) -> Optional[requests.Response]:
+        result : Optional[requests.Response] = None
+        try:
+            if _config.Verbose:
+                print(f"Sending request to {url}")
+            match (request.upper()):
+                case "GET":
+                    result = requests.get(url)
+                case "POST":
+                    result = requests.post(url)
+                case "PUT":
+                    result = requests.put(url)
+                case _:
+                    print(f"Bad request type {request}, defaulting to GET")
+                    result = requests.get(url)
+        except Exception as err:
+            if _config.Verbose:
+                print(f"Error on {request} request to {url} : {err}")
+            raise err
+        else:
+            if _config.Verbose:
+                if result is not None:
+                    print(f"Result of {request} request:\n{result.text}")
+                else:
+                    print(f"No response to {request} request.")
+                print()
+        finally:
+            return result
