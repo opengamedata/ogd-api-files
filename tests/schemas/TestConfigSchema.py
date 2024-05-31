@@ -22,14 +22,16 @@ class TestConfigSchema(Schema):
         return TestConfigSchema(
             name            = "DefaultTestConfig",
             extern_endpoint = "https://ogd-staging.fielddaylab.wisc.edu/wsgi-bin/opengamedata/apis/opengamedata-api-files/main/app.wsgi",
+            api_version     = "Testing",
             verbose         = False,
             enabled_tests   = {
                 "HELLO" : True
             }
         )
 
-    def __init__(self, name:str, extern_endpoint:str, verbose:bool, enabled_tests:Dict[str, bool], other_elements:Dict[str, Any]={}):
+    def __init__(self, name:str, extern_endpoint:str, api_version:str, verbose:bool, enabled_tests:Dict[str, bool], other_elements:Dict[str, Any]={}):
         self._extern_server : str             = extern_endpoint
+        self._api_version   : str             = api_version
         self._verbose       : bool            = verbose
         self._enabled_tests : Dict[str, bool] = enabled_tests
         super().__init__(name=name, other_elements=other_elements)
@@ -48,6 +50,15 @@ class TestConfigSchema(Schema):
                 logger.warn(_msg, logging.WARN)
             else:
                 print(logger)
+        if "API_VERSION" in all_elements.keys():
+            _api_version = TestConfigSchema._parseAPIVersion(all_elements["API_VERSION"], logger=logger)
+        else:
+            _api_version = TestConfigSchema.DEFAULT().APIVersion
+            _msg = f"{name} config does not have an 'API_VERSION' element; defaulting to api_version={_api_version}"
+            if logger:
+                logger.warn(_msg, logging.WARN)
+            else:
+                print(_msg)
         if "VERBOSE" in all_elements.keys():
             _verbose = TestConfigSchema._parseVerbose(all_elements["VERBOSE"], logger=logger)
         else:
@@ -67,11 +78,15 @@ class TestConfigSchema(Schema):
 
         _used = {"EXTERN_ENDPOINT", "VERBOSE", "ENABLED"}
         _leftovers = { key : val for key,val in all_elements.items() if key not in _used }
-        return TestConfigSchema(name=name, extern_endpoint=_extern_endpoint, verbose=_verbose, enabled_tests=_enabled_tests, other_elements=_leftovers)
+        return TestConfigSchema(name=name, extern_endpoint=_extern_endpoint, api_version=_api_version, verbose=_verbose, enabled_tests=_enabled_tests, other_elements=_leftovers)
 
     @property
     def ExternEndpoint(self) -> str:
         return self._extern_server
+
+    @property
+    def APIVersion(self) -> str:
+        return self._api_version
 
     @property
     def Verbose(self) -> bool:
@@ -96,6 +111,20 @@ class TestConfigSchema(Schema):
         else:
             ret_val = str(endpoint)
             _msg = f"Config external endpoint was unexpected type {type(endpoint)}, defaulting to str(endpoint) = {ret_val}."
+            if logger:
+                logger.warn(_msg, logging.WARN)
+            else:
+                print(_msg)
+        return ret_val
+
+    @staticmethod
+    def _parseAPIVersion(version, logger:Optional[logging.Logger]) -> str:
+        ret_val : str
+        if isinstance(version, str):
+            ret_val = version
+        else:
+            ret_val = str(version)
+            _msg = f"Config API version was unexpected type {type(version)}, defaulting to str(version) = {ret_val}."
             if logger:
                 logger.warn(_msg, logging.WARN)
             else:

@@ -9,6 +9,10 @@ inputs:
     description: "The external endpoint where the app is deployed"
     required: true
     default: 'https://ogd-staging.fielddaylab.wisc.edu/wsgi-binopengamedata/apis/opengamedata-api-files/main/app.wsgi'
+  api_version:
+    description: "The version of the API code."
+    required: false
+    default: 'Testing'
   verbose_output:
     description: "Whether to output extra debugging lines from tests."
     required: false
@@ -25,6 +29,9 @@ runs:
       shell: bash
     - name: Set Endpoint Location
       run: sed -i 's@ENDPOINT_PLACEHOLDER@${{inputs.endpoint}}@g' tests/config/t_config.py
+      shell: bash
+    - name: Set API Version
+      run: sed -i 's@VERSION_PLACEHOLDER@${{inputs.api_version}}@g' tests/config/config.py
       shell: bash
     - name: Set Output Verbosity
       run: sed -i 's@"VERBOSE":False@"VERBOSE":${{inputs.verbose_output}}@g' tests/config/t_config.py

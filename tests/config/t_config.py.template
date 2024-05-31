@@ -1,5 +1,6 @@
 settings = {
     "EXTERN_ENDPOINT":"ENDPOINT_PLACEHOLDER",
+    "API_VERSION":"VERSION_PLACEHOLDER",
     "VERBOSE":False,
     "ENABLED" : {
         "HELLO":True,

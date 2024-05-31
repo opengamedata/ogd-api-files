@@ -84,6 +84,7 @@ jobs:
       uses: ./.github/actions/test_config
       with:
           endpoint: ${{ env.DEPLOY_URL }}
+          api_version: ${{ github.event.release.tag_name }}
           verbose_output: True
 
   # 2. Build & configure remote environments
