@@ -1,5 +1,6 @@
 # import libraries
 import requests
+import unittest
 from typing import Optional
 from unittest import TestCase, TestSuite, main
 # import locals
@@ -14,6 +15,7 @@ class t_FileAPI:
     def RunAll():
         pass
 
+@unittest.skip("This endpoint is not in use; needs access to database")
 class t_GameUsageByMonth(TestCase):
     def setUp(self):
         self.url    : str
