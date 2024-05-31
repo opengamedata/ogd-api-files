@@ -35,6 +35,12 @@ class t_Hello(TestCase):
         else:
             self.fail(f"No result from request to {_url}")
 
+    def test_Succeeded(self):
+        if self.result is not None:
+            self.assertEqual(self.result.json()["success"], True)
+        else:
+            self.fail(f"No result from request to {self.url}")
+
     def test_Correct(self):
         if self.result is not None:
             self.assertEqual(self.result.json()["data"], {"message":"hello, world"})
@@ -49,6 +55,12 @@ class t_Version(TestCase):
     def test_Responded(self):
         if self.result is not None:
             self.assertTrue(self.result.ok)
+        else:
+            self.fail(f"No result from request to {self.url}")
+
+    def test_Succeeded(self):
+        if self.result is not None:
+            self.assertEqual(self.result.json()["success"], True)
         else:
             self.fail(f"No result from request to {self.url}")
 
