@@ -89,8 +89,8 @@ def Hello():
 def get_api_version():
     ret_val = APIResponse.Default(req_type=RESTType.GET)
 
-    _msg = settings["API_VERSION"]
-    ret_val.RequestSucceeded(msg=_msg, val={})
+    _ver = settings["API_VERSION"]
+    ret_val.RequestSucceeded(msg=f"Retrieved version", val={"version":_ver})
 
     return ret_val.AsFlaskResponse
 
@@ -136,7 +136,7 @@ def getGameUsageByMonth():
         "total_monthly_sessions": total_monthly_sessions,
         "sessions_by_day": sessions_by_day
     }
-    ret_val.RequestSucceeded(msg="Successful request for game usage by month", val=responseData)
+    ret_val.RequestSucceeded(msg="Retrieved game usage by month", val=responseData)
 
     return ret_val.AsFlaskResponse
 
@@ -217,7 +217,7 @@ def getMonthlyGameUsage():
             startRangeMonth = 1
 
     responseData = { "game_id": game_id, "sessions": sessions }
-    ret_val.RequestSucceeded(msg="Successful request for monthly game usage", val=responseData)
+    ret_val.RequestSucceeded(msg="Retrieved monthly game usage", val=responseData)
 
     return ret_val.AsFlaskResponse
 
@@ -310,7 +310,7 @@ def getGameFileInfoByMonth():
     file_info["features_link"]  = f"{GITHUB_BASE_URL}{_revision}/games/{_branch_name}/features"  if _revision else None
     file_info["found_matching_range"] = True
 
-    ret_val.RequestSucceeded(msg="Successful request for game file info by month", val=file_info)
+    ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=file_info)
 
     return ret_val.AsFlaskResponse
 
