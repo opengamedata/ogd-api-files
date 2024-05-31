@@ -10,8 +10,10 @@ from urllib import request as url_request
 from flask import Flask, send_file, request
 from flask_cors import CORS
 
+# import ogd libraries
+from ogd.apis.utils.APIResponse import APIResponse, RESTType, ResponseStatus
+
 # import our app libraries
-from models.APIResponse import APIResponse
 from schemas.DatasetSchema import DatasetSchema
 from schemas.FileListSchema import FileListSchema, GameDatasetCollectionSchema
 from models.SanitizedParams import SanitizedParams
@@ -76,21 +78,21 @@ def Hello():
     """
     Basic response if someone just hits the home path to say "hello"
     """
+    ret_val = APIResponse.Default(req_type=RESTType.GET)
 
-    responseObj = {
-        "message": "hello, world"
-    }
+    _msg = "hello, world"
+    ret_val.RequestSucceeded(msg=_msg, val={})
 
-    return APIResponse(success=True, data=responseObj).ToDict()
+    return ret_val.AsFlaskResponse
 
 @application.route('/version', methods=['GET'])
 def get_api_version():
+    ret_val = APIResponse.Default(req_type=RESTType.GET)
 
-    responseObj = {
-        "message": settings["API_VERSION"]
-    }
+    _msg = settings["API_VERSION"]
+    ret_val.RequestSucceeded(msg=_msg, val={})
 
-    return APIResponse(True, responseObj).ToDict()
+    return ret_val.AsFlaskResponse
 
 # Get game usage statistics for a given game, year, and month
 @application.route('/getGameUsageByMonth', methods=['GET'])
