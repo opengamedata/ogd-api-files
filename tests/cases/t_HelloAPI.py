@@ -66,7 +66,7 @@ class t_Version(TestCase):
 
     def test_Correct(self):
         if self.result is not None:
-            self.assertEqual(self.result.json()["data"], {"message":"Testing"})
+            self.assertEqual(self.result.json()["data"], {"message":_config.APIVersion})
         else:
             self.fail(f"No result from request to {self.url}")
 
