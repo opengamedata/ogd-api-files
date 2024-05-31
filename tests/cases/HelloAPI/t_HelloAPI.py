@@ -12,67 +12,25 @@ class t_HelloAPI:
     @staticmethod
     def RunAll():
         t = t_Hello()
-        t.test_Hello_get()
-        t.test_Hello_post()
-        t.test_Hello_put()
+        t.test_Hello()
+        t.test_Version()
 
 class t_Hello(TestCase):
-    def test_Hello_get(self):
+    def test_Hello(self):
         result : Optional[requests.Response]
 
-        _url = f"{_config.ExternEndpoint}/hello"
+        _url = f"{_config.ExternEndpoint}/"
         result = SendTestRequest(url=_url, request="GET")
         if result is not None:
             self.assertTrue(result.ok)
         else:
             self.fail(f"No result from request to {_url}")
 
-    def test_Hello_post(self):
+    def test_Version(self):
         result : Optional[requests.Response]
 
-        _url = f"{_config.ExternEndpoint}/hello"
-        result = SendTestRequest(url=_url, request="POST")
-        if result is not None:
-            self.assertTrue(result.ok)
-        else:
-            self.fail(f"No result from request to {_url}")
-
-    def test_Hello_put(self):
-        result : Optional[requests.Response]
-
-        _url = f"{_config.ExternEndpoint}/hello"
-        result = SendTestRequest(url=_url, request="PUT")
-        if result is not None:
-            self.assertTrue(result.ok)
-        else:
-            self.fail(f"No result from request to {_url}")
-
-class t_ParamHello(TestCase):
-    def test_ParamHello_get(self):
-        result : Optional[requests.Response]
-
-        _url = f"{_config.ExternEndpoint}/p_hello/GetTestName"
+        _url = f"{_config.ExternEndpoint}/version"
         result = SendTestRequest(url=_url, request="GET")
-        if result is not None:
-            self.assertTrue(result.ok)
-        else:
-            self.fail(f"No result from request to {_url}")
-
-    def test_ParamHello_post(self):
-        result : Optional[requests.Response]
-
-        _url = f"{_config.ExternEndpoint}/p_hello/PostTestName"
-        result = SendTestRequest(url=_url, request="POST")
-        if result is not None:
-            self.assertTrue(result.ok)
-        else:
-            self.fail(f"No result from request to {_url}")
-
-    def test_ParamHello_put(self):
-        result : Optional[requests.Response]
-
-        _url = f"{_config.ExternEndpoint}/p_hello/PutTestName"
-        result = SendTestRequest(url=_url, request="PUT")
         if result is not None:
             self.assertTrue(result.ok)
         else:
