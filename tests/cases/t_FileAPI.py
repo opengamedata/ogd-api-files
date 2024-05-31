@@ -78,11 +78,12 @@ class t_MonthlyGameUsage(TestCase):
         else:
             self.fail(f"No result from request to {self.url}")
 
-    # def test_Correct(self):
-    #     if self.result is not None:
-    #         self.assertEqual(self.result.json()["data"], {"message":_config.APIVersion})
-    #     else:
-    #         self.fail(f"No result from request to {self.url}")
+    @unittest.skip("Haven't sorted out full expected data yet.")
+    def test_Correct(self):
+        if self.result is not None:
+            self.assertEqual(self.result.json()["data"], {"message":_config.APIVersion})
+        else:
+            self.fail(f"No result from request to {self.url}")
 
 class t_GameFileInfoByMonth(TestCase):
     def setUp(self):
@@ -109,11 +110,24 @@ class t_GameFileInfoByMonth(TestCase):
         else:
             self.fail(f"No result from request to {self.url}")
 
-    # def test_Correct(self):
-    #     if self.result is not None:
-    #         self.assertEqual(self.result.json()["data"], {"message":_config.APIVersion})
-    #     else:
-    #         self.fail(f"No result from request to {self.url}")
+    def test_Correct(self):
+        expected_data = {
+            "detectors_link":"https://github.com/opengamedata/opengamedata-core/tree/df72162/games/aqualab/detectors",
+            "events_codespace":"https://codespaces.new/opengamedata/opengamedata-samples/tree/aqualab?quickstart=1&devcontainer_path=.devcontainer%2Fevent-template%2Fdevcontainer.json",
+            "events_file":"https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_all-events.zip",
+            "events_template":"https://github.com/opengamedata/opengamedata-templates/tree/aqualab",
+            "features_link":"https://github.com/opengamedata/opengamedata-core/tree/df72162/games/aqualab/features",
+            "first_month":1,
+            "first_year":2024,
+            "found_matching_range":True,
+            "last_month":1,
+            "last_year":2024,
+            "players_codespace":"https://codespaces.new/opengamedata/opengamedata-samples/tree/aqualab?quickstart=1&devcontainer_path=.devcontainer%2Fsession-template%2Fdevcontainer.json","players_file":"https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_player-features.zip","players_template":"https://github.com/opengamedata/opengamedata-templates/tree/aqualab","population_file":"https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_population-features.zip","population_template":"https://github.com/opengamedata/opengamedata-templates/tree/aqualab","raw_file":"https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_events.zip","sessions_codespace":"https://codespaces.new/opengamedata/opengamedata-samples/tree/aqualab?quickstart=1&devcontainer_path=.devcontainer%2Fplayer-template%2Fdevcontainer.json","sessions_file":"https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_session-features.zip","sessions_template":"https://github.com/opengamedata/opengamedata-templates/tree/aqualab"
+        }
+        if self.result is not None:
+            self.assertEqual(self.result.json()["data"], expected_data)
+        else:
+            self.fail(f"No result from request to {self.url}")
 
 if __name__ == "__main__":
     main()
