@@ -1,5 +1,5 @@
 # Workflow to deploy and test Files API to the CI server
-name: OGD Files API CI Script
+name: OGD FileAPI CI Script
 on:
   workflow_dispatch:
   push:

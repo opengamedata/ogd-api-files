@@ -1,5 +1,5 @@
 # Workflow to test Files API on the CI server
-name: OGD Files API Testbed - FileAPI
+name: OGD FileAPI Testbed - FileAPI
 on:
   workflow_dispatch:
   push:
