@@ -39,7 +39,7 @@ jobs:
 
   # 3. Perform export
     - name: Execute testbed
-      run: python -m unittest discover -s ./tests/cases/HelloAPI -p "t_*.py" 
+      run: python -m unittest ./tests/cases/t_HelloAPI.py 
 
   # 4. Cleanup & complete
     - name: Announce test completed
