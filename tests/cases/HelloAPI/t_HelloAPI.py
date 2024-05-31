@@ -1,7 +1,7 @@
 # import libraries
 import requests
 from typing import Optional
-from unittest import TestCase, TestSuite
+from unittest import TestCase, TestSuite, main
 # import locals
 from tests.schemas.TestConfigSchema import TestConfigSchema
 from tests.config.t_config import settings
@@ -64,3 +64,6 @@ def SendTestRequest(url:str, request:str) -> Optional[requests.Response]:
             print()
     finally:
         return result
+
+if __name__ == "__main__":
+    main()
