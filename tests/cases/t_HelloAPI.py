@@ -48,8 +48,8 @@ class t_Hello(TestCase):
             self.fail(f"No result from request to {self.url}")
 
     def test_Succeeded(self):
-        if self.result is not None:
-            self.assertEqual(self.result.json()["success"], True)
+        if self.content is not None:
+            self.assertEqual(self.content.Status, ResponseStatus.SUCCESS)
         else:
             self.fail(f"No result from request to {self.url}")
 
