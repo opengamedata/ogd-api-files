@@ -23,7 +23,7 @@ jobs:
     name: CI Deploy of Website API
     runs-on: ubuntu-22.04
     concurrency:
-      group: ${{ github.repository }}-CI-${{ github.ref }}
+      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}
       cancel-in-progress: true
 
     steps:
