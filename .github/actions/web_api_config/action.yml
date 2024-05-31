@@ -16,12 +16,12 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Set up config
-      run: cp config/config.py.template config/config.py 
+    - name: Set up src/config
+      run: cp src/config/config.py.template src/config/config.py 
       shell: bash
     - name: Set API Version
-      run: sed -i 's@VERSION_PLACEHOLDER@${{inputs.api_version}}@g' config/config.py
+      run: sed -i 's@VERSION_PLACEHOLDER@${{inputs.api_version}}@g' src/config/config.py
       shell: bash
     - name: Set API Base Path
-      run: sed -i 's@placeholder home@${{inputs.api_base}}@g' app.wsgi
+      run: sed -i 's@placeholder home@${{inputs.api_base}}@g' src/app.wsgi
       shell: bash
