@@ -27,6 +27,10 @@ class t_GameUsageByMonth(TestCase):
         self.url    = f"{_config.ExternEndpoint}/getGameUsageByMonth"
         self.result = SendTestRequest(url=self.url, request="GET", params=params, config=_config)
 
+    def tearDown(self):
+        if self.result is not None:
+            self.result.close()
+
     def test_Responded(self):
         if self.result is not None:
             self.assertTrue(self.result.ok)
@@ -55,6 +59,10 @@ class t_MonthlyGameUsage(TestCase):
         }
         self.url    = f"{_config.ExternEndpoint}/getMonthlyGameUsage"
         self.result = SendTestRequest(url=self.url, request="GET", params=params, config=_config)
+
+    def tearDown(self):
+        if self.result is not None:
+            self.result.close()
 
     def test_Responded(self):
         if self.result is not None:

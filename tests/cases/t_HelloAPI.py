@@ -26,6 +26,10 @@ class t_Hello(TestCase):
         self.url    : str                         = f"{_config.ExternEndpoint}/"
         self.result : Optional[requests.Response] = SendTestRequest(url=self.url, request="GET", params={}, config=_config)
 
+    def tearDown(self):
+        if self.result is not None:
+            self.result.close()
+
     def test_Responded(self):
         if self.result is not None:
             self.assertTrue(self.result.ok)
@@ -48,6 +52,10 @@ class t_Version(TestCase):
     def setUp(self):
         self.url    : str                         = f"{_config.ExternEndpoint}/version"
         self.result : Optional[requests.Response] = SendTestRequest(url=self.url, request="GET", params={}, config=_config)
+
+    def tearDown(self):
+        if self.result is not None:
+            self.result.close()
 
     def test_Responded(self):
         if self.result is not None:
