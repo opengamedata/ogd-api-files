@@ -1,5 +1,5 @@
-# Workflow to build and deploy designer dashboard to server.
-name: OGD Files API CI Script
+# Workflow to deploy and test Files API to the CI server
+name: OGD FileAPI CI Script
 on:
   workflow_dispatch:
   push:
