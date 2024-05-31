@@ -73,8 +73,8 @@ jobs:
     needs: ci_deploy
     runs-on: ubuntu-22.04
     concurrency:
-      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-${{ github.job }}
-      cancel-in-progress: true
+      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-test-hello
+      cancel-in-progress: false
 
     steps:
 
@@ -108,7 +108,7 @@ jobs:
     needs: ci_deploy
     runs-on: ubuntu-22.04
     concurrency:
-      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-${{ github.job }}
+      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-test-files
       cancel-in-progress: false
 
     steps:
