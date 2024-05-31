@@ -1,29 +1,29 @@
 # Workflow to build and deploy designer dashboard to server.
 name: OGD-Website-API CI Script
 on:
-  workflow_dispatch: # Allow manual trigger of this workflow from the Actions tab
+  workflow_dispatch:
   push:
     paths:
-    - '.github/workflows/webAPI_CI.yml'
+    - '.github/workflows/CI_webAPI.yml'
     - '.github/actions/**'
-    - 'interfaces/**'
-    - 'models/**'
-    - 'schemas/**'
-    - 'app.py'
-    - 'app.wsgi'
+    - 'src/interfaces/**'
+    - 'src/models/**'
+    - 'src/schemas/**'
+    - 'src/app.py'
+    - 'src/app.wsgi'
+    - 'requirements.txt'
 
 env:
   DEPLOY_HOST: ${{ vars.OGD_STAGING_HOST }}
-  DEPLOY_DIR: ${{ vars.WSGI_PATH }}/${{ github.event.repository.name }}/${{ github.ref_name }}
-  DEPLOY_URL:  ${{ vars.OGD_STAGING_HOST }}/wsgi-bin/${{ github.event.repository.name }}/${{ github.ref_name }}
-  URL_PATH:    wsgi-bin/${{ github.event.repository.name }}/${{ github.ref_name }}
+  DEPLOY_DIR:                              ${{ vars.API_BASE_PATH }}/${{ github.event.repository.name }}/${{ github.ref_name }}
+  DEPLOY_URL:  ${{ vars.OGD_STAGING_HOST }}/${{ vars.API_BASE_URL }}/${{ github.event.repository.name }}/${{ github.ref_name }}/app.wsgi
 
 jobs:
   ci_deploy:
     name: CI Deploy of Website API
     runs-on: ubuntu-22.04
     concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
+      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}
       cancel-in-progress: true
 
     steps:
@@ -56,7 +56,7 @@ jobs:
       uses: burnett01/rsync-deployments@5.2
       with:
         switches: -vrct --delete --exclude-from 'rsync-exclude'
-        path: ./*
+        path: ./src/*
         remote_path: ${{ env.DEPLOY_DIR }}
         remote_host: ${{ env.DEPLOY_HOST }}
         remote_user: ${{ secrets.DEPLOY_USER }}
@@ -67,3 +67,38 @@ jobs:
       run: ssh -o StrictHostKeyChecking=no -T -i ./key.txt ${{ secrets.DEPLOY_USER }}@${{ env.DEPLOY_HOST }} "sudo systemctl restart apache2"
     - name: Announce deploy
       run: echo "Deployed to ${{ env.DEPLOY_URL }}"
+
+  run_testbed_hello:
+    name: Run HelloAPI Testbed
+    needs: ci_deploy
+    runs-on: ubuntu-22.04
+    concurrency:
+      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}
+      cancel-in-progress: true
+
+    steps:
+
+  # 1. Local checkout 
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: Get Dependencies
+      uses: ./.github/actions/install_dependencies
+    - name: Set up Config File
+      uses: ./.github/actions/test_config
+      with:
+          endpoint: ${{ env.DEPLOY_URL }}
+          verbose_output: "True"
+
+  # 2. Build & configure remote environments
+
+  # 3. Perform export
+    - name: Execute testbed
+      run: python -m unittest ./tests/cases/t_HelloAPI.py 
+
+  # 4. Cleanup & complete
+    - name: Announce test completed
+      run: echo "Tested HelloAPI endpoint at ${{ env.DEPLOY_URL }}"
+    - name: Upload logs as artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        path: ./*.log
