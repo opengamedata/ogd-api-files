@@ -70,7 +70,7 @@ jobs:
     needs: production_deploy
     runs-on: ubuntu-22.04
     concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
+      group: ${{ github.repository }}-${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
 
     steps:
