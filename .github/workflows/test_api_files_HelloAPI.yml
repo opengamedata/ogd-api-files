@@ -1,4 +1,4 @@
-# Workflow to build and deploy designer dashboard to server.
+# Workflow to test the "HelloAPI" portion of Files API on the CI server
 name: OGD Files API Testbed - HelloAPI
 on:
   workflow_dispatch:

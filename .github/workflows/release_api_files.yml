@@ -1,10 +1,10 @@
-# Workflow to build and deploy designer dashboard to server.
+# Workflow to deploy and test Files API to the production server
 name: OGD Files API Release Script
 on:
   #create:
   #  tags:
   #    - '*'
-  workflow_dispatch: # Allow manual trigger of this workflow from the Actions tab
+  workflow_dispatch:
   release:
     types: released
 
