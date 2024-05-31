@@ -26,12 +26,9 @@ class t_Hello(TestCase):
         self.result : Optional[requests.Response] = SendTestRequest(url=self.url, request="GET")
 
     def test_Responded(self):
-        result : Optional[requests.Response]
-
         _url = f"{_config.ExternEndpoint}/"
-        result = SendTestRequest(url=_url, request="GET")
-        if result is not None:
-            self.assertTrue(result.ok)
+        if self.result is not None:
+            self.assertTrue(self.result.ok)
         else:
             self.fail(f"No result from request to {_url}")
 
