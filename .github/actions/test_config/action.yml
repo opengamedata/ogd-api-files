@@ -31,7 +31,7 @@ runs:
       run: sed -i 's@ENDPOINT_PLACEHOLDER@${{inputs.endpoint}}@g' tests/config/t_config.py
       shell: bash
     - name: Set API Version
-      run: sed -i 's@VERSION_PLACEHOLDER@${{inputs.api_version}}@g' tests/config/config.py
+      run: sed -i 's@VERSION_PLACEHOLDER@${{inputs.api_version}}@g' tests/config/t_config.py
       shell: bash
     - name: Set Output Verbosity
       run: sed -i 's@"VERBOSE":False@"VERBOSE":${{inputs.verbose_output}}@g' tests/config/t_config.py
