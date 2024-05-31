@@ -1,5 +1,5 @@
 # Workflow to build and deploy designer dashboard to server.
-name: FileAPI Testbed
+name: OGD Files API Testbed - FileAPI
 on:
   workflow_dispatch:
   push:
