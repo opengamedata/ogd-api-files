@@ -8,8 +8,6 @@ def SendTestRequest(url:str, request:str, params:Dict[str, Any], config:TestConf
     if not (url.startswith("https://") or url.startswith("http://")):
         url = f"https://{url}" # give url a default scheme
     try:
-        if config.Verbose:
-            print(f"Sending request to {url}")
         match (request.upper()):
             case "GET":
                 result = requests.get(url, params=params)
@@ -26,6 +24,7 @@ def SendTestRequest(url:str, request:str, params:Dict[str, Any], config:TestConf
         raise err
     else:
         if config.Verbose:
+            print(f"Sent request to {result.url}")
             if result is not None:
                 print(f"Result of {request} request:\n{result.text}")
             else:
