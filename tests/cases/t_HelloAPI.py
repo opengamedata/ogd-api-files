@@ -12,11 +12,20 @@ class t_HelloAPI:
     @staticmethod
     def RunAll():
         t = t_Hello()
-        t.test_Hello()
-        t.test_Version()
+        t.setUp()
+        t.test_Responded()
+        t.test_Correct()
+        t = t_Version()
+        t.setUp()
+        t.test_Responded()
+        t.test_Correct()
 
 class t_Hello(TestCase):
-    def test_Hello(self):
+    def setUp(self):
+        self.url    : str                         = f"{_config.ExternEndpoint}/version"
+        self.result : Optional[requests.Response] = SendTestRequest(url=self.url, request="GET")
+
+    def test_Responded(self):
         result : Optional[requests.Response]
 
         _url = f"{_config.ExternEndpoint}/"
@@ -26,15 +35,28 @@ class t_Hello(TestCase):
         else:
             self.fail(f"No result from request to {_url}")
 
-    def test_Version(self):
-        result : Optional[requests.Response]
-
-        _url = f"{_config.ExternEndpoint}/version"
-        result = SendTestRequest(url=_url, request="GET")
-        if result is not None:
-            self.assertTrue(result.ok)
+    def test_Correct(self):
+        if self.result is not None:
+            self.assertEqual(self.result.json()["data"], {"message":"hello, world"})
         else:
-            self.fail(f"No result from request to {_url}")
+            self.fail(f"No result from request to {self.url}")
+
+class t_Version(TestCase):
+    def setUp(self):
+        self.url    : str                         = f"{_config.ExternEndpoint}/version"
+        self.result : Optional[requests.Response] = SendTestRequest(url=self.url, request="GET")
+
+    def test_Responded(self):
+        if self.result is not None:
+            self.assertTrue(self.result.ok)
+        else:
+            self.fail(f"No result from request to {self.url}")
+
+    def test_Correct(self):
+        if self.result is not None:
+            self.assertEqual(self.result.json()["data"], {"message":"Testing"})
+        else:
+            self.fail(f"No result from request to {self.url}")
 
 def SendTestRequest(url:str, request:str) -> Optional[requests.Response]:
     result : Optional[requests.Response] = None
