@@ -73,7 +73,7 @@ jobs:
     needs: ci_deploy
     runs-on: ubuntu-22.04
     concurrency:
-      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}
+      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-${{ github.job }}
       cancel-in-progress: true
 
     steps:
@@ -105,9 +105,10 @@ jobs:
 
   run_testbed_files:
     name: Run FileAPI Testbed
+    needs: ci_deploy
     runs-on: ubuntu-22.04
     concurrency:
-      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}
+      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-${{ github.job }}
       cancel-in-progress: false
 
     steps:
