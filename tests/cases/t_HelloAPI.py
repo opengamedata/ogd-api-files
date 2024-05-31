@@ -1,6 +1,7 @@
 # import libraries
 import requests
-from typing import Optional
+from json.decoder import JSONDecodeError
+from typing import Any, Dict, Optional
 from unittest import TestCase, TestSuite, main
 # import locals
 from tests.schemas.TestConfigSchema import TestConfigSchema
@@ -23,8 +24,14 @@ class t_HelloAPI:
 
 class t_Hello(TestCase):
     def setUp(self):
-        self.url    : str                         = f"{_config.ExternEndpoint}/"
-        self.result : Optional[requests.Response] = SendTestRequest(url=self.url, request="GET", params={}, config=_config)
+        self.url     : str                         = f"{_config.ExternEndpoint}/"
+        self.result  : Optional[requests.Response] = SendTestRequest(url=self.url, request="GET", params={}, config=_config)
+        self.content : Optional[Dict[str, Any]]    = None
+        if self.result is not None:
+            try:
+                self.content = self.result.json()
+            except JSONDecodeError as err:
+                print(f"Could not parse {self.result.text} to JSON!\n{err}")
 
     def tearDown(self):
         if self.result is not None:
@@ -43,15 +50,21 @@ class t_Hello(TestCase):
             self.fail(f"No result from request to {self.url}")
 
     def test_Correct(self):
-        if self.result is not None:
-            self.assertEqual(self.result.json()["data"], {"message":"hello, world"})
+        if self.content is not None:
+            self.assertEqual(self.content.get("data", None), {"message":"hello, world"})
         else:
-            self.fail(f"No result from request to {self.url}")
+            self.fail(f"No JSON content from request to {self.url}")
 
 class t_Version(TestCase):
     def setUp(self):
         self.url    : str                         = f"{_config.ExternEndpoint}/version"
         self.result : Optional[requests.Response] = SendTestRequest(url=self.url, request="GET", params={}, config=_config)
+        self.content : Optional[Dict[str, Any]]    = None
+        if self.result is not None:
+            try:
+                self.content = self.result.json()
+            except JSONDecodeError as err:
+                print(f"Could not parse {self.result.text} to JSON!\n{err}")
 
     def tearDown(self):
         if self.result is not None:
@@ -70,10 +83,10 @@ class t_Version(TestCase):
             self.fail(f"No result from request to {self.url}")
 
     def test_Correct(self):
-        if self.result is not None:
-            self.assertEqual(self.result.json()["data"], {"message":_config.APIVersion})
+        if self.content is not None:
+            self.assertEqual(self.content.get("data", None), {"message":_config.APIVersion})
         else:
-            self.fail(f"No result from request to {self.url}")
+            self.fail(f"No JSON content from request to {self.url}")
 
 if __name__ == "__main__":
     main()
