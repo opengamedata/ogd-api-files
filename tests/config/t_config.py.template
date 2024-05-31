@@ -4,5 +4,6 @@ settings = {
     "VERBOSE":False,
     "ENABLED" : {
         "HELLO":True,
+        "FILE":True,
     }
 }
