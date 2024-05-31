@@ -1,5 +1,5 @@
 # Workflow to test the "HelloAPI" portion of Files API on the CI server
-name: OGD FileAPI Testbed - HelloAPI
+name: OGD FileAPI - HelloAPI Testbed
 on:
   workflow_dispatch:
   push:

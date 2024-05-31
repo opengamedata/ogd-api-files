@@ -1,5 +1,5 @@
 # Workflow to clean out the directory where a deleted "FileAPI" branch's files were deployed on the CI server
-name: OGD FileAPI Dead Branch Cleanup Script
+name: OGD FileAPI - Dead Branch Cleanup Script
 
 # Controls when the action will run. Triggers the workflow on deletion of branches. 
 on:

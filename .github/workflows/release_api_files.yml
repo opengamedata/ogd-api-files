@@ -1,5 +1,5 @@
 # Workflow to deploy and test Files API to the production server
-name: OGD FileAPI Release Script
+name: OGD FileAPI - Release Script
 on:
   #create:
   #  tags:
