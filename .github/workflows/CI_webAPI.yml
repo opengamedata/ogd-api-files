@@ -87,7 +87,7 @@ jobs:
       uses: ./.github/actions/test_config
       with:
           endpoint: ${{ env.DEPLOY_URL }}
-          verbose_output: "True"
+          verbose_output: "False"
 
   # 2. Build & configure remote environments
 
@@ -122,7 +122,7 @@ jobs:
       uses: ./.github/actions/test_config
       with:
           endpoint: ${{ env.DEPLOY_URL }}
-          verbose_output: "True"
+          verbose_output: "False"
 
   # 2. Build & configure remote environments
 
