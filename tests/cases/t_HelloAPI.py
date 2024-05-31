@@ -22,7 +22,7 @@ class t_HelloAPI:
 
 class t_Hello(TestCase):
     def setUp(self):
-        self.url    : str                         = f"{_config.ExternEndpoint}/version"
+        self.url    : str                         = f"{_config.ExternEndpoint}/"
         self.result : Optional[requests.Response] = SendTestRequest(url=self.url, request="GET")
 
     def test_Responded(self):
