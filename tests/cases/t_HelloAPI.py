@@ -19,7 +19,7 @@ class t_Hello(TestCase):
     def test_Hello(self):
         result : Optional[requests.Response]
 
-        _url = f"https://{_config.ExternEndpoint}/"
+        _url = f"{_config.ExternEndpoint}/"
         result = SendTestRequest(url=_url, request="GET")
         if result is not None:
             self.assertTrue(result.ok)
@@ -29,7 +29,7 @@ class t_Hello(TestCase):
     def test_Version(self):
         result : Optional[requests.Response]
 
-        _url = f"https://{_config.ExternEndpoint}/version"
+        _url = f"{_config.ExternEndpoint}/version"
         result = SendTestRequest(url=_url, request="GET")
         if result is not None:
             self.assertTrue(result.ok)
@@ -38,6 +38,8 @@ class t_Hello(TestCase):
 
 def SendTestRequest(url:str, request:str) -> Optional[requests.Response]:
     result : Optional[requests.Response] = None
+    if not (url.startswith("https://") or url.startswith("http://")):
+        url = f"https://{url}" # give url a default scheme
     try:
         if _config.Verbose:
             print(f"Sending request to {url}")
