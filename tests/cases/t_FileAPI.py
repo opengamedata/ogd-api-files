@@ -4,6 +4,8 @@ import unittest
 from json.decoder import JSONDecodeError
 from typing import Any, Dict, Optional
 from unittest import TestCase, TestSuite, main
+# import ogd libraries
+from ogd.apis.utils.APIResponse import APIResponse, RESTType, ResponseStatus
 # import locals
 from tests.schemas.TestConfigSchema import TestConfigSchema
 from tests.utils.SendRequest import SendTestRequest
@@ -21,7 +23,7 @@ class t_GameUsageByMonth(TestCase):
     def setUp(self):
         self.url    : str
         self.result : Optional[requests.Response]
-        self.content : Optional[Dict[str, Any]]
+        self.content : Optional[APIResponse]    = None
 
         params = {
             "game_id" : "AQUALAB",
@@ -32,9 +34,11 @@ class t_GameUsageByMonth(TestCase):
         self.result = SendTestRequest(url=self.url, request="GET", params=params, config=_config)
         if self.result is not None:
             try:
-                self.content = self.result.json()
+                _raw = self.result.json()
             except JSONDecodeError as err:
                 print(f"Could not parse {self.result.text} to JSON!\n{err}")
+            else:
+                self.content = APIResponse.FromDict(all_elements=_raw)
 
     def tearDown(self):
         if self.result is not None:
@@ -48,7 +52,7 @@ class t_GameUsageByMonth(TestCase):
 
     def test_Succeeded(self):
         if self.content is not None:
-            self.assertEqual(self.content.get("success", None), True)
+            self.assertEqual(self.content.Status, ResponseStatus.SUCCESS)
         else:
             self.fail(f"No JSON content from request to {self.url}")
 
@@ -62,7 +66,7 @@ class t_MonthlyGameUsage(TestCase):
     def setUp(self):
         self.url    : str
         self.result : Optional[requests.Response]
-        self.content : Optional[Dict[str, Any]]
+        self.content : Optional[APIResponse]    = None
 
         params = {
             "game_id" : "AQUALAB"
@@ -71,9 +75,11 @@ class t_MonthlyGameUsage(TestCase):
         self.result = SendTestRequest(url=self.url, request="GET", params=params, config=_config)
         if self.result is not None:
             try:
-                self.content = self.result.json()
+                _raw = self.result.json()
             except JSONDecodeError as err:
                 print(f"Could not parse {self.result.text} to JSON!\n{err}")
+            else:
+                self.content = APIResponse.FromDict(all_elements=_raw)
 
     def tearDown(self):
         if self.result is not None:
@@ -87,14 +93,15 @@ class t_MonthlyGameUsage(TestCase):
 
     def test_Succeeded(self):
         if self.content is not None:
-            self.assertEqual(self.content.get("success"), True)
+            self.assertEqual(self.content.Status, ResponseStatus.SUCCESS)
         else:
             self.fail(f"No JSON content from request to {self.url}")
 
     @unittest.skip("Haven't sorted out full expected data yet.")
     def test_Correct(self):
+        _expected_data = {}
         if self.content is not None:
-            self.assertEqual(self.content.get("data"), {"message":_config.APIVersion})
+            self.assertEqual(self.content.Value, _expected_data)
         else:
             self.fail(f"No JSON content from request to {self.url}")
 
@@ -102,7 +109,7 @@ class t_GameFileInfoByMonth(TestCase):
     def setUp(self):
         self.url    : str
         self.result : Optional[requests.Response]
-        self.content : Optional[Dict[str, Any]]
+        self.content : Optional[APIResponse]    = None
 
         params = {
             "game_id" : "AQUALAB",
@@ -113,9 +120,11 @@ class t_GameFileInfoByMonth(TestCase):
         self.result = SendTestRequest(url=self.url, request="GET", params=params, config=_config)
         if self.result is not None:
             try:
-                self.content = self.result.json()
+                _raw = self.result.json()
             except JSONDecodeError as err:
                 print(f"Could not parse {self.result.text} to JSON!\n{err}")
+            else:
+                self.content = APIResponse.FromDict(all_elements=_raw)
 
     def test_Responded(self):
         if self.result is not None:
@@ -125,7 +134,7 @@ class t_GameFileInfoByMonth(TestCase):
 
     def test_Succeeded(self):
         if self.content is not None:
-            self.assertEqual(self.content.get("success", None), True)
+            self.assertEqual(self.content.Status, ResponseStatus.SUCCESS)
         else:
             self.fail(f"No JSON content from request to {self.url}")
 
@@ -144,7 +153,7 @@ class t_GameFileInfoByMonth(TestCase):
             "players_codespace":"https://codespaces.new/opengamedata/opengamedata-samples/tree/aqualab?quickstart=1&devcontainer_path=.devcontainer%2Fsession-template%2Fdevcontainer.json","players_file":"https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_player-features.zip","players_template":"https://github.com/opengamedata/opengamedata-templates/tree/aqualab","population_file":"https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_population-features.zip","population_template":"https://github.com/opengamedata/opengamedata-templates/tree/aqualab","raw_file":"https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_events.zip","sessions_codespace":"https://codespaces.new/opengamedata/opengamedata-samples/tree/aqualab?quickstart=1&devcontainer_path=.devcontainer%2Fplayer-template%2Fdevcontainer.json","sessions_file":"https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_session-features.zip","sessions_template":"https://github.com/opengamedata/opengamedata-templates/tree/aqualab"
         }
         if self.content is not None:
-            self.assertEqual(self.content.get("data"), expected_data)
+            self.assertEqual(self.content.Value, expected_data)
         else:
             self.fail(f"No JSON content from request to {self.url}")
 
