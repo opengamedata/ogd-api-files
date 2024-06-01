@@ -1,5 +1,6 @@
 # Workflow to deploy and test Files API to the production server
 name: OGD FileAPI - Release Script
+run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'release' && github.ref || 'Manual Run') }}
 on:
   #create:
   #  tags:

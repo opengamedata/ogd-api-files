@@ -1,5 +1,6 @@
 # Workflow to clean out the directory where a deleted "FileAPI" branch's files were deployed on the CI server
 name: OGD FileAPI - Dead Branch Cleanup Script
+run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'delete' && github.event.ref || 'Manual Run') }}
 
 # Controls when the action will run. Triggers the workflow on deletion of branches. 
 on:
