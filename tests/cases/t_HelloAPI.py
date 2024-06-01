@@ -25,21 +25,23 @@ class t_HelloAPI:
         t.test_Correct()
 
 class t_Hello(TestCase):
-    def setUp(self):
-        self.url     : str                         = f"{_config.ExternEndpoint}/"
-        self.result  : Optional[requests.Response] = SendTestRequest(url=self.url, request="GET", params={}, config=_config)
-        self.content : Optional[APIResponse]    = None
-        if self.result is not None:
+    @classmethod
+    def setUpClass(cls):
+        cls.url     : str                         = f"{_config.ExternEndpoint}/"
+        cls.result  : Optional[requests.Response] = SendTestRequest(url=cls.url, request="GET", params={}, config=_config)
+        cls.content : Optional[APIResponse]    = None
+        if cls.result is not None:
             try:
-                _raw = self.result.json()
+                _raw = cls.result.json()
             except JSONDecodeError as err:
-                print(f"Could not parse {self.result.text} to JSON!\n{err}")
+                print(f"Could not parse {cls.result.text} to JSON!\n{err}")
             else:
-                self.content = APIResponse.FromDict(all_elements=_raw)
+                cls.content = APIResponse.FromDict(all_elements=_raw)
 
-    def tearDown(self):
-        if self.result is not None:
-            self.result.close()
+    @classmethod
+    def tearDownClass(cls):
+        if cls.result is not None:
+            cls.result.close()
 
     def test_Responded(self):
         if self.result is not None:
