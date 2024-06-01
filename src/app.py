@@ -10,8 +10,10 @@ from urllib import request as url_request
 from flask import Flask, send_file, request
 from flask_cors import CORS
 
+# import ogd libraries
+from ogd.apis.utils.APIResponse import APIResponse, RESTType, ResponseStatus
+
 # import our app libraries
-from models.APIResponse import APIResponse
 from schemas.DatasetSchema import DatasetSchema
 from schemas.FileListSchema import FileListSchema, GameDatasetCollectionSchema
 from models.SanitizedParams import SanitizedParams
@@ -76,21 +78,21 @@ def Hello():
     """
     Basic response if someone just hits the home path to say "hello"
     """
+    ret_val = APIResponse.Default(req_type=RESTType.GET)
 
-    responseObj = {
-        "message": "hello, world"
-    }
+    _msg = "hello, world"
+    ret_val.RequestSucceeded(msg=_msg, val={})
 
-    return APIResponse(success=True, data=responseObj).ToDict()
+    return ret_val.AsFlaskResponse
 
 @application.route('/version', methods=['GET'])
 def get_api_version():
+    ret_val = APIResponse.Default(req_type=RESTType.GET)
 
-    responseObj = {
-        "message": settings["API_VERSION"]
-    }
+    _ver = settings["API_VERSION"]
+    ret_val.RequestSucceeded(msg=f"Retrieved version", val={"version":_ver})
 
-    return APIResponse(True, responseObj).ToDict()
+    return ret_val.AsFlaskResponse
 
 # Get game usage statistics for a given game, year, and month
 @application.route('/getGameUsageByMonth', methods=['GET'])
@@ -106,16 +108,19 @@ def getGameUsageByMonth():
     - Month's session count
     - Daily session counts for month
     """
+    ret_val = APIResponse.Default(req_type=RESTType.GET)
 
     last_month = date.today().replace(day=1) - timedelta(days=1)
     sanitized_request = SanitizedParams.FromRequest(default_date=last_month)
 
     if sanitized_request.GameID is None or sanitized_request.GameID == "":
-        return APIResponse(False, None).ToDict()
+        ret_val.RequestErrored(msg=f"Bad GameID '{sanitized_request.GameID}'")
+        return ret_val.AsFlaskResponse
 
     # If we don't have a mapping for the given game
     if not sanitized_request.GameID in settings["BIGQUERY_GAME_MAPPING"]:
-        return APIResponse(False, None).ToDict()
+        ret_val.ServerErrored(msg=f"GameID '{sanitized_request.GameID}' not found in available games")
+        return ret_val.AsFlaskResponse
 
     total_monthly_sessions = 0
     sessions_by_day = {}
@@ -124,15 +129,16 @@ def getGameUsageByMonth():
     total_monthly_sessions = bqInterface.GetTotalSessionsForMonth(sanitized_request.Year, sanitized_request.Month)
     sessions_by_day        = bqInterface.GetSessionsPerDayForMonth(sanitized_request.Year, sanitized_request.Month)
 
-    responseObj = {
+    responseData = {
         "game_id": sanitized_request.GameID,
         "selected_month": sanitized_request.Month,
         "selected_year": sanitized_request.Year,
         "total_monthly_sessions": total_monthly_sessions,
         "sessions_by_day": sessions_by_day
     }
+    ret_val.RequestSucceeded(msg="Retrieved game usage by month", val=responseData)
 
-    return APIResponse(True, responseObj).ToDict()
+    return ret_val.AsFlaskResponse
 
 @application.route("/getMonthlyGameUsage", methods=['GET'])
 def getMonthlyGameUsage():
@@ -146,12 +152,14 @@ def getMonthlyGameUsage():
     Outputs:
     - Session count for each month of game's data
     """
+    ret_val = APIResponse.Default(req_type=RESTType.GET)
     
     # Extract a sanitized game_id from the query string
     game_id = SanitizedParams.sanitizeGameId(request.args.get("game_id", default = "", type=str))
      
     if game_id is None or game_id == "":
-        return APIResponse(False, None).ToDict()
+        ret_val.RequestErrored(msg=f"Bad GameID '{game_id}'")
+        return ret_val.AsFlaskResponse
 
     # Pull the file list data into a dictionary
     file_list_url      : str                       = settings.get("FILE_LIST_URL", "https://opengamedata.fielddaylab.wisc.edu/data/file_list.json")
@@ -162,7 +170,8 @@ def getMonthlyGameUsage():
 
     # If the given game isn't in our dictionary, or our dictionary doesn't have any date ranges for this game
     if not game_id in file_list.Games or len(file_list.Games[game_id].Datasets) == 0:
-        return APIResponse(False, None).ToDict()
+        ret_val.ServerErrored(msg=f"GameID '{game_id}' not found in list of games with datasets, or had no datasets listed")
+        return ret_val.AsFlaskResponse
 
     first_month = None
     first_year  = None
@@ -208,7 +217,9 @@ def getMonthlyGameUsage():
             startRangeMonth = 1
 
     responseData = { "game_id": game_id, "sessions": sessions }
-    return APIResponse(True, responseData).ToDict()
+    ret_val.RequestSucceeded(msg="Retrieved monthly game usage", val=responseData)
+
+    return ret_val.AsFlaskResponse
 
 @application.route('/getGameFileInfoByMonth', methods=['GET'])
 def getGameFileInfoByMonth():
@@ -222,6 +233,8 @@ def getGameFileInfoByMonth():
     Outputs:
     - DatasetSchema of most recently-exported dataset for game in month
     """
+    ret_val = APIResponse.Default(req_type=RESTType.GET)
+
     last_month = date.today().replace(day=1) - timedelta(days=1)
     sanitized_request = SanitizedParams.FromRequest(default_date=last_month)
 
@@ -233,8 +246,12 @@ def getGameFileInfoByMonth():
     game_datasets      : GameDatasetCollectionSchema = file_list.Games.get(sanitized_request.GameID or "NO GAME REQUESTED", GameDatasetCollectionSchema.EmptySchema())
 
     # If we couldn't find the requested game in file_list.json, or the game didn't have any date ranges, skip.
-    if (sanitized_request.GameID is None) or (len(game_datasets.Datasets) == 0):
-        return APIResponse(success=False, data=None).ToDict()
+    if (sanitized_request.GameID is None):
+        ret_val.RequestErrored(msg=f"Bad GameID '{sanitized_request.GameID}'")
+        return ret_val.AsFlaskResponse
+    elif (len(game_datasets.Datasets) == 0):
+        ret_val.ServerErrored(msg=f"GameID '{sanitized_request.GameID}' did not have available datasets")
+        return ret_val.AsFlaskResponse
     # Else, continue on.
 
 # 2. Search for the most recently modified dataset that contains the requested month and year
@@ -293,5 +310,7 @@ def getGameFileInfoByMonth():
     file_info["features_link"]  = f"{GITHUB_BASE_URL}{_revision}/games/{_branch_name}/features"  if _revision else None
     file_info["found_matching_range"] = True
 
-    return APIResponse(True, file_info).ToDict()
+    ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=file_info)
+
+    return ret_val.AsFlaskResponse
 
