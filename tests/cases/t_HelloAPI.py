@@ -75,6 +75,7 @@ class t_Version(TestCase):
             else:
                 cls.content = APIResponse.FromDict(all_elements=_raw)
 
+    @classmethod
     def tearDownClass(cls):
         if cls.result is not None:
             cls.result.close()
