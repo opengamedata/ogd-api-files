@@ -1,12 +1,15 @@
-# Workflow to build and deploy designer dashboard to server.
-name: OGD Files API Testbed - FileAPI
+# Workflow to test Files API on the CI server
+name: OGD FileAPI - FileAPI Testbed
 on:
   workflow_dispatch:
   push:
     paths:
     - '.github/workflows/test_webAPI_Files.yml'
     - '.github/actions/test_config/**'
-    - 'tests/**'
+    - 'tests/cases/t_FileAPI.py'
+    - 'tests/config/**'
+    - 'tests/schemas/**'
+    - 'tests/utils/**'
     - 'requirements.txt'
 
 env:
