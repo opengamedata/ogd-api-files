@@ -1,5 +1,6 @@
 # Workflow to test Files API on the CI server
 name: OGD FileAPI - FileAPI Testbed
+run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' && github.event.head_commit.message || 'Manual Run') }}
 on:
   workflow_dispatch:
   push:
