@@ -1,8 +1,11 @@
 # import libraries
 import requests
 import unittest
-from typing import Optional
+from json.decoder import JSONDecodeError
+from typing import Any, Dict, Optional
 from unittest import TestCase, TestSuite, main
+# import ogd libraries
+from ogd.apis.utils.APIResponse import APIResponse, RESTType, ResponseStatus
 # import locals
 from tests.schemas.TestConfigSchema import TestConfigSchema
 from tests.utils.SendRequest import SendTestRequest
@@ -17,21 +20,31 @@ class t_FileAPI:
 
 @unittest.skip("This endpoint is not in use; needs access to database")
 class t_GameUsageByMonth(TestCase):
-    def setUp(self):
-        self.url    : str
-        self.result : Optional[requests.Response]
+    @classmethod
+    def setUpClass(cls):
+        cls.url    : str
+        cls.result : Optional[requests.Response]
+        cls.content : Optional[APIResponse]    = None
 
         params = {
             "game_id" : "AQUALAB",
             "year"    : 2024,
             "month"   : 1
         }
-        self.url    = f"{_config.ExternEndpoint}/getGameUsageByMonth"
-        self.result = SendTestRequest(url=self.url, request="GET", params=params, config=_config)
+        cls.url    = f"{_config.ExternEndpoint}/getGameUsageByMonth"
+        cls.result = SendTestRequest(url=cls.url, request="GET", params=params, config=_config)
+        if cls.result is not None:
+            try:
+                _raw = cls.result.json()
+            except JSONDecodeError as err:
+                print(f"Could not parse {cls.result.text} to JSON!\n{err}")
+            else:
+                cls.content = APIResponse.FromDict(all_elements=_raw)
 
-    def tearDown(self):
-        if self.result is not None:
-            self.result.close()
+    @classmethod
+    def tearDownClass(cls):
+        if cls.result is not None:
+            cls.result.close()
 
     def test_Responded(self):
         if self.result is not None:
@@ -40,10 +53,10 @@ class t_GameUsageByMonth(TestCase):
             self.fail(f"No result from request to {self.url}")
 
     def test_Succeeded(self):
-        if self.result is not None:
-            self.assertEqual(self.result.json()["success"], True)
+        if self.content is not None:
+            self.assertEqual(self.content.Status, ResponseStatus.SUCCESS)
         else:
-            self.fail(f"No result from request to {self.url}")
+            self.fail(f"No JSON content from request to {self.url}")
 
     # def test_Correct(self):
     #     if self.result is not None:
@@ -52,19 +65,29 @@ class t_GameUsageByMonth(TestCase):
     #         self.fail(f"No result from request to {self.url}")
 
 class t_MonthlyGameUsage(TestCase):
-    def setUp(self):
-        self.url    : str
-        self.result : Optional[requests.Response]
+    @classmethod
+    def setUpClass(cls):
+        cls.url    : str
+        cls.result : Optional[requests.Response]
+        cls.content : Optional[APIResponse]    = None
 
         params = {
             "game_id" : "AQUALAB"
         }
-        self.url    = f"{_config.ExternEndpoint}/getMonthlyGameUsage"
-        self.result = SendTestRequest(url=self.url, request="GET", params=params, config=_config)
+        cls.url    = f"{_config.ExternEndpoint}/getMonthlyGameUsage"
+        cls.result = SendTestRequest(url=cls.url, request="GET", params=params, config=_config)
+        if cls.result is not None:
+            try:
+                _raw = cls.result.json()
+            except JSONDecodeError as err:
+                print(f"Could not parse {cls.result.text} to JSON!\n{err}")
+            else:
+                cls.content = APIResponse.FromDict(all_elements=_raw)
 
-    def tearDown(self):
-        if self.result is not None:
-            self.result.close()
+    @classmethod
+    def tearDownClass(cls):
+        if cls.result is not None:
+            cls.result.close()
 
     def test_Responded(self):
         if self.result is not None:
@@ -73,22 +96,24 @@ class t_MonthlyGameUsage(TestCase):
             self.fail(f"No result from request to {self.url}")
 
     def test_Succeeded(self):
-        if self.result is not None:
-            self.assertEqual(self.result.json()["success"], True)
+        if self.content is not None:
+            self.assertEqual(self.content.Status, ResponseStatus.SUCCESS)
         else:
-            self.fail(f"No result from request to {self.url}")
+            self.fail(f"No JSON content from request to {self.url}")
 
     @unittest.skip("Haven't sorted out full expected data yet.")
     def test_Correct(self):
-        if self.result is not None:
-            self.assertEqual(self.result.json()["data"], {"message":_config.APIVersion})
+        _expected_data = {}
+        if self.content is not None:
+            self.assertEqual(self.content.Value, _expected_data)
         else:
-            self.fail(f"No result from request to {self.url}")
+            self.fail(f"No JSON content from request to {self.url}")
 
 class t_GameFileInfoByMonth(TestCase):
     def setUp(self):
         self.url    : str
         self.result : Optional[requests.Response]
+        self.content : Optional[APIResponse]    = None
 
         params = {
             "game_id" : "AQUALAB",
@@ -97,6 +122,13 @@ class t_GameFileInfoByMonth(TestCase):
         }
         self.url    = f"{_config.ExternEndpoint}/getGameFileInfoByMonth"
         self.result = SendTestRequest(url=self.url, request="GET", params=params, config=_config)
+        if self.result is not None:
+            try:
+                _raw = self.result.json()
+            except JSONDecodeError as err:
+                print(f"Could not parse {self.result.text} to JSON!\n{err}")
+            else:
+                self.content = APIResponse.FromDict(all_elements=_raw)
 
     def test_Responded(self):
         if self.result is not None:
@@ -105,10 +137,10 @@ class t_GameFileInfoByMonth(TestCase):
             self.fail(f"No result from request to {self.url}")
 
     def test_Succeeded(self):
-        if self.result is not None:
-            self.assertEqual(self.result.json()["success"], True)
+        if self.content is not None:
+            self.assertEqual(self.content.Status, ResponseStatus.SUCCESS)
         else:
-            self.fail(f"No result from request to {self.url}")
+            self.fail(f"No JSON content from request to {self.url}")
 
     def test_Correct(self):
         expected_data = {
@@ -124,10 +156,10 @@ class t_GameFileInfoByMonth(TestCase):
             "last_year":2024,
             "players_codespace":"https://codespaces.new/opengamedata/opengamedata-samples/tree/aqualab?quickstart=1&devcontainer_path=.devcontainer%2Fsession-template%2Fdevcontainer.json","players_file":"https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_player-features.zip","players_template":"https://github.com/opengamedata/opengamedata-templates/tree/aqualab","population_file":"https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_population-features.zip","population_template":"https://github.com/opengamedata/opengamedata-templates/tree/aqualab","raw_file":"https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_events.zip","sessions_codespace":"https://codespaces.new/opengamedata/opengamedata-samples/tree/aqualab?quickstart=1&devcontainer_path=.devcontainer%2Fplayer-template%2Fdevcontainer.json","sessions_file":"https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_session-features.zip","sessions_template":"https://github.com/opengamedata/opengamedata-templates/tree/aqualab"
         }
-        if self.result is not None:
-            self.assertEqual(self.result.json()["data"], expected_data)
+        if self.content is not None:
+            self.assertEqual(self.content.Value, expected_data)
         else:
-            self.fail(f"No result from request to {self.url}")
+            self.fail(f"No JSON content from request to {self.url}")
 
 if __name__ == "__main__":
     main()
