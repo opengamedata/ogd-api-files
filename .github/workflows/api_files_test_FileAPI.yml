@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-    - '.github/workflows/test_webAPI_Files.yml'
+    - '.github/workflows/api_files_test_FileAPI.yml'
     - '.github/actions/test_config/**'
     - 'tests/cases/t_FileAPI.py'
     - 'tests/config/**'
