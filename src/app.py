@@ -1,17 +1,16 @@
 # import standard libraries
 import json
-from calendar import monthrange
 from datetime import date, timedelta
 from logging.config import dictConfig
 from typing import Any, Dict, Optional
 from urllib import request as url_request
 
 # import 3rd-party libraries
-from flask import Flask, send_file, request
+from flask import Flask, request
 from flask_cors import CORS
 
 # import ogd libraries
-from ogd.apis.utils.APIResponse import APIResponse, RESTType, ResponseStatus
+from ogd.apis.utils.APIResponse import APIResponse, RESTType
 
 # import ogd libraries
 from ogd.core.schemas.datasets.DatasetSchema import DatasetSchema
