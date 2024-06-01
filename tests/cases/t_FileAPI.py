@@ -20,29 +20,31 @@ class t_FileAPI:
 
 @unittest.skip("This endpoint is not in use; needs access to database")
 class t_GameUsageByMonth(TestCase):
-    def setUp(self):
-        self.url    : str
-        self.result : Optional[requests.Response]
-        self.content : Optional[APIResponse]    = None
+    @classmethod
+    def setUpClass(cls):
+        cls.url    : str
+        cls.result : Optional[requests.Response]
+        cls.content : Optional[APIResponse]    = None
 
         params = {
             "game_id" : "AQUALAB",
             "year"    : 2024,
             "month"   : 1
         }
-        self.url    = f"{_config.ExternEndpoint}/getGameUsageByMonth"
-        self.result = SendTestRequest(url=self.url, request="GET", params=params, config=_config)
-        if self.result is not None:
+        cls.url    = f"{_config.ExternEndpoint}/getGameUsageByMonth"
+        cls.result = SendTestRequest(url=cls.url, request="GET", params=params, config=_config)
+        if cls.result is not None:
             try:
-                _raw = self.result.json()
+                _raw = cls.result.json()
             except JSONDecodeError as err:
-                print(f"Could not parse {self.result.text} to JSON!\n{err}")
+                print(f"Could not parse {cls.result.text} to JSON!\n{err}")
             else:
-                self.content = APIResponse.FromDict(all_elements=_raw)
+                cls.content = APIResponse.FromDict(all_elements=_raw)
 
-    def tearDown(self):
-        if self.result is not None:
-            self.result.close()
+    @classmethod
+    def tearDownClass(cls):
+        if cls.result is not None:
+            cls.result.close()
 
     def test_Responded(self):
         if self.result is not None:
@@ -63,27 +65,29 @@ class t_GameUsageByMonth(TestCase):
     #         self.fail(f"No result from request to {self.url}")
 
 class t_MonthlyGameUsage(TestCase):
-    def setUp(self):
-        self.url    : str
-        self.result : Optional[requests.Response]
-        self.content : Optional[APIResponse]    = None
+    @classmethod
+    def setUpClass(cls):
+        cls.url    : str
+        cls.result : Optional[requests.Response]
+        cls.content : Optional[APIResponse]    = None
 
         params = {
             "game_id" : "AQUALAB"
         }
-        self.url    = f"{_config.ExternEndpoint}/getMonthlyGameUsage"
-        self.result = SendTestRequest(url=self.url, request="GET", params=params, config=_config)
-        if self.result is not None:
+        cls.url    = f"{_config.ExternEndpoint}/getMonthlyGameUsage"
+        cls.result = SendTestRequest(url=cls.url, request="GET", params=params, config=_config)
+        if cls.result is not None:
             try:
-                _raw = self.result.json()
+                _raw = cls.result.json()
             except JSONDecodeError as err:
-                print(f"Could not parse {self.result.text} to JSON!\n{err}")
+                print(f"Could not parse {cls.result.text} to JSON!\n{err}")
             else:
-                self.content = APIResponse.FromDict(all_elements=_raw)
+                cls.content = APIResponse.FromDict(all_elements=_raw)
 
-    def tearDown(self):
-        if self.result is not None:
-            self.result.close()
+    @classmethod
+    def tearDownClass(cls):
+        if cls.result is not None:
+            cls.result.close()
 
     def test_Responded(self):
         if self.result is not None:
