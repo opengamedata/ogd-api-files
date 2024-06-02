@@ -1,10 +1,11 @@
 # Workflow to test the "HelloAPI" portion of Files API on the CI server
 name: OGD FileAPI - HelloAPI Testbed
+run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' && github.event.head_commit.message || 'Manual Run') }}
 on:
   workflow_dispatch:
   push:
     paths:
-    - '.github/workflows/test_webAPI_Hello.yml'
+    - '.github/workflows/api_files_test_HelloAPI.yml'
     - '.github/actions/test_config/**'
     - 'tests/cases/t_HelloAPI.py'
     - 'tests/config/**'

@@ -1,5 +1,6 @@
 # Workflow to clean out the directory where a deleted "FileAPI" branch's files were deployed on the CI server
 name: OGD FileAPI - Dead Branch Cleanup Script
+run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'delete' && github.event.ref || 'Manual Run') }}
 
 # Controls when the action will run. Triggers the workflow on deletion of branches. 
 on:
@@ -8,8 +9,8 @@ on:
 
 env:
   DEPLOY_HOST: ${{ vars.OGD_STAGING_HOST }}
-  DEPLOY_DIR:                              ${{ vars.API_BASE_PATH }}/${{ github.event.repository.name }}/${{ github.ref_name }}
-  DEPLOY_URL:  ${{ vars.OGD_STAGING_HOST }}/${{ vars.API_BASE_URL }}/${{ github.event.repository.name }}/${{ github.ref_name }}/app.wsgi
+  DEPLOY_DIR:                              ${{ vars.API_BASE_PATH }}/${{ github.event.repository.name }}/${{ github.event.ref }}
+  DEPLOY_URL:  ${{ vars.OGD_STAGING_HOST }}/${{ vars.API_BASE_URL }}/${{ github.event.repository.name }}/${{ github.event.ref }}/app.wsgi
     
 jobs:
   branch_delete:
@@ -39,7 +40,7 @@ jobs:
         chmod 600 ./key.txt
 
     - name: Remove branch folder
-      run: ssh -o StrictHostKeyChecking=no -t -i ./key.txt ${{ secrets.CLEAN_USER }}@${{ env.DEPLOY_HOST }} "rm -r ${{ env.DEPLOY_DIR }}"
+      run: ssh -o StrictHostKeyChecking=no -T -i ./key.txt ${{ secrets.CLEAN_USER }}@${{ env.DEPLOY_HOST }} "rm -r ${{ env.DEPLOY_DIR }}"
     
     - name: Announce cleanup
       run: echo "Removed branch deploy at ${{ env.DEPLOY_URL }}"
