@@ -37,7 +37,7 @@ class BigQueryInterface:
             query += " WHERE _TABLE_SUFFIX BETWEEN '" + str(year) + str(month).zfill(2) + "01' AND '" + str(year) + str(month).zfill(2) + str(numDaysInMonth) + "')"
 
         else:
-            raise "Unsupported schema type"
+            raise NotImplementedError("Unsupported schema type")
 
         job = self._client.query(query)
 
@@ -61,7 +61,7 @@ class BigQueryInterface:
             query += " GROUP BY _TABLE_SUFFIX ORDER BY _TABLE_SUFFIX"
 
         else:
-            raise "Unsupported schema type"
+            raise NotImplementedError("Unsupported schema type")
 
         job = self._client.query(query)
 
