@@ -1,13 +1,13 @@
-# Workflow to test the "HelloAPI" portion of Files API on the CI server
-name: OGD FileAPI - HelloAPI Testbed
+# Workflow to test Files API on the CI server
+name: OGD FileAPI - FileAPI Testbed
 run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' && github.event.head_commit.message || 'Manual Run') }}
 on:
   workflow_dispatch:
   push:
     paths:
-    - '.github/workflows/test_webAPI_Hello.yml'
+    - '.github/workflows/api_files_test_FileAPI.yml'
     - '.github/actions/test_config/**'
-    - 'tests/cases/t_HelloAPI.py'
+    - 'tests/cases/t_FileAPI.py'
     - 'tests/config/**'
     - 'tests/schemas/**'
     - 'tests/utils/**'
@@ -19,8 +19,8 @@ env:
   DEPLOY_URL:  ${{ vars.OGD_STAGING_HOST }}/${{ vars.API_BASE_URL }}/${{ github.event.repository.name }}/${{ github.ref_name }}/app.wsgi
 
 jobs:
-  run_testbed_hello:
-    name: Run HelloAPI Testbed
+  run_testbed_files:
+    name: Run FileAPI Testbed
     runs-on: ubuntu-22.04
     concurrency:
       group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}
@@ -43,11 +43,11 @@ jobs:
 
   # 3. Perform export
     - name: Execute testbed
-      run: python -m unittest ./tests/cases/t_HelloAPI.py 
+      run: python -m unittest ./tests/cases/t_FileAPI.py 
 
   # 4. Cleanup & complete
     - name: Announce test completed
-      run: echo "Tested HelloAPI endpoint at ${{ env.DEPLOY_URL }}"
+      run: echo "Tested FileAPI endpoint at ${{ env.DEPLOY_URL }}"
     - name: Upload logs as artifacts
       uses: actions/upload-artifact@v3
       with:
