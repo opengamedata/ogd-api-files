@@ -7,11 +7,11 @@ from unittest import TestCase, TestSuite, main
 # import ogd libraries
 from ogd.apis.utils.APIResponse import APIResponse, RESTType, ResponseStatus
 # import locals
-from tests.schemas.TestConfigSchema import TestConfigSchema
+from tests.schemas.FileAPITestConfigSchema import FileAPITestConfigSchema
 from tests.utils.SendRequest import SendTestRequest
 from tests.config.t_config import settings
 
-_config = TestConfigSchema.FromDict(name="FileAPITestConfig", all_elements=settings, logger=None)
+_config = FileAPITestConfigSchema.FromDict(name="FileAPITestConfig", all_elements=settings, logger=None)
 
 class t_FileAPI:
     @staticmethod
