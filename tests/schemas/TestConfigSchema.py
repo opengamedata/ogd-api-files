@@ -12,14 +12,14 @@ from types import SimpleNamespace
 # import 3rd-party libraries
 
 # import OGD libraries
-from ogd.core.schemas.Schema import Schema
+from ogd.core.schemas.configs.TestConfigSchema import TestConfigSchema
 
 # import local files
 
-class TestConfigSchema(Schema):
+class FileAPITestConfigSchema(TestConfigSchema):
     @staticmethod
     def DEFAULT():
-        return TestConfigSchema(
+        return FileAPITestConfigSchema(
             name            = "DefaultTestConfig",
             extern_endpoint = "https://ogd-staging.fielddaylab.wisc.edu/wsgi-bin/opengamedata/apis/opengamedata-api-files/main/app.wsgi",
             api_version     = "Testing",
@@ -32,9 +32,7 @@ class TestConfigSchema(Schema):
     def __init__(self, name:str, extern_endpoint:str, api_version:str, verbose:bool, enabled_tests:Dict[str, bool], other_elements:Dict[str, Any]={}):
         self._extern_server : str             = extern_endpoint
         self._api_version   : str             = api_version
-        self._verbose       : bool            = verbose
-        self._enabled_tests : Dict[str, bool] = enabled_tests
-        super().__init__(name=name, other_elements=other_elements)
+        super().__init__(name=name, verbose=verbose, enabled_tests=enabled_tests, other_elements=other_elements)
 
     @staticmethod
     def FromDict(name:str, all_elements:Dict[str, Any], logger:Optional[logging.Logger]):
@@ -42,43 +40,32 @@ class TestConfigSchema(Schema):
         _verbose         : bool
         _enabled_tests   : Dict[str, bool]
         if "EXTERN_ENDPOINT" in all_elements.keys():
-            _extern_endpoint = TestConfigSchema._parseExternEndpoint(all_elements["EXTERN_ENDPOINT"], logger=logger)
+            _extern_endpoint = FileAPITestConfigSchema._parseExternEndpoint(all_elements["EXTERN_ENDPOINT"], logger=logger)
         else:
-            _extern_endpoint = TestConfigSchema.DEFAULT().ExternEndpoint
+            _extern_endpoint = FileAPITestConfigSchema.DEFAULT().ExternEndpoint
             _msg = f"{name} config does not have an 'EXTERN_ENDPOINT' element; defaulting to extern_endpoint={_extern_endpoint}"
             if logger:
                 logger.warn(_msg, logging.WARN)
             else:
                 print(logger)
         if "API_VERSION" in all_elements.keys():
-            _api_version = TestConfigSchema._parseAPIVersion(all_elements["API_VERSION"], logger=logger)
+            _api_version = FileAPITestConfigSchema._parseAPIVersion(all_elements["API_VERSION"], logger=logger)
         else:
-            _api_version = TestConfigSchema.DEFAULT().APIVersion
+            _api_version = FileAPITestConfigSchema.DEFAULT().APIVersion
             _msg = f"{name} config does not have an 'API_VERSION' element; defaulting to api_version={_api_version}"
             if logger:
                 logger.warn(_msg, logging.WARN)
             else:
                 print(_msg)
-        if "VERBOSE" in all_elements.keys():
-            _verbose = TestConfigSchema._parseVerbose(all_elements["VERBOSE"], logger=logger)
-        else:
-            _verbose = TestConfigSchema.DEFAULT().Verbose
-            _msg = f"{name} config does not have an 'VERBOSE' element; defaulting to verbose={_verbose}"
-            if logger:
-                logger.warn(_msg, logging.WARN)
-            else:
-                print(_msg)
-        if "ENABLED" in all_elements.keys():
-            _enabled_tests = TestConfigSchema._parseEnabledTests(all_elements["ENABLED"], logger=logger)
-        else:
-            _enabled_tests = TestConfigSchema.DEFAULT().EnabledTests
-            _msg = f"{name} config does not have an 'ENABLED' element; defaulting to enabled={_enabled_tests}"
-            if logger:
-                logger.warn(_msg, logging.WARN)
 
-        _used = {"EXTERN_ENDPOINT", "VERBOSE", "ENABLED"}
+        _used = {"EXTERN_ENDPOINT", "API_VERSION"}
         _leftovers = { key : val for key,val in all_elements.items() if key not in _used }
-        return TestConfigSchema(name=name, extern_endpoint=_extern_endpoint, api_version=_api_version, verbose=_verbose, enabled_tests=_enabled_tests, other_elements=_leftovers)
+        # TODO : TUrns out we should have never tried to do the separation of FromDict, since this doesn't give a good way to pass up to parent class.
+        # When we change this, need to come back and remove this hack.
+        _parent = TestConfigSchema.FromDict(name=name, all_elements=_leftovers, logger=logger)
+        _parent_used = {"VERBOSE", "ENABLED"}
+        _leftovers = { key : val for key,val in _leftovers.items() if key not in _used }
+        return FileAPITestConfigSchema(name=name, extern_endpoint=_extern_endpoint, api_version=_api_version, verbose=_parent.Verbose, enabled_tests=_parent.EnabledTests, other_elements=_leftovers)
 
     @property
     def ExternEndpoint(self) -> str:
@@ -87,14 +74,6 @@ class TestConfigSchema(Schema):
     @property
     def APIVersion(self) -> str:
         return self._api_version
-
-    @property
-    def Verbose(self) -> bool:
-        return self._verbose
-
-    @property
-    def EnabledTests(self) -> Dict[str, bool]:
-        return self._enabled_tests
 
     @property
     def AsMarkdown(self) -> str:
@@ -125,38 +104,6 @@ class TestConfigSchema(Schema):
         else:
             ret_val = str(version)
             _msg = f"Config API version was unexpected type {type(version)}, defaulting to str(version) = {ret_val}."
-            if logger:
-                logger.warn(_msg, logging.WARN)
-            else:
-                print(_msg)
-        return ret_val
-
-    @staticmethod
-    def _parseVerbose(verbose, logger:Optional[logging.Logger]) -> bool:
-        ret_val : bool
-        if isinstance(verbose, bool):
-            ret_val = verbose
-        elif isinstance(verbose, int):
-            ret_val = bool(verbose)
-        elif isinstance(verbose, str):
-            ret_val = False if verbose.upper()=="FALSE" else bool(verbose)
-        else:
-            ret_val = bool(verbose)
-            _msg = f"Config 'verbose' setting was unexpected type {type(verbose)}, defaulting to bool(verbose)={ret_val}."
-            if logger:
-                logger.warn(_msg, logging.WARN)
-            else:
-                print(_msg)
-        return ret_val
-
-    @staticmethod
-    def _parseEnabledTests(enabled, logger:Optional[logging.Logger]) -> Dict[str, bool]:
-        ret_val : Dict[str, bool]
-        if isinstance(enabled, dict):
-            ret_val = { str(key) : bool(val) for key, val in enabled.items() }
-        else:
-            ret_val = TestConfigSchema.DEFAULT().EnabledTests
-            _msg = f"Config 'enabled tests' setting was unexpected type {type(enabled)}, defaulting to class default = {ret_val}."
             if logger:
                 logger.warn(_msg, logging.WARN)
             else:
