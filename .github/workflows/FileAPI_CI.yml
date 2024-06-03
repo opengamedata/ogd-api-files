@@ -7,11 +7,7 @@ on:
     paths:
     - '.github/workflows/FileAPI_CI.yml'
     - '.github/actions/**'
-    - 'src/interfaces/**'
-    - 'src/models/**'
-    - 'src/schemas/**'
-    - 'src/app.py'
-    - 'src/app.wsgi'
+    - 'src/**'
     - 'requirements.txt'
 
 env:
