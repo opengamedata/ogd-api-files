@@ -4,4 +4,5 @@ google-cloud-bigquery==3.2.0
 mysql-connector-python==8.0.25
 opengamedata-core==0.0.10
 opengamedata-api-utils==1.0.12
+sshtunnel==0.4.0
 werkzeug==2.3.*
