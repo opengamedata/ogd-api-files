@@ -6,9 +6,9 @@ from typing import Any, Dict, Optional
 from unittest import TestCase, TestSuite, main
 # import ogd libraries
 from ogd.apis.utils.APIResponse import APIResponse, RESTType, ResponseStatus
+from ogd.apis.utils.SendRequest import SendTestRequest
 # import locals
 from tests.schemas.FileAPITestConfigSchema import FileAPITestConfigSchema
-from tests.utils.SendRequest import SendTestRequest
 from tests.config.t_config import settings
 
 _config = FileAPITestConfigSchema.FromDict(name="FileAPITestConfig", all_elements=settings, logger=None)
