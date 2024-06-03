@@ -33,7 +33,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
     - name: Set up Config File
-      uses: ./.github/actions/FileAPI_confg
+      uses: ./.github/actions/FileAPI_config
       with:
           api_base: ${{ env.DEPLOY_DIR }}
 
