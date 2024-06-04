@@ -45,7 +45,7 @@ class FileAPITestConfigSchema(TestConfigSchema):
             _extern_endpoint = FileAPITestConfigSchema.DEFAULT().ExternEndpoint
             _msg = f"{name} config does not have an 'EXTERN_ENDPOINT' element; defaulting to extern_endpoint={_extern_endpoint}"
             if logger:
-                logger.warn(_msg, logging.WARN)
+                logger.warning(_msg, logging.WARN)
             else:
                 print(logger)
         if "API_VERSION" in all_elements.keys():
@@ -54,7 +54,7 @@ class FileAPITestConfigSchema(TestConfigSchema):
             _api_version = FileAPITestConfigSchema.DEFAULT().APIVersion
             _msg = f"{name} config does not have an 'API_VERSION' element; defaulting to api_version={_api_version}"
             if logger:
-                logger.warn(_msg, logging.WARN)
+                logger.warning(_msg, logging.WARN)
             else:
                 print(_msg)
 
@@ -91,7 +91,7 @@ class FileAPITestConfigSchema(TestConfigSchema):
             ret_val = str(endpoint)
             _msg = f"Config external endpoint was unexpected type {type(endpoint)}, defaulting to str(endpoint) = {ret_val}."
             if logger:
-                logger.warn(_msg, logging.WARN)
+                logger.warning(_msg, logging.WARN)
             else:
                 print(_msg)
         return ret_val
@@ -105,7 +105,7 @@ class FileAPITestConfigSchema(TestConfigSchema):
             ret_val = str(version)
             _msg = f"Config API version was unexpected type {type(version)}, defaulting to str(version) = {ret_val}."
             if logger:
-                logger.warn(_msg, logging.WARN)
+                logger.warning(_msg, logging.WARN)
             else:
                 print(_msg)
         return ret_val
