@@ -7,7 +7,7 @@ from urllib import request as url_request
 
 # import 3rd-party libraries
 from flask import Flask, request
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 
 # import ogd libraries
 from ogd.apis.utils.APIResponse import APIResponse, RESTType
@@ -87,6 +87,7 @@ def Hello():
     return ret_val.AsFlaskResponse
 
 @application.route('/version', methods=['GET'])
+@cross_origin()
 def get_api_version():
     ret_val = APIResponse.Default(req_type=RESTType.GET)
 
@@ -97,6 +98,7 @@ def get_api_version():
 
 # Get game usage statistics for a given game, year, and month
 @application.route('/getGameUsageByMonth', methods=['GET'])
+@cross_origin()
 def getGameUsageByMonth():
     """
     Get game usage statistics for a given game, year, and month
@@ -142,6 +144,7 @@ def getGameUsageByMonth():
     return ret_val.AsFlaskResponse
 
 @application.route("/getMonthlyGameUsage", methods=['GET'])
+@cross_origin()
 def getMonthlyGameUsage():
     """
     Get the per-month number of sessions for a given game
@@ -223,6 +226,7 @@ def getMonthlyGameUsage():
     return ret_val.AsFlaskResponse
 
 @application.route('/getGameFileInfoByMonth', methods=['GET'])
+@cross_origin()
 def getGameFileInfoByMonth():
     """
     Get info on the files that are available for the given game in the given month & year
