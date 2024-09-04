@@ -9,19 +9,23 @@ inputs:
     description: "The version of the API code."
     required: false
     default: 'Testing'
-  api_base:
-    description: "Base path for where the app.wsgi lives."
+  app_path:
+    description: "Local path to the wsgi app being deployed"
     required: true
-    default: 'path placeholder'
+    default: 'src/app.wsgi'
+  config_path:
+    description: "Local path to config folder"
+    required: false
+    default: 'src/config'
 runs:
   using: "composite"
   steps:
     - name: Set up src/config
-      run: cp src/config/config.py.template src/config/config.py 
+      run: cp ${{ inputs.config_path }}/config.py.template ${{ inputs.config_path }}/config.py 
       shell: bash
     - name: Set API Version
-      run: sed -i 's@VERSION_PLACEHOLDER@${{inputs.api_version}}@g' src/config/config.py
+      run: sed -i 's@VERSION_PLACEHOLDER@${{inputs.api_version}}@g' ${{ inputs.config_path }}/config.py
       shell: bash
     - name: Set API Base Path
-      run: sed -i 's@placeholder home@${{inputs.api_base}}@g' src/app.wsgi
+      run: sed -i 's@placeholder home@${{inputs.api_base}}@g'       ${{ inputs.app_path }}
       shell: bash

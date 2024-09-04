@@ -2,10 +2,9 @@
 name: OGD FileAPI - Dead Branch Cleanup Script
 run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'delete' && github.event.ref || 'Manual Run') }}
 
-# Controls when the action will run. Triggers the workflow on deletion of branches. 
 on:
   delete: # Trigger automatically when we do a deletion of a branch
-  workflow_dispatch: # Allow manual trigger of this workflow from the Actions tab
+  workflow_dispatch:
 
 env:
   DEPLOY_HOST: ${{ vars.OGD_STAGING_HOST }}

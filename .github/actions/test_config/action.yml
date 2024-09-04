@@ -8,7 +8,7 @@ inputs:
   endpoint:
     description: "The external endpoint where the app is deployed"
     required: true
-    default: 'https://ogd-staging.fielddaylab.wisc.edu/wsgi-binopengamedata/apis/opengamedata-api-files/main/app.wsgi'
+    default: 'https://ogd-staging.fielddaylab.wisc.edu/wsgi-bin/opengamedata/apis/opengamedata-api-files/main/app.wsgi'
   api_version:
     description: "The version of the API code."
     required: false
@@ -21,21 +21,25 @@ inputs:
     description: "Whether to run the HelloAPI tests."
     required: false
     default: "True"
+  config_path:
+    description: "Local path to test config folder"
+    required: false
+    default: 'tests/config'
 runs:
   using: "composite"
   steps:
     - name: Set up config
-      run: cp tests/config/t_config.py.template tests/config/t_config.py 
+      run: cp ${{ config_path }}/t_config.py.template ${{ config_path }}/t_config.py 
       shell: bash
     - name: Set Endpoint Location
-      run: sed -i 's@ENDPOINT_PLACEHOLDER@${{inputs.endpoint}}@g' tests/config/t_config.py
+      run: sed -i 's@ENDPOINT_PLACEHOLDER@${{inputs.endpoint}}@g'            ${{ config_path }}/t_config.py
       shell: bash
     - name: Set API Version
-      run: sed -i 's@VERSION_PLACEHOLDER@${{inputs.api_version}}@g' tests/config/t_config.py
+      run: sed -i 's@VERSION_PLACEHOLDER@${{inputs.api_version}}@g'          ${{ config_path }}/t_config.py
       shell: bash
     - name: Set Output Verbosity
-      run: sed -i 's@"VERBOSE":False@"VERBOSE":${{inputs.verbose_output}}@g' tests/config/t_config.py
+      run: sed -i 's@"VERBOSE":False@"VERBOSE":${{inputs.verbose_output}}@g' ${{ config_path }}/t_config.py
       shell: bash
     - name: Set HelloAPI test to run or not
-      run: sed -i 's@"HELLO":True@"HELLO":${{inputs.with_hello_api}}@g' tests/config/t_config.py
+      run: sed -i 's@"HELLO":True@"HELLO":${{inputs.with_hello_api}}@g'      ${{ config_path }}/t_config.py
       shell: bash
