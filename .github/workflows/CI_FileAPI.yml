@@ -102,7 +102,7 @@ jobs:
     - name: Announce test completed
       run: echo "Tested HelloAPI endpoint at ${{ env.DEPLOY_URL }}"
     - name: Upload logs as artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         path: ./*.log
 
@@ -134,6 +134,6 @@ jobs:
     - name: Announce test completed
       run: echo "Tested FileAPI endpoint at ${{ env.DEPLOY_URL }}"
     - name: Upload logs as artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         path: ./*.log
