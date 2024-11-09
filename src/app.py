@@ -283,14 +283,15 @@ def getGameFileInfoByMonth():
     # Base URLs
     CODESPACES_BASE_URL : str = "https://codespaces.new/opengamedata/opengamedata-samples/tree/"
     GITHUB_BASE_URL     : str = "https://github.com/opengamedata/opengamedata-core/tree/"
+
+    _branch_name     = sanitized_request.GameID.lower().replace('_', '-')
+    _revision        = _matched_dataset.OGDRevision or None
     
     # Date information
     file_info["first_year"]  = _matched_dataset.Key.FromYear
     file_info["first_month"] = _matched_dataset.Key.FromMonth
     file_info["last_year"]   = _matched_dataset.Key.ToYear
     file_info["last_month"]  = _matched_dataset.Key.ToMonth
-    _branch_name     = sanitized_request.GameID.lower().replace('_', '-')
-    _revision        = _matched_dataset.OGDRevision or None
 
     # Files
     file_info["raw_file"]        = f"{file_list.Config.FilesBase}{_matched_dataset.RawFile}"        if _matched_dataset.RawFile        is not None else None
