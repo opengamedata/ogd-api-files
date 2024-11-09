@@ -29,17 +29,17 @@ runs:
   using: "composite"
   steps:
     - name: Set up config
-      run: cp ${{ config_path }}/t_config.py.template ${{ config_path }}/t_config.py 
+      run: cp ${{ inputs.config_path }}/t_config.py.template ${{ inputs.config_path }}/t_config.py 
       shell: bash
     - name: Set Endpoint Location
-      run: sed -i 's@ENDPOINT_PLACEHOLDER@${{inputs.endpoint}}@g'            ${{ config_path }}/t_config.py
+      run: sed -i 's@ENDPOINT_PLACEHOLDER@${{inputs.endpoint}}@g'            ${{ inputs.config_path }}/t_config.py
       shell: bash
     - name: Set API Version
-      run: sed -i 's@VERSION_PLACEHOLDER@${{inputs.api_version}}@g'          ${{ config_path }}/t_config.py
+      run: sed -i 's@VERSION_PLACEHOLDER@${{inputs.api_version}}@g'          ${{ inputs.config_path }}/t_config.py
       shell: bash
     - name: Set Output Verbosity
-      run: sed -i 's@"VERBOSE":False@"VERBOSE":${{inputs.verbose_output}}@g' ${{ config_path }}/t_config.py
+      run: sed -i 's@"VERBOSE":False@"VERBOSE":${{inputs.verbose_output}}@g' ${{ inputs.config_path }}/t_config.py
       shell: bash
     - name: Set HelloAPI test to run or not
-      run: sed -i 's@"HELLO":True@"HELLO":${{inputs.with_hello_api}}@g'      ${{ config_path }}/t_config.py
+      run: sed -i 's@"HELLO":True@"HELLO":${{inputs.with_hello_api}}@g'      ${{ inputs.config_path }}/t_config.py
       shell: bash
