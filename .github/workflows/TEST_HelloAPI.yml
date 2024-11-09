@@ -3,6 +3,7 @@ name: OGD FileAPI - HelloAPI Testbed
 run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' && github.event.head_commit.message || 'Manual Run') }}
 on:
   workflow_dispatch:
+  workflow_call:
   push:
     paths:
     - '.github/workflows/FileAPI_test_HelloAPI.yml'
