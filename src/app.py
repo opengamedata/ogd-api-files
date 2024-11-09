@@ -281,8 +281,8 @@ def getGameFileInfoByMonth():
 
     # If this range contains the given year & month
     # Base URLs
-    CODESPACES_BASE_URL : str           = "https://codespaces.new/opengamedata/opengamedata-samples/tree/"
-    GITHUB_BASE_URL     : str           = "https://github.com/opengamedata/opengamedata-core/tree/"
+    CODESPACES_BASE_URL : str = "https://codespaces.new/opengamedata/opengamedata-samples/tree/"
+    GITHUB_BASE_URL     : str = "https://github.com/opengamedata/opengamedata-core/tree/"
     
     # Date information
     file_info["first_year"]  = _matched_dataset.Key.FromYear
