@@ -32,7 +32,9 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
     - name: Get Dependencies
-      uses: ./.github/actions/install_dependencies
+      uses: opengamedata/setup-ogd-py-dependencies@v1.0
+      with:
+        python_version: ${{ vars.OGD_PYTHON_VERSION }}
     - name: Set up Config File
       uses: ./.github/actions/test_config
       with:
