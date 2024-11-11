@@ -6,7 +6,7 @@ on:
   workflow_call:
   push:
     paths:
-    - '.github/workflows/FileAPI_test_HelloAPI.yml'
+    - '.github/workflows/TEST_HelloAPI.yml'
     - '.github/actions/test_config/**'
     - 'tests/cases/t_HelloAPI.py'
     - 'tests/config/**'

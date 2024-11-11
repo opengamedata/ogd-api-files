@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-    - '.github/workflows/FileAPI_CI.yml'
+    - '.github/workflows/CI_FileAPI.yml'
     - '.github/actions/**'
     - 'src/**'
     - 'requirements.txt'
