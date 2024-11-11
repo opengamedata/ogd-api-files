@@ -1,16 +1,16 @@
 # Workflow to test Files API on the CI server
-name: OGD FileAPI - FileAPI Testbed
+name: Testbed - FileAPI
 run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' && github.event.head_commit.message || 'Manual Run') }}
 on:
   workflow_dispatch:
+  workflow_call:
   push:
     paths:
-    - '.github/workflows/FileAPI_test_FileAPI.yml'
+    - '.github/workflows/TEST_FileAPI.yml'
     - '.github/actions/test_config/**'
     - 'tests/cases/t_FileAPI.py'
     - 'tests/config/**'
     - 'tests/schemas/**'
-    - 'tests/utils/**'
     - 'requirements.txt'
 
 env:
@@ -32,7 +32,9 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
     - name: Get Dependencies
-      uses: ./.github/actions/install_dependencies
+      uses: opengamedata/actions-setup-ogd-py-dependencies@v1.0
+      with:
+        python_version: ${{ vars.OGD_PYTHON_VERSION }}
     - name: Set up Config File
       uses: ./.github/actions/test_config
       with:
