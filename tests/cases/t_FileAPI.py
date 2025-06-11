@@ -6,7 +6,8 @@ from typing import Any, Dict, Optional
 from unittest import TestCase, TestSuite, main
 # import ogd libraries
 from ogd.apis.utils.APIResponse import APIResponse, RESTType, ResponseStatus
-from ogd.apis.utils.SendRequest import SendTestRequest
+from ogd.apis.utils.TestRequest import TestRequest
+from ogd.common.utils.Logger import Logger
 # import locals
 from tests.schemas.FileAPITestConfigSchema import FileAPITestConfigSchema
 from tests.config.t_config import settings
@@ -32,7 +33,7 @@ class t_GameUsageByMonth(TestCase):
             "month"   : 1
         }
         cls.url    = f"{_config.ExternEndpoint}/getGameUsageByMonth"
-        cls.result = SendTestRequest(url=cls.url, request="GET", params=params, config=_config)
+        cls.result = TestRequest(url=cls.url, request="GET", params=params, logger=Logger)
         if cls.result is not None:
             try:
                 _raw = cls.result.json()
@@ -75,7 +76,7 @@ class t_MonthlyGameUsage(TestCase):
             "game_id" : "AQUALAB"
         }
         cls.url    = f"{_config.ExternEndpoint}/getMonthlyGameUsage"
-        cls.result = SendTestRequest(url=cls.url, request="GET", params=params, config=_config)
+        cls.result = TestRequest(url=cls.url, request="GET", params=params, logger=Logger)
         if cls.result is not None:
             try:
                 _raw = cls.result.json()
@@ -121,7 +122,7 @@ class t_GameFileInfoByMonth(TestCase):
             "month"   : 1
         }
         self.url    = f"{_config.ExternEndpoint}/getGameFileInfoByMonth"
-        self.result = SendTestRequest(url=self.url, request="GET", params=params, config=_config)
+        self.result = TestRequest(url=self.url, request="GET", params=params, logger=Logger)
         if self.result is not None:
             try:
                 _raw = self.result.json()
