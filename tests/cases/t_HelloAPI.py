@@ -29,7 +29,7 @@ class t_Hello(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.url     : str                         = f"{_config.ExternEndpoint}/"
-        cls.result  : Optional[requests.Response] = TestRequest(url=cls.url, request="GET", params={}, logger=Logger)
+        cls.result  : Optional[requests.Response] = TestRequest(url=cls.url, request="GET", params={}, logger=Logger.std_logger)
         cls.content : Optional[APIResponse]    = None
         if cls.result is not None:
             try:
@@ -66,7 +66,7 @@ class t_Version(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.url    : str                         = f"{_config.ExternEndpoint}/version"
-        cls.result : Optional[requests.Response] = TestRequest(url=cls.url, request="GET", params={}, logger=Logger)
+        cls.result : Optional[requests.Response] = TestRequest(url=cls.url, request="GET", params={}, logger=Logger.std_logger)
         cls.content : Optional[APIResponse]    = None
         if cls.result is not None:
             try:

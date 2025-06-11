@@ -33,7 +33,7 @@ class t_GameUsageByMonth(TestCase):
             "month"   : 1
         }
         cls.url    = f"{_config.ExternEndpoint}/getGameUsageByMonth"
-        cls.result = TestRequest(url=cls.url, request="GET", params=params, logger=Logger)
+        cls.result = TestRequest(url=cls.url, request="GET", params=params, logger=Logger.std_logger)
         if cls.result is not None:
             try:
                 _raw = cls.result.json()
@@ -76,7 +76,7 @@ class t_MonthlyGameUsage(TestCase):
             "game_id" : "AQUALAB"
         }
         cls.url    = f"{_config.ExternEndpoint}/getMonthlyGameUsage"
-        cls.result = TestRequest(url=cls.url, request="GET", params=params, logger=Logger)
+        cls.result = TestRequest(url=cls.url, request="GET", params=params, logger=Logger.std_logger)
         if cls.result is not None:
             try:
                 _raw = cls.result.json()
@@ -122,7 +122,7 @@ class t_GameFileInfoByMonth(TestCase):
             "month"   : 1
         }
         self.url    = f"{_config.ExternEndpoint}/getGameFileInfoByMonth"
-        self.result = TestRequest(url=self.url, request="GET", params=params, logger=Logger)
+        self.result = TestRequest(url=self.url, request="GET", params=params, logger=Logger.std_logger)
         if self.result is not None:
             try:
                 _raw = self.result.json()
