@@ -3,6 +3,6 @@ flask-cors==4.0.1
 google-cloud-bigquery==3.19.0
 mysql-connector-python==8.0.25
 opengamedata-core==0.0.14
-opengamedata-common==1.2.1
-opengamedata-api-utils==1.1.0
+opengamedata-common==1.2.*
+opengamedata-api-utils==1.1.*
 sshtunnel==0.4.0
