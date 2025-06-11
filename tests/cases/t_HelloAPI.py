@@ -1,11 +1,12 @@
 # import libraries
 import requests
 from json.decoder import JSONDecodeError
-from typing import Any, Dict, Optional
+from typing import Optional
 from unittest import TestCase, TestSuite, main
 # import ogd libraries
 from ogd.apis.utils.APIResponse import APIResponse, RESTType, ResponseStatus
-from ogd.apis.utils.SendRequest import SendTestRequest
+from ogd.apis.utils.TestRequest import TestRequest
+from ogd.common.utils.Logger import Logger
 # import locals
 from tests.schemas.FileAPITestConfigSchema import FileAPITestConfigSchema
 from tests.config.t_config import settings
@@ -28,7 +29,7 @@ class t_Hello(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.url     : str                         = f"{_config.ExternEndpoint}/"
-        cls.result  : Optional[requests.Response] = SendTestRequest(url=cls.url, request="GET", params={}, config=_config)
+        cls.result  : Optional[requests.Response] = TestRequest(url=cls.url, request="GET", params={}, logger=Logger.std_logger)
         cls.content : Optional[APIResponse]    = None
         if cls.result is not None:
             try:
@@ -65,7 +66,7 @@ class t_Version(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.url    : str                         = f"{_config.ExternEndpoint}/version"
-        cls.result : Optional[requests.Response] = SendTestRequest(url=cls.url, request="GET", params={}, config=_config)
+        cls.result : Optional[requests.Response] = TestRequest(url=cls.url, request="GET", params={}, logger=Logger.std_logger)
         cls.content : Optional[APIResponse]    = None
         if cls.result is not None:
             try:
