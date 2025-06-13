@@ -32,7 +32,7 @@ jobs:
       uses: ./.github/actions/FileAPI_config
       with:
           api_base: ${{ env.DEPLOY_DIR }}
-          api_version: ${{ github.repository }}-${{ github.ref }}-${{ github.sha }}
+          api_version: ${{ github.ref_name }}-${{ github.sha }}
 
     # 2. Build 
 
