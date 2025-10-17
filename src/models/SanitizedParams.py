@@ -3,7 +3,6 @@ import datetime, re
 from typing import Any, Dict, Optional
 
 # 3rd-party imports
-from flask import request
 from flask_restful import reqparse
 
 # local imports
