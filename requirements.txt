@@ -1,5 +1,6 @@
 flask==2.3.3
 flask-cors==4.0.1
+flask-restful==0.3.10
 google-cloud-bigquery==3.19.0
 mysql-connector-python==8.0.25
 opengamedata-common==1.2.*
