@@ -1,26 +1,25 @@
 # import libraries
-import requests
+import logging
 import unittest
 from json.decoder import JSONDecodeError
-from typing import Any, Dict, Optional
-from unittest import TestCase, TestSuite, main
+from typing import Optional
+from unittest import TestCase
+# import 3rd-party libraries
+import requests
 # import ogd libraries
-from ogd.apis.utils.APIResponse import APIResponse, RESTType, ResponseStatus
+from ogd.apis.utils.APIResponse import APIResponse, ResponseStatus
 from ogd.apis.utils.TestRequest import TestRequest
 from ogd.common.utils.Logger import Logger
 # import locals
 from tests.schemas.FileAPITestConfigSchema import FileAPITestConfigSchema
 from tests.config.t_config import settings
 
-_config = FileAPITestConfigSchema.FromDict(name="FileAPITestConfig", all_elements=settings, logger=None)
-
-class t_FileAPI:
-    @staticmethod
-    def RunAll():
-        pass
+_testing_cfg = FileAPITestConfigSchema.FromDict(name="FileAPITestConfig", all_elements=settings, logger=None)
+_level       = logging.DEBUG if _testing_cfg.Verbose else logging.INFO
+Logger.std_logger.setLevel(_level)
 
 @unittest.skip("This endpoint is not in use; needs access to database")
-class t_GameUsageByMonth(TestCase):
+class test_GameUsageByMonth(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.url    : str
@@ -32,7 +31,7 @@ class t_GameUsageByMonth(TestCase):
             "year"    : 2024,
             "month"   : 1
         }
-        cls.url    = f"{_config.ExternEndpoint}/getGameUsageByMonth"
+        cls.url    = f"{_testing_cfg.ExternEndpoint}/getGameUsageByMonth"
         cls.result = TestRequest(url=cls.url, request="GET", params=params, logger=Logger.std_logger)
         if cls.result is not None:
             try:
@@ -46,6 +45,10 @@ class t_GameUsageByMonth(TestCase):
     def tearDownClass(cls):
         if cls.result is not None:
             cls.result.close()
+
+    @staticmethod
+    def RunAll():
+        pass
 
     def test_Responded(self):
         if self.result is not None:
@@ -65,7 +68,7 @@ class t_GameUsageByMonth(TestCase):
     #     else:
     #         self.fail(f"No result from request to {self.url}")
 
-class t_MonthlyGameUsage(TestCase):
+class test_MonthlyGameUsage(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.url    : str
@@ -75,7 +78,7 @@ class t_MonthlyGameUsage(TestCase):
         params = {
             "game_id" : "AQUALAB"
         }
-        cls.url    = f"{_config.ExternEndpoint}/getMonthlyGameUsage"
+        cls.url    = f"{_testing_cfg.ExternEndpoint}/getMonthlyGameUsage"
         cls.result = TestRequest(url=cls.url, request="GET", params=params, logger=Logger.std_logger)
         if cls.result is not None:
             try:
@@ -89,6 +92,10 @@ class t_MonthlyGameUsage(TestCase):
     def tearDownClass(cls):
         if cls.result is not None:
             cls.result.close()
+
+    @staticmethod
+    def RunAll():
+        pass
 
     def test_Responded(self):
         if self.result is not None:
@@ -110,7 +117,7 @@ class t_MonthlyGameUsage(TestCase):
         else:
             self.fail(f"No JSON content from request to {self.url}")
 
-class t_GameFileInfoByMonth(TestCase):
+class test_GameFileInfoByMonth(TestCase):
     def setUp(self):
         self.url    : str
         self.result : Optional[requests.Response]
@@ -121,7 +128,7 @@ class t_GameFileInfoByMonth(TestCase):
             "year"    : 2024,
             "month"   : 1
         }
-        self.url    = f"{_config.ExternEndpoint}/getGameFileInfoByMonth"
+        self.url    = f"{_testing_cfg.ExternEndpoint}/getGameFileInfoByMonth"
         self.result = TestRequest(url=self.url, request="GET", params=params, logger=Logger.std_logger)
         if self.result is not None:
             try:
@@ -130,6 +137,10 @@ class t_GameFileInfoByMonth(TestCase):
                 print(f"Could not parse {self.result.text} to JSON!\n{err}")
             else:
                 self.content = APIResponse.FromDict(all_elements=_raw)
+
+    @staticmethod
+    def RunAll():
+        pass
 
     def test_Responded(self):
         if self.result is not None:
@@ -163,4 +174,4 @@ class t_GameFileInfoByMonth(TestCase):
             self.fail(f"No JSON content from request to {self.url}")
 
 if __name__ == "__main__":
-    main()
+    unittest.main()
