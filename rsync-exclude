@@ -1,9 +1,9 @@
 *__pycache__/*
-config/config.py.template
 .DS_Store
 .gitignore
 .gitmodules
 .git
+src/config/config.py.template
 Makefile
 LICENSE
 README.md
