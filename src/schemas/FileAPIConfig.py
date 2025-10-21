@@ -26,7 +26,13 @@ class FileAPIConfig(ServerConfigSchema):
 
         _used = {"DB_CONFIG", "OGD_CORE_PATH", "GOOGLE_CLIENT_ID"}
         _leftovers = { key : val for key,val in all_elements.items() if key not in _used }
-        super().__init__(name=name, debug_level=logging.INFO, version=SemanticVersion(0,0,0,"version-not-set"), other_elements=_leftovers)
+        version_str = all_elements.get("API_VERSION", str(SemanticVersion(0,0,0,"version-not-set")))
+        super().__init__(
+            name=name,
+            debug_level=all_elements.get("DEBUG_LEVEL", logging.INFO),
+            version=SemanticVersion.FromString(version_str),
+            other_elements=_leftovers
+        )
 
     @property
     def GameMapping(self) -> Dict[str, Dict[str, str]]:
