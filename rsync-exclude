@@ -5,9 +5,11 @@
 .git
 .pylintrc
 src/config/config.py.template
+tests/**
 CITATION.cff
 LICENSE
 README.md
 requirements.txt
 rsync-exclude
+TestDriver.py
 *.log
