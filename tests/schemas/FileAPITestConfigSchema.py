@@ -12,7 +12,7 @@ from types import SimpleNamespace
 # import 3rd-party libraries
 
 # import OGD libraries
-from ogd.core.schemas.configs.TestConfigSchema import TestConfigSchema
+from ogd.common.schemas.configs.TestConfigSchema import TestConfigSchema
 
 # import local files
 
