@@ -1,8 +1,10 @@
 *__pycache__/*
 .DS_Store
+.git
+.github/**
+.venv*
 .gitignore
 .gitmodules
-.git
 .pylintrc
 src/config/config.py.template
 tests/**
