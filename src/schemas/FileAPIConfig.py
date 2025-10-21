@@ -48,3 +48,7 @@ class FileAPIConfig(ServerConfigSchema):
 
         ret_val = f"{self.Name}"
         return ret_val
+
+    @staticmethod
+    def FromDict(name:str, all_elements:Dict[str, Any]) -> "FileAPIConfig":
+        return FileAPIConfig(name=name, all_elements=all_elements)
