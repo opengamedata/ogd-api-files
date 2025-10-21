@@ -10,6 +10,7 @@ from ogd.common.utils.Logger import Logger
 
 # import local files
 from config.config import settings
+from schemas.FileAPIConfig import FileAPIConfig
 
 # By default we'll log to the WSGI errors stream which ends up in the Apache error log
 logHandlers = {
@@ -52,13 +53,15 @@ logRootHandlers = ['wsgi']
 
 application = Flask(__name__)
 
+_server_cfg = FileAPIConfig.FromDict(name="DataAPIConfiguration", all_elements=settings)
+
 # Allow cross-origin requests from any origin by default
 # This presents minimal risk to visitors since the API merely retrieves non-sensitive data
 # NOTE: Comment this out if the web server itself is configured to send an Access-Control-Allow-Origin header, so we don't have a duplicate header
 CORS(application)
 
 # Now that logging is set up, import our local config settings
-application.logger.setLevel(settings['DEBUG_LEVEL'])
+application.logger.setLevel(_server_cfg.DebugLevel)
 
 def _logImportErr(msg:str, err:Exception):
     application.logger.warning(msg)
@@ -73,4 +76,13 @@ except ImportError as err:
 except Exception as err:
     _logImportErr(msg="Could not import Legacy Web API, general error:", err=err)
 else:
-    LegacyWebAPI.register(application, settings=settings)
+    LegacyWebAPI.register(application, settings=_server_cfg)
+
+try:
+    from ogd.apis.HelloAPI import HelloAPI
+except ImportError as err:
+    _logImportErr(msg="Could not import Hello API:", err=err)
+except Exception as err:
+    _logImportErr(msg="Could not import Hello API, general error:", err=err)
+else:
+    HelloAPI.register(app=application, server_config=_server_cfg)
