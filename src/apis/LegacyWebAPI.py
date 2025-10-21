@@ -52,7 +52,7 @@ class LegacyWebAPI:
         LegacyWebAPI.server_config = settings
 
     # Basic response if someone just hits the home path to say "hello"
-    class Hello:
+    class Hello(Resource):
         """
         Basic response if someone just hits the home path to say "hello"
         """
@@ -65,7 +65,7 @@ class LegacyWebAPI:
             return ret_val.AsFlaskResponse
 
     # Get the version of the API.
-    class Version:
+    class Version(Resource):
         """
         Get the version of the API.
         """
@@ -78,7 +78,7 @@ class LegacyWebAPI:
             return ret_val.AsFlaskResponse
 
     # Get game usage statistics for a given game, year, and month
-    class GameUsageByMonth:
+    class GameUsageByMonth(Resource):
         """
         Get game usage statistics for a given game, year, and month
 
@@ -125,7 +125,7 @@ class LegacyWebAPI:
 
             return ret_val.AsFlaskResponse
 
-    class MonthlyGameUsage:
+    class MonthlyGameUsage(Resource):
         """
         Get the per-month number of sessions for a given game
 
@@ -208,7 +208,7 @@ class LegacyWebAPI:
 
             return ret_val.AsFlaskResponse
 
-    class GameFileInfoByMonth:
+    class GameFileInfoByMonth(Resource):
         """
         Get info on the files that are available for the given game in the given month & year
 
