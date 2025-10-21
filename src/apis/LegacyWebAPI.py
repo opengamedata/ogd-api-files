@@ -10,7 +10,6 @@ from flask import Flask, request, Response, current_app
 from flask_restful import Resource, Api, reqparse
 from flask_restful.inputs import datetime_from_iso8601
 from werkzeug.exceptions import BadRequest
-from flask_cors import CORS, cross_origin
 
 # import ogd libraries
 from ogd.apis.utils.APIResponse import APIResponse, RESTType
@@ -20,6 +19,7 @@ from ogd.common.schemas.datasets.DatasetSchema import DatasetSchema
 from ogd.common.schemas.datasets.FileListSchema import FileListSchema, GameDatasetCollectionSchema
 
 # import local files
+from schemas.FileAPIConfig import FileAPIConfig
 from models.SanitizedParams import SanitizedParams
 from interfaces.BigQueryInterface import BigQueryInterface
 
@@ -30,13 +30,13 @@ class LegacyWebAPI:
     implementing the same functionality, but with cleaner endpoint routes/naming.
     """
 
-    server_config : Dict[str, Any]
+    server_config : FileAPIConfig
 
     # TODO: Remove this action and dependencies (interfaces, config) if we're certain they won't be needed.
     # The SQL for BigQuery did take a bit of effort to compose, but could always be retrieved from old commits
 
     @staticmethod
-    def register(app:Flask, settings:Dict[str, Any]):
+    def register(app:Flask, settings:FileAPIConfig):
         """Set up the Legacy Web api in a flask app.
 
         :param app: _description_
@@ -72,7 +72,7 @@ class LegacyWebAPI:
         def get(self) -> Response:
             ret_val = APIResponse.Default(req_type=RESTType.GET)
 
-            _ver = LegacyWebAPI.server_config["API_VERSION"]
+            _ver = LegacyWebAPI.server_config.Version
             ret_val.RequestSucceeded(msg=f"Retrieved version", val={"version":_ver})
 
             return ret_val.AsFlaskResponse
@@ -103,14 +103,14 @@ class LegacyWebAPI:
                 return ret_val.AsFlaskResponse
 
             # If we don't have a mapping for the given game
-            if not sanitized_request.GameID in LegacyWebAPI.server_config.get("BIGQUERY_GAME_MAPPING", {}):
+            if not sanitized_request.GameID in LegacyWebAPI.server_config.GameMapping:
                 ret_val.ServerErrored(msg=f"GameID '{sanitized_request.GameID}' not found in available games")
                 return ret_val.AsFlaskResponse
 
             total_monthly_sessions = 0
             sessions_by_day = {}
 
-            bqInterface = BigQueryInterface(LegacyWebAPI.server_config.get("BIGQUERY_GAME_MAPPING", {})[sanitized_request.GameID])
+            bqInterface = BigQueryInterface(LegacyWebAPI.server_config.GameMapping[sanitized_request.GameID])
             total_monthly_sessions = bqInterface.GetTotalSessionsForMonth(sanitized_request.Year, sanitized_request.Month)
             sessions_by_day        = bqInterface.GetSessionsPerDayForMonth(sanitized_request.Year, sanitized_request.Month)
 
@@ -150,8 +150,7 @@ class LegacyWebAPI:
                 return ret_val.AsFlaskResponse
 
             # Pull the file list data into a dictionary
-            file_list_url      : str                       = LegacyWebAPI.server_config.get("FILE_LIST_URL", "https://opengamedata.fielddaylab.wisc.edu/data/file_list.json")
-            file_list_response                             = url_request.urlopen(file_list_url)
+            file_list_response                             = url_request.urlopen(LegacyWebAPI.server_config.FileListURL)
             file_list_json     : Dict[str, Dict[str, Any]] = json.loads(file_list_response.read())
             file_list          : FileListSchema              = FileListSchema(name="file_list", all_elements=file_list_json)
             game_datasets      : GameDatasetCollectionSchema = file_list.Games.get(game_id or "NO GAME REQUESTED", GameDatasetCollectionSchema.EmptySchema())
@@ -227,8 +226,7 @@ class LegacyWebAPI:
             sanitized_request = SanitizedParams.FromRequest(default_date=last_month)
 
         # 1. Get the list of datasets available on the server, for given game.
-            file_list_url      : str                         = LegacyWebAPI.server_config.get("FILE_LIST_URL", "https://opengamedata.fielddaylab.wisc.edu/data/file_list.json")
-            file_list_response                               = url_request.urlopen(file_list_url)
+            file_list_response                               = url_request.urlopen(LegacyWebAPI.server_config.FileListURL)
             file_list_json     : Dict[str, Dict[str, Any]]   = json.loads(file_list_response.read())
             file_list          : FileListSchema              = FileListSchema(name="file_list", all_elements=file_list_json)
             game_datasets      : GameDatasetCollectionSchema = file_list.Games.get(sanitized_request.GameID or "NO GAME REQUESTED", GameDatasetCollectionSchema.EmptySchema())
