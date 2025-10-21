@@ -45,7 +45,7 @@ jobs:
         endpoint: "soe.vpn.wisc.edu"
 
     - name: Deploy to Server
-      uses: opengamedata/actions-deploy-project@v1.0
+      uses: opengamedata/actions-deploy-project@v1.1
       with:
         local_path: ./src
         remote_path: ${{ env.DEPLOY_DIR }}
