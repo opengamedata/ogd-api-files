@@ -3,8 +3,9 @@
 .gitignore
 .gitmodules
 .git
+.pylintrc
 src/config/config.py.template
-Makefile
+CITATION.cff
 LICENSE
 README.md
 requirements.txt
