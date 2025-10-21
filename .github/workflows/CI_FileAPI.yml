@@ -1,11 +1,11 @@
 # Workflow to deploy and test Files API to the CI server
-name: OGD FileAPI - CI Script
+name: CI Script - FileAPI
 run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' && github.event.head_commit.message || 'Manual Run') }}
 on:
   workflow_dispatch:
   push:
     paths:
-    - '.github/workflows/FileAPI_CI.yml'
+    - '.github/workflows/CI_FileAPI.yml'
     - '.github/actions/**'
     - 'src/**'
     - 'requirements.txt'
@@ -32,41 +32,26 @@ jobs:
       uses: ./.github/actions/FileAPI_config
       with:
           api_base: ${{ env.DEPLOY_DIR }}
+          api_version: ${{ github.ref_name }}-${{ github.sha }}
 
     # 2. Build 
 
     # 3. Remote config & deploy
-    - name: Install OpenConnect
-      run: sudo apt-get -q update && sudo apt-get -q install openconnect
-    - name: Connect VPN
-      run: echo ${{ secrets.VPN_PASS }} | sudo openconnect --protocol=gp -u ${{ secrets.VPN_USER }} --passwd-on-stdin soe.vpn.wisc.edu &
-
-    - name: Setup Access Key
-      run: |
-        mkdir -p ~/.ssh
-        echo '${{ secrets.DEPLOY_KEY }}' >> ./key.txt
-        chmod 600 ./key.txt
-    - name: Ensure directory exists
-      run: ssh -o StrictHostKeyChecking=no -T -i ./key.txt ${{ secrets.DEPLOY_USER }}@${{ env.DEPLOY_HOST }} "mkdir -p ${{ env.DEPLOY_DIR }}"
-
-    - name: Upload to web server via rsync
-      uses: burnett01/rsync-deployments@7.0.1
+    - name: Connect to VPN
+      uses: opengamedata/actions-openconnect-vpn@v1.1
       with:
-        # switches:
-        # -v : verbose output
-        # -r : recurse into subdirectories
-        # -c : use checksum to determine what files to update/skip
-        # -t : preserve modification times
-        # --delete : delete extraneous files from destination directories
-        # --exclude-from : skip any files in rsync-exclude
-        # --chmod : For each directory (D) and file (F), give user (u) and group (g) rwx permissions.
-        #           Give others (o) only read permissions, plus execute for directories.
-        switches: -vrct --delete --exclude-from 'rsync-exclude' --chmod=Du=rwx,Dg=rwx,Do=rx,Fu=rwx,Fg=rwx,Fo=r
-        path: ./src/*
+        username: ${{ secrets.VPN_USER }}
+        password: ${{ secrets.VPN_PASS }}
+        endpoint: "soe.vpn.wisc.edu"
+
+    - name: Deploy to Server
+      uses: opengamedata/actions-deploy-project@v1.1
+      with:
+        local_path: ./src
         remote_path: ${{ env.DEPLOY_DIR }}
         remote_host: ${{ env.DEPLOY_HOST }}
         remote_user: ${{ secrets.DEPLOY_USER }}
-        remote_key:  ${{ secrets.DEPLOY_KEY  }}
+        remote_key:  ${{ secrets.DEPLOY_KEY }}
 
     # 4. Cleanup & complete
     - name: Restart httpd via ssh
@@ -74,66 +59,12 @@ jobs:
     - name: Announce deploy
       run: echo "Deployed to ${{ env.DEPLOY_URL }}"
 
-  run_testbed_hello:
-    name: Run HelloAPI Testbed
+  testbed_hello:
+    name: HelloAPI Testbed
     needs: ci_deploy
-    runs-on: ubuntu-22.04
-    concurrency:
-      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-test-hello
-      cancel-in-progress: false
+    uses: ./.github/workflows/TEST_HelloAPI.yml
 
-    steps:
-    # 1. Local checkout 
-    - name: Checkout repository
-      uses: actions/checkout@v4
-    - name: Get Dependencies
-      uses: ./.github/actions/install_dependencies
-    - name: Set up Config File
-      uses: ./.github/actions/test_config
-      with:
-          endpoint: ${{ env.DEPLOY_URL }}
-          verbose_output: "False"
-    # 2. Build & configure remote environments
-
-    # 3. Perform export
-    - name: Execute testbed
-      run: python -m unittest ./tests/cases/t_HelloAPI.py 
-    # 4. Cleanup & complete
-    - name: Announce test completed
-      run: echo "Tested HelloAPI endpoint at ${{ env.DEPLOY_URL }}"
-    - name: Upload logs as artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        path: ./*.log
-
-  run_testbed_files:
-    name: Run FileAPI Testbed
+  testbed_fileapi:
+    name: FileAPI Testbed
     needs: ci_deploy
-    runs-on: ubuntu-22.04
-    concurrency:
-      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-test-files
-      cancel-in-progress: false
-
-    steps:
-    # 1. Local checkout 
-    - name: Checkout repository
-      uses: actions/checkout@v4
-    - name: Get Dependencies
-      uses: ./.github/actions/install_dependencies
-    - name: Set up Config File
-      uses: ./.github/actions/test_config
-      with:
-          endpoint: ${{ env.DEPLOY_URL }}
-          verbose_output: "False"
-    # 2. Build & configure remote environments
-
-    # 3. Perform export
-    - name: Execute testbed
-      run: python -m unittest ./tests/cases/t_FileAPI.py 
-    # 4. Cleanup & complete
-    - name: Announce test completed
-      run: echo "Tested FileAPI endpoint at ${{ env.DEPLOY_URL }}"
-    - name: Upload logs as artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        path: ./*.log
+    uses: ./.github/workflows/TEST_HelloAPI.yml

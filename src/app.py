@@ -13,8 +13,8 @@ from flask_cors import CORS, cross_origin
 from ogd.apis.utils.APIResponse import APIResponse, RESTType
 
 # import ogd libraries
-from ogd.core.schemas.datasets.DatasetSchema import DatasetSchema
-from ogd.core.schemas.datasets.FileListSchema import FileListSchema, GameDatasetCollectionSchema
+from ogd.common.schemas.datasets.DatasetSchema import DatasetSchema
+from ogd.common.schemas.datasets.FileListSchema import FileListSchema, GameDatasetCollectionSchema
 
 # import local files
 from models.SanitizedParams import SanitizedParams
@@ -69,7 +69,6 @@ CORS(application)
 # Now that logging is set up, import our local config settings
 from config.config import settings
 application.logger.setLevel(settings['DEBUG_LEVEL'])
-
 
 # TODO: Remove this action and dependencies (interfaces, config) if we're certain they won't be needed.
 # The SQL for BigQuery did take a bit of effort to compose, but could always be retrieved from old commits
@@ -319,4 +318,3 @@ def getGameFileInfoByMonth():
     ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=file_info)
 
     return ret_val.AsFlaskResponse
-

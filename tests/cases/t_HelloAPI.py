@@ -1,34 +1,28 @@
 # import libraries
-import requests
+import logging
+import unittest
 from json.decoder import JSONDecodeError
-from typing import Any, Dict, Optional
-from unittest import TestCase, TestSuite, main
+from typing import Optional
+from unittest import TestCase
+# import 3rd-party libraries
+import requests
 # import ogd libraries
-from ogd.apis.utils.APIResponse import APIResponse, RESTType, ResponseStatus
-from ogd.apis.utils.SendRequest import SendTestRequest
+from ogd.apis.utils.APIResponse import APIResponse, ResponseStatus
+from ogd.apis.utils.TestRequest import TestRequest
+from ogd.common.utils.Logger import Logger
 # import locals
 from tests.schemas.FileAPITestConfigSchema import FileAPITestConfigSchema
 from tests.config.t_config import settings
 
-_config = FileAPITestConfigSchema.FromDict(name="FileAPITestConfig", all_elements=settings, logger=None)
+_testing_cfg = FileAPITestConfigSchema.FromDict(name="FileAPITestConfig", all_elements=settings, logger=None)
+_level       = logging.DEBUG if _testing_cfg.Verbose else logging.INFO
+Logger.std_logger.setLevel(_level)
 
-class t_HelloAPI:
-    @staticmethod
-    def RunAll():
-        t = t_Hello()
-        t.setUp()
-        t.test_Responded()
-        t.test_Correct()
-        t = t_Version()
-        t.setUp()
-        t.test_Responded()
-        t.test_Correct()
-
-class t_Hello(TestCase):
+class test_Hello(TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.url     : str                         = f"{_config.ExternEndpoint}/"
-        cls.result  : Optional[requests.Response] = SendTestRequest(url=cls.url, request="GET", params={}, config=_config)
+        cls.url     : str                         = f"{_testing_cfg.ExternEndpoint}/"
+        cls.result  : Optional[requests.Response] = TestRequest(url=cls.url, request="GET", params={}, logger=Logger.std_logger)
         cls.content : Optional[APIResponse]    = None
         if cls.result is not None:
             try:
@@ -42,6 +36,10 @@ class t_Hello(TestCase):
     def tearDownClass(cls):
         if cls.result is not None:
             cls.result.close()
+
+    @staticmethod
+    def RunAll():
+        pass
 
     def test_Responded(self):
         if self.result is not None:
@@ -61,11 +59,11 @@ class t_Hello(TestCase):
         else:
             self.fail(f"No JSON content from request to {self.url}")
 
-class t_Version(TestCase):
+class test_Version(TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.url    : str                         = f"{_config.ExternEndpoint}/version"
-        cls.result : Optional[requests.Response] = SendTestRequest(url=cls.url, request="GET", params={}, config=_config)
+        cls.url    : str                         = f"{_testing_cfg.ExternEndpoint}/version"
+        cls.result : Optional[requests.Response] = TestRequest(url=cls.url, request="GET", params={}, logger=Logger.std_logger)
         cls.content : Optional[APIResponse]    = None
         if cls.result is not None:
             try:
@@ -79,6 +77,10 @@ class t_Version(TestCase):
     def tearDownClass(cls):
         if cls.result is not None:
             cls.result.close()
+
+    @staticmethod
+    def RunAll():
+        pass
 
     def test_Responded(self):
         if self.result is not None:
@@ -94,9 +96,9 @@ class t_Version(TestCase):
 
     def test_Correct(self):
         if self.content is not None:
-            self.assertEqual(self.content.Value, {"version":_config.APIVersion})
+            self.assertEqual(self.content.Value, {"version":_testing_cfg.APIVersion})
         else:
             self.fail(f"No JSON content from request to {self.url}")
 
 if __name__ == "__main__":
-    main()
+    unittest.main()
