@@ -69,8 +69,8 @@ Logger.InitializeLogger(level=logging.INFO, use_logfile=False)
 try:
     from apis.LegacyWebAPI import LegacyWebAPI
 except ImportError as err:
-    _logImportErr(msg="Could not import Population API:", err=err)
+    _logImportErr(msg="Could not import Legacy Web API:", err=err)
 except Exception as err:
-    _logImportErr(msg="Could not import Population API, general error:", err=err)
+    _logImportErr(msg="Could not import Legacy Web API, general error:", err=err)
 else:
     LegacyWebAPI.register(application, settings=settings)
