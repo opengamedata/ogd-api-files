@@ -280,16 +280,17 @@ def getGameFileInfoByMonth():
 
     # If this range contains the given year & month
     # Base URLs
-    CODESPACES_BASE_URL : str           = "https://codespaces.new/opengamedata/opengamedata-samples/tree/"
-    GITHUB_BASE_URL     : str           = "https://github.com/opengamedata/opengamedata-core/tree/"
+    CODESPACES_BASE_URL : str = "https://codespaces.new/opengamedata/opengamedata-samples/tree/"
+    GITHUB_BASE_URL     : str = "https://github.com/opengamedata/opengamedata-core/tree/"
+
+    _branch_name     = sanitized_request.GameID.lower().replace('_', '-')
+    _revision        = _matched_dataset.OGDRevision or None
     
     # Date information
     file_info["first_year"]  = _matched_dataset.Key.FromYear
     file_info["first_month"] = _matched_dataset.Key.FromMonth
     file_info["last_year"]   = _matched_dataset.Key.ToYear
     file_info["last_month"]  = _matched_dataset.Key.ToMonth
-    _branch_name     = sanitized_request.GameID.lower().replace('_', '-')
-    _revision        = _matched_dataset.OGDRevision or None
 
     # Files
     file_info["raw_file"]        = f"{file_list.Config.FilesBase}{_matched_dataset.RawFile}"        if _matched_dataset.RawFile        is not None else None
@@ -310,8 +311,8 @@ def getGameFileInfoByMonth():
 
     # Convention for branch naming is lower-case with dashes,
     # while game IDs are usually upper-case with underscores, so make sure we do the conversion
-    file_info["detectors_link"] = f"{GITHUB_BASE_URL}{_revision}/games/{_branch_name}/detectors" if _revision else None
-    file_info["features_link"]  = f"{GITHUB_BASE_URL}{_revision}/games/{_branch_name}/features"  if _revision else None
+    file_info["detectors_link"] = f"{GITHUB_BASE_URL}{_revision}/src/games/{_branch_name.upper()}/detectors" if _revision else None
+    file_info["features_link"]  = f"{GITHUB_BASE_URL}{_revision}/src/games/{_branch_name.upper()}/features"  if _revision else None
     file_info["found_matching_range"] = True
 
     ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=file_info)
