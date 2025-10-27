@@ -85,4 +85,4 @@ jobs:
   testbed_fileapi:
     name: FileAPI Testbed
     needs: ci_deploy
-    uses: ./.github/workflows/TEST_HelloAPI.yml
+    uses: ./.github/workflows/TEST_FileAPI.yml
