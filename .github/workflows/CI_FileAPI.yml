@@ -28,11 +28,14 @@ jobs:
     # 1. Local checkout & config
     - name: Checkout repository
       uses: actions/checkout@v4
+    - name: Get current version tag
+      id: version-tag
+      run: echo "VERSION_TAG=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
     - name: Set up Config File
       uses: ./.github/actions/FileAPI_config
       with:
           api_base: ${{ env.DEPLOY_DIR }}
-          api_version: ${{ github.ref_name }}-${{ github.sha }}
+          api_version: ${{ steps.version-tag.outputs.VERSION_TAG }}-${{ github.ref_name }}-${{ github.sha }}
 
     # 2. Build 
 
