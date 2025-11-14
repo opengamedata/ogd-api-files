@@ -11,12 +11,12 @@ from typing import Any, Dict, Final
 # import 3rd-party libraries
 
 # import OGD libraries
-from ogd.common.utils.SemanticVersion import SemanticVersion
-from ogd.apis.schemas.ServerConfigSchema import ServerConfigSchema
+from ogd.common.models.SemanticVersion import SemanticVersion
+from ogd.apis.configs.ServerConfig import ServerConfig
 
 # import local files
 
-class FileAPIConfig(ServerConfigSchema):
+class FileAPIConfig(ServerConfig):
     _DEFAULT_FILE_LIST_URL : Final[str] = 'https://opengamedata.fielddaylab.wisc.edu/data/file_list.json'
 
 
