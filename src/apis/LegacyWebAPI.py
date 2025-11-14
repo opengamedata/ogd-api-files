@@ -44,38 +44,11 @@ class LegacyWebAPI:
         """
         # Expected WSGIScriptAlias URL path is /data
         api = Api(app)
-        api.add_resource(LegacyWebAPI.Hello,               '/')
-        # api.add_resource(LegacyWebAPI.Version,             '/version')
         api.add_resource(LegacyWebAPI.GameUsageByMonth,    '/getGameUsageByMonth')
         api.add_resource(LegacyWebAPI.MonthlyGameUsage,    '/getMonthlyGameUsage')
         api.add_resource(LegacyWebAPI.GameFileInfoByMonth, '/getGameFileInfoByMonth')
         LegacyWebAPI.server_config = settings
 
-    # Basic response if someone just hits the home path to say "hello"
-    class Hello(Resource):
-        """
-        Basic response if someone just hits the home path to say "hello"
-        """
-        def get(self) -> Response:
-            ret_val = APIResponse.Default(req_type=RESTType.GET)
-
-            _msg = "hello, world"
-            ret_val.RequestSucceeded(msg=_msg, val={})
-
-            return ret_val.AsFlaskResponse
-
-    # Get the version of the API.
-    # class Version(Resource):
-    #     """
-    #     Get the version of the API.
-    #     """
-    #     def get(self) -> Response:
-    #         ret_val = APIResponse.Default(req_type=RESTType.GET)
-
-    #         _ver = LegacyWebAPI.server_config.Version
-    #         ret_val.RequestSucceeded(msg=f"Retrieved version", val={"version":_ver})
-
-    #         return ret_val.AsFlaskResponse
 
     # Get game usage statistics for a given game, year, and month
     class GameUsageByMonth(Resource):
