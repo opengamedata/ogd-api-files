@@ -26,11 +26,10 @@ class FileAPIConfig(ServerConfig):
 
         _used = {"DB_CONFIG", "OGD_CORE_PATH", "GOOGLE_CLIENT_ID"}
         _leftovers = { key : val for key,val in all_elements.items() if key not in _used }
-        version_str = all_elements.get("API_VERSION", str(SemanticVersion(0,0,0,"version-not-set")))
         super().__init__(
             name=name,
-            debug_level=all_elements.get("DEBUG_LEVEL", logging.INFO),
-            version=SemanticVersion.FromString(version_str),
+            debug_level=None,
+            version=None,
             other_elements=_leftovers
         )
 
