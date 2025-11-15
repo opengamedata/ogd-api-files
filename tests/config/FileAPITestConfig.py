@@ -6,66 +6,37 @@ Contains a Schema class for managing config data for server configurations.
 
 # import standard libraries
 import logging
-from typing import Any, Dict, Optional
+from typing import Dict, Final, Optional, Self
 from types import SimpleNamespace
 
 # import 3rd-party libraries
 
 # import OGD libraries
 from ogd.common.configs.TestConfig import TestConfig
+from ogd.common.utils.typing import Map
 
 # import local files
 
 class FileAPITestConfig(TestConfig):
-    @staticmethod
-    def DEFAULT():
-        return FileAPITestConfig(
-            name            = "DefaultTestConfig",
-            extern_endpoint = "https://ogd-staging.fielddaylab.wisc.edu/wsgi-bin/opengamedata/apis/opengamedata-api-files/main/app.wsgi",
-            api_version     = "Testing",
-            verbose         = False,
-            enabled_tests   = {
-                "HELLO" : True
-            }
-        )
+    _DEFAULT_ENDPOINT    : Final[str] = "https://ogd-staging.fielddaylab.wisc.edu/wsgi-bin/opengamedata/apis/opengamedata-api-files/main/app.wsgi"
+    _DEFAULT_API_VERSION : Final[str] = "Testing"
 
-    def __init__(self, name:str, extern_endpoint:str, api_version:str, verbose:bool, enabled_tests:Dict[str, bool], other_elements:Dict[str, Any]={}):
-        self._extern_server : str             = extern_endpoint
-        self._api_version   : str             = api_version
-        super().__init__(name=name, verbose=verbose, enabled_tests=enabled_tests, other_elements=other_elements)
+    # *** BUILT-INS & PROPERTIES ***
 
-    @staticmethod
-    def FromDict(name:str, all_elements:Dict[str, Any], logger:Optional[logging.Logger]):
-        _extern_endpoint : str
-        _verbose         : bool
-        _enabled_tests   : Dict[str, bool]
-        if "EXTERN_ENDPOINT" in all_elements.keys():
-            _extern_endpoint = FileAPITestConfig._parseExternEndpoint(all_elements["EXTERN_ENDPOINT"], logger=logger)
-        else:
-            _extern_endpoint = FileAPITestConfig.DEFAULT().ExternEndpoint
-            _msg = f"{name} config does not have an 'EXTERN_ENDPOINT' element; defaulting to extern_endpoint={_extern_endpoint}"
-            if logger:
-                logger.warning(_msg, logging.WARN)
-            else:
-                print(logger)
-        if "API_VERSION" in all_elements.keys():
-            _api_version = FileAPITestConfig._parseAPIVersion(all_elements["API_VERSION"], logger=logger)
-        else:
-            _api_version = FileAPITestConfig.DEFAULT().APIVersion
-            _msg = f"{name} config does not have an 'API_VERSION' element; defaulting to api_version={_api_version}"
-            if logger:
-                logger.warning(_msg, logging.WARN)
-            else:
-                print(_msg)
+    def __init__(self, name:str,
+                 extern_endpoint:Optional[str]=None, api_version:Optional[str]=None,
+                 verbose:Optional[bool]=None, enabled_tests:Optional[Dict[str, bool]]=None,
+                 other_elements:Optional[Map]=None):
 
-        _used = {"EXTERN_ENDPOINT", "API_VERSION"}
-        _leftovers = { key : val for key,val in all_elements.items() if key not in _used }
-        # TODO : TUrns out we should have never tried to do the separation of FromDict, since this doesn't give a good way to pass up to parent class.
-        # When we change this, need to come back and remove this hack.
-        _parent = TestConfigSchema.FromDict(name=name, all_elements=_leftovers, logger=logger)
-        _parent_used = {"VERBOSE", "ENABLED"}
-        _leftovers = { key : val for key,val in _leftovers.items() if key not in _used }
-        return FileAPITestConfig(name=name, extern_endpoint=_extern_endpoint, api_version=_api_version, verbose=_parent.Verbose, enabled_tests=_parent.EnabledTests, other_elements=_leftovers)
+        unparsed_elements : Map = other_elements or {}
+
+        self._extern_server : str
+        self._api_version   : str
+
+        self._extern_server = extern_endpoint if extern_endpoint is not None else self._parseExternEndpoint(unparsed_elements=unparsed_elements, schema_name=name)
+        self._api_version   = api_version     if api_version     is not None else self._parseAPIVersion(unparsed_elements=unparsed_elements, schema_name=name)
+
+        super().__init__(name=name, verbose=verbose, enabled_tests=enabled_tests, other_elements=unparsed_elements)
 
     @property
     def ExternEndpoint(self) -> str:
@@ -75,37 +46,59 @@ class FileAPITestConfig(TestConfig):
     def APIVersion(self) -> str:
         return self._api_version
 
+    # *** IMPLEMENT ABSTRACT FUNCTIONS ***
+
     @property
     def AsMarkdown(self) -> str:
         ret_val : str
 
-        ret_val = f"{self.Name}"
+        ret_val = self.Name
+        return ret_val
+
+    @classmethod
+    def Default(cls):
+        return FileAPITestConfig(
+            name="DefaultFileAPITests",
+            extern_endpoint=FileAPITestConfig._DEFAULT_ENDPOINT,
+            api_version=FileAPITestConfig._DEFAULT_API_VERSION,
+            verbose=FileAPITestConfig._DEFAULT_VERBOSE,
+            enabled_tests=FileAPITestConfig._DEFAULT_ENABLED_TESTS,
+            other_elements={}
+        )
+
+    @classmethod
+    def _fromDict(cls, name:str, unparsed_elements:Map,
+                  key_overrides:Optional[Dict[str, str]]=None,
+                  default_override:Optional[Self]=None):
+        return FileAPITestConfig(name=name, extern_endpoint=None, api_version=None,
+                                 verbose=None, enabled_tests=None, other_elements=unparsed_elements)
+
+    @staticmethod
+    def _parseExternEndpoint(unparsed_elements:Map, schema_name:Optional[str]=None) -> str:
+        ret_val : str
+
+        ret_val = FileAPITestConfig.ParseElement(
+            unparsed_elements=unparsed_elements,
+            valid_keys=["EXTERN_ENDPOINT"],
+            to_type=str,
+            default_value=FileAPITestConfig._DEFAULT_ENDPOINT,
+            remove_target=True,
+            schema_name=schema_name
+        )
+
         return ret_val
 
     @staticmethod
-    def _parseExternEndpoint(endpoint, logger:Optional[logging.Logger]) -> str:
+    def _parseAPIVersion(unparsed_elements:Map, schema_name:Optional[str]=None) -> str:
         ret_val : str
-        if isinstance(endpoint, str):
-            ret_val = endpoint
-        else:
-            ret_val = str(endpoint)
-            _msg = f"Config external endpoint was unexpected type {type(endpoint)}, defaulting to str(endpoint) = {ret_val}."
-            if logger:
-                logger.warning(_msg, logging.WARN)
-            else:
-                print(_msg)
-        return ret_val
 
-    @staticmethod
-    def _parseAPIVersion(version, logger:Optional[logging.Logger]) -> str:
-        ret_val : str
-        if isinstance(version, str):
-            ret_val = version
-        else:
-            ret_val = str(version)
-            _msg = f"Config API version was unexpected type {type(version)}, defaulting to str(version) = {ret_val}."
-            if logger:
-                logger.warning(_msg, logging.WARN)
-            else:
-                print(_msg)
+        ret_val = FileAPITestConfig.ParseElement(
+            unparsed_elements=unparsed_elements,
+            valid_keys=["API_VERSION"],
+            to_type=str,
+            default_value=FileAPITestConfig._DEFAULT_API_VERSION,
+            remove_target=True,
+            schema_name=schema_name
+        )
+
         return ret_val
