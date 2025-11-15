@@ -11,10 +11,10 @@ from ogd.apis.utils.APIResponse import APIResponse, ResponseStatus
 from ogd.apis.utils.TestRequest import TestRequest
 from ogd.common.utils.Logger import Logger
 # import locals
-from tests.schemas.FileAPITestConfigSchema import FileAPITestConfigSchema
+from tests.config.FileAPITestConfig import FileAPITestConfig
 from tests.config.t_config import settings
 
-_testing_cfg = FileAPITestConfigSchema.FromDict(name="FileAPITestConfig", all_elements=settings, logger=None)
+_testing_cfg = FileAPITestConfig.FromDict(name="FileAPITestConfig", all_elements=settings, logger=None)
 _level       = logging.DEBUG if _testing_cfg.Verbose else logging.INFO
 Logger.std_logger.setLevel(_level)
 
