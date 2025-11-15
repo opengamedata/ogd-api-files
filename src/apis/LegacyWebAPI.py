@@ -19,7 +19,7 @@ from ogd.common.schemas.datasets.DatasetSchema import DatasetSchema
 from ogd.common.schemas.datasets.FileListSchema import FileListSchema, GameDatasetCollectionSchema
 
 # import local files
-from schemas.FileAPIConfig import FileAPIConfig
+from configs.FileAPIConfig import FileAPIConfig
 from models.SanitizedParams import SanitizedParams
 from interfaces.BigQueryInterface import BigQueryInterface
 

@@ -12,14 +12,14 @@ from types import SimpleNamespace
 # import 3rd-party libraries
 
 # import OGD libraries
-from ogd.common.schemas.configs.TestConfigSchema import TestConfigSchema
+from ogd.common.configs.TestConfig import TestConfig
 
 # import local files
 
-class FileAPITestConfigSchema(TestConfigSchema):
+class FileAPITestConfig(TestConfig):
     @staticmethod
     def DEFAULT():
-        return FileAPITestConfigSchema(
+        return FileAPITestConfig(
             name            = "DefaultTestConfig",
             extern_endpoint = "https://ogd-staging.fielddaylab.wisc.edu/wsgi-bin/opengamedata/apis/opengamedata-api-files/main/app.wsgi",
             api_version     = "Testing",
@@ -40,18 +40,18 @@ class FileAPITestConfigSchema(TestConfigSchema):
         _verbose         : bool
         _enabled_tests   : Dict[str, bool]
         if "EXTERN_ENDPOINT" in all_elements.keys():
-            _extern_endpoint = FileAPITestConfigSchema._parseExternEndpoint(all_elements["EXTERN_ENDPOINT"], logger=logger)
+            _extern_endpoint = FileAPITestConfig._parseExternEndpoint(all_elements["EXTERN_ENDPOINT"], logger=logger)
         else:
-            _extern_endpoint = FileAPITestConfigSchema.DEFAULT().ExternEndpoint
+            _extern_endpoint = FileAPITestConfig.DEFAULT().ExternEndpoint
             _msg = f"{name} config does not have an 'EXTERN_ENDPOINT' element; defaulting to extern_endpoint={_extern_endpoint}"
             if logger:
                 logger.warning(_msg, logging.WARN)
             else:
                 print(logger)
         if "API_VERSION" in all_elements.keys():
-            _api_version = FileAPITestConfigSchema._parseAPIVersion(all_elements["API_VERSION"], logger=logger)
+            _api_version = FileAPITestConfig._parseAPIVersion(all_elements["API_VERSION"], logger=logger)
         else:
-            _api_version = FileAPITestConfigSchema.DEFAULT().APIVersion
+            _api_version = FileAPITestConfig.DEFAULT().APIVersion
             _msg = f"{name} config does not have an 'API_VERSION' element; defaulting to api_version={_api_version}"
             if logger:
                 logger.warning(_msg, logging.WARN)
@@ -65,7 +65,7 @@ class FileAPITestConfigSchema(TestConfigSchema):
         _parent = TestConfigSchema.FromDict(name=name, all_elements=_leftovers, logger=logger)
         _parent_used = {"VERBOSE", "ENABLED"}
         _leftovers = { key : val for key,val in _leftovers.items() if key not in _used }
-        return FileAPITestConfigSchema(name=name, extern_endpoint=_extern_endpoint, api_version=_api_version, verbose=_parent.Verbose, enabled_tests=_parent.EnabledTests, other_elements=_leftovers)
+        return FileAPITestConfig(name=name, extern_endpoint=_extern_endpoint, api_version=_api_version, verbose=_parent.Verbose, enabled_tests=_parent.EnabledTests, other_elements=_leftovers)
 
     @property
     def ExternEndpoint(self) -> str:

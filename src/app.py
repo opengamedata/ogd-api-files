@@ -10,7 +10,7 @@ from ogd.common.utils.Logger import Logger
 
 # import local files
 from config.config import settings
-from schemas.FileAPIConfig import FileAPIConfig
+from configs.FileAPIConfig import FileAPIConfig
 
 # By default we'll log to the WSGI errors stream which ends up in the Apache error log
 logHandlers = {
