@@ -79,6 +79,7 @@ class test_MonthlyGameUsage(TestCase):
             "game_id" : "AQUALAB"
         }
         cls.url    = f"{_testing_cfg.ExternEndpoint}/getMonthlyGameUsage"
+        Logger.Log(f"Sending request to {cls.url}", logging.INFO)
         cls.result = TestRequest(url=cls.url, request="GET", params=params, logger=Logger.std_logger)
         if cls.result is not None:
             try:
@@ -129,6 +130,7 @@ class test_GameFileInfoByMonth(TestCase):
             "month"   : 1
         }
         self.url    = f"{_testing_cfg.ExternEndpoint}/getGameFileInfoByMonth"
+        Logger.Log(f"Sending request to {self.url}", logging.INFO)
         self.result = TestRequest(url=self.url, request="GET", params=params, logger=Logger.std_logger)
         if self.result is not None:
             try:
