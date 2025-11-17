@@ -5,13 +5,11 @@ Contains a Schema class for managing config data for server configurations.
 """
 
 # import standard libraries
-import logging
 from typing import Any, Dict, Final
 
 # import 3rd-party libraries
 
 # import OGD libraries
-from ogd.common.models.SemanticVersion import SemanticVersion
 from ogd.apis.configs.ServerConfig import ServerConfig
 
 # import local files
