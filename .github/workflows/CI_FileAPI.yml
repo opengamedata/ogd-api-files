@@ -29,13 +29,10 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
-        fetch-tags: true
         fetch-depth: 0
     - name: Get current version tag
       id: version-tag
       run: |
-        echo "Version:"
-        echo "VERSION_TAG=$(git describe --tags --abbrev=0)"
         echo "VERSION_TAG=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
     - name: Set up Config File
       uses: ./.github/actions/FileAPI_config
