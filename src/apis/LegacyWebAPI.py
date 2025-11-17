@@ -1,7 +1,6 @@
 # import standard libraries
 import json
 from datetime import date, timedelta
-from logging.config import dictConfig
 from typing import Any, Dict, Optional
 from urllib import request as url_request
 
@@ -15,8 +14,9 @@ from werkzeug.exceptions import BadRequest
 from ogd.apis.utils.APIResponse import APIResponse, RESTType
 
 # import ogd libraries
+from ogd.common.configs.storage.DatasetRepositoryConfig import DatasetRepositoryConfig
 from ogd.common.schemas.datasets.DatasetSchema import DatasetSchema
-from ogd.common.schemas.datasets.FileListSchema import FileListSchema, GameDatasetCollectionSchema
+from ogd.common.schemas.datasets.DatasetCollectionSchema import DatasetCollectionSchema
 
 # import local files
 from configs.FileAPIConfig import FileAPIConfig
