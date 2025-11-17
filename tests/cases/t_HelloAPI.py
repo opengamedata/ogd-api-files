@@ -14,7 +14,7 @@ from ogd.common.utils.Logger import Logger
 from tests.config.FileAPITestConfig import FileAPITestConfig
 from tests.config.t_config import settings
 
-_testing_cfg = FileAPITestConfig.FromDict(name="FileAPITestConfig", all_elements=settings, logger=None)
+_testing_cfg = FileAPITestConfig.FromDict(name="FileAPITestConfig", unparsed_elements=settings)
 _level       = logging.DEBUG if _testing_cfg.Verbose else logging.INFO
 Logger.std_logger.setLevel(_level)
 
