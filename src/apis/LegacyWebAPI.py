@@ -116,7 +116,7 @@ class LegacyWebAPI:
             parser = reqparse.RequestParser()
             parser.add_argument("game_id", type=str, nullable=True, required=False, default="",                 location="args")
             args : Dict[str, Any] = parser.parse_args()
-            game_id = SanitizedParams.sanitizeGameId(args.get("game_id") or "")
+            game_id = SanitizedParams.sanitizeGameId(args.get("game_id", ""))
             
             if game_id is None or game_id == "":
                 ret_val.RequestErrored(msg=f"Bad GameID '{game_id}'")
