@@ -129,6 +129,8 @@ class LegacyWebAPI:
             if "CONFIG" in file_list_json.keys() and isinstance(file_list_json["CONFIG"], dict):
                 if not "remote_url" in file_list_json["CONFIG"].keys():
                     file_list_json["CONFIG"]["remote_url"] = file_list_json["CONFIG"].get("files_base", "https://opengamedata.fielddaylab.wisc.edu/")
+                if not "templates_url" in file_list_json["CONFIG"].keys():
+                    file_list_json["CONFIG"]["templates_url"] = file_list_json["CONFIG"].get("templates_base", "https://github.com/opengamedata/opengamedata-templates")
             file_list          : DatasetRepositoryConfig   = DatasetRepositoryConfig.FromDict(name="file_list", unparsed_elements=file_list_json)
             game_datasets      : DatasetCollectionSchema   = file_list.Games.get(game_id, DatasetCollectionSchema.Default())
 
@@ -209,6 +211,8 @@ class LegacyWebAPI:
             if "CONFIG" in file_list_json.keys() and isinstance(file_list_json["CONFIG"], dict):
                 if not "remote_url" in file_list_json["CONFIG"].keys():
                     file_list_json["CONFIG"]["remote_url"] = file_list_json["CONFIG"].get("files_base", "https://opengamedata.fielddaylab.wisc.edu/")
+                if not "templates_url" in file_list_json["CONFIG"].keys():
+                    file_list_json["CONFIG"]["templates_url"] = file_list_json["CONFIG"].get("templates_base", "https://github.com/opengamedata/opengamedata-templates")
             file_list          : DatasetRepositoryConfig   = DatasetRepositoryConfig.FromDict(name="file_list", unparsed_elements=file_list_json)
             game_datasets      : DatasetCollectionSchema   = file_list.Games.get(sanitized_request.GameID or "NO GAME REQUESTED", DatasetCollectionSchema.Default())
 
