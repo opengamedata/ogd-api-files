@@ -125,6 +125,10 @@ class LegacyWebAPI:
             # Pull the file list data into a dictionary
             file_list_response                             = url_request.urlopen(LegacyWebAPI.server_config.FileListURL)
             file_list_json     : Dict[str, Dict[str, Any]] = json.loads(file_list_response.read())
+            # HACK to make sure we've got a remote_url, working around bug in RepositoryIndexingConfig FromDict(...) implementation.
+            if "CONFIG" in file_list_json.keys() and isinstance(file_list_json["CONFIG"], dict):
+                if not "remote_url" in file_list_json["CONFIG"].keys():
+                    file_list_json["CONFIG"]["remote_url"] = file_list_json["CONFIG"].get("files_base", "https://opengamedata.fielddaylab.wisc.edu/")
             file_list          : DatasetRepositoryConfig   = DatasetRepositoryConfig.FromDict(name="file_list", unparsed_elements=file_list_json)
             game_datasets      : DatasetCollectionSchema   = file_list.Games.get(game_id, DatasetCollectionSchema.Default())
 
@@ -201,6 +205,10 @@ class LegacyWebAPI:
         # 1. Get the list of datasets available on the server, for given game.
             file_list_response                             = url_request.urlopen(LegacyWebAPI.server_config.FileListURL)
             file_list_json     : Dict[str, Dict[str, Any]] = json.loads(file_list_response.read())
+            # HACK to make sure we've got a remote_url, working around bug in RepositoryIndexingConfig FromDict(...) implementation.
+            if "CONFIG" in file_list_json.keys() and isinstance(file_list_json["CONFIG"], dict):
+                if not "remote_url" in file_list_json["CONFIG"].keys():
+                    file_list_json["CONFIG"]["remote_url"] = file_list_json["CONFIG"].get("files_base", "https://opengamedata.fielddaylab.wisc.edu/")
             file_list          : DatasetRepositoryConfig   = DatasetRepositoryConfig.FromDict(name="file_list", unparsed_elements=file_list_json)
             game_datasets      : DatasetCollectionSchema   = file_list.Games.get(sanitized_request.GameID or "NO GAME REQUESTED", DatasetCollectionSchema.Default())
 
