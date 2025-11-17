@@ -125,8 +125,8 @@ class LegacyWebAPI:
             # Pull the file list data into a dictionary
             file_list_response                             = url_request.urlopen(LegacyWebAPI.server_config.FileListURL)
             file_list_json     : Dict[str, Dict[str, Any]] = json.loads(file_list_response.read())
-            file_list          : FileListSchema              = FileListSchema(name="file_list", all_elements=file_list_json)
-            game_datasets      : GameDatasetCollectionSchema = file_list.Games.get(game_id or "NO GAME REQUESTED", GameDatasetCollectionSchema.EmptySchema())
+            file_list          : DatasetRepositoryConfig   = DatasetRepositoryConfig.FromDict(name="file_list", unparsed_elements=file_list_json)
+            game_datasets      : DatasetCollectionSchema   = file_list.Games.get(game_id, DatasetCollectionSchema.Default())
 
             # If the given game isn't in our dictionary, or our dictionary doesn't have any date ranges for this game
             if not game_id in file_list.Games or len(file_list.Games[game_id].Datasets) == 0:
@@ -141,26 +141,26 @@ class LegacyWebAPI:
             total_sessions_by_yyyymm = {}
 
             # rangeKey format is GAMEID_YYYYMMDD_to_YYYYMMDD or GAME_ID_YYYYMMDD_to_YYYYYMMDD
-            for _key,_dataset in game_datasets.Datasets.items():
+            for _datset_id,_dataset in game_datasets.Datasets.items():
 
                 # If this rangeKey matches the expected format
-                if _dataset.Key.IsValid: # len(rangeKeyParts) == 4:
+                if _dataset.Key.DateFrom and _dataset.Key.DateTo: # len(rangeKeyParts) == 4:
                     # Capture the number of sessions for this YYYYMM
-                    _year_month = str(_dataset.Key.FromYear) + str(_dataset.Key.FromMonth).zfill(2)
+                    _year_month = _dataset.Key.DateFrom.strftime("%Y%m")
                     total_sessions_by_yyyymm[_year_month] = _dataset.SessionCount
 
                     # The ranges in file_list_json should be chronologically ordered, but manually determining the first & last months here just in case
-                    if first_year is None or first_month is None or _dataset.Key.FromYear < first_year:
-                        first_year = _dataset.Key.FromYear
-                        first_month = _dataset.Key.FromMonth
-                    elif _dataset.Key.FromYear == first_year and _dataset.Key.FromMonth < first_month:
-                        first_month = _dataset.Key.FromMonth
+                    if first_year is None or first_month is None or _dataset.Key.DateFrom.year < first_year:
+                        first_year = _dataset.Key.DateFrom.year
+                        first_month = _dataset.Key.DateFrom.month
+                    elif _dataset.Key.DateFrom.year == first_year and _dataset.Key.DateFrom.month < first_month:
+                        first_month = _dataset.Key.DateFrom.month
                     
-                    if lastYear is None or lastMonth is None or _dataset.Key.FromYear > lastYear:
-                        lastYear = _dataset.Key.FromYear
-                        lastMonth = _dataset.Key.FromMonth
-                    elif lastYear == _dataset.Key.FromYear and lastMonth < _dataset.Key.FromMonth:
-                        lastMonth = _dataset.Key.FromMonth
+                    if lastYear is None or lastMonth is None or _dataset.Key.DateFrom.year > lastYear:
+                        lastYear = _dataset.Key.DateFrom.year
+                        lastMonth = _dataset.Key.DateFrom.month
+                    elif lastYear == _dataset.Key.DateFrom.year and lastMonth < _dataset.Key.DateFrom.month:
+                        lastMonth = _dataset.Key.DateFrom.month
 
 
             # Iterate through all of the months from the first month+year to last month+year, since the ranges have gaps
@@ -172,7 +172,7 @@ class LegacyWebAPI:
                     endRangeMonth = lastMonth if year == lastYear else 12
                     for month in range(startRangeMonth, endRangeMonth + 1):
                         # If file_list.json has an entry for this month
-                        _year_month = str(year) + str(month).zfill(2)
+                        _year_month = f"{year}{month:02}" # {month:02} => 0-pad width 2
                         sessions.append({ "year": year, "month": month, "total_sessions": total_sessions_by_yyyymm.get(_year_month, 0)})
                     startRangeMonth = 1
 
