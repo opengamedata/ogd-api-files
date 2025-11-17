@@ -56,7 +56,7 @@ class test_Hello(TestCase):
 
     def test_Correct(self):
         if self.content is not None:
-            self.assertEqual(self.content.Message, "SUCCESS: hello, world")
+            self.assertEqual(self.content.Message, "Hello! You GETted successfully!")
         else:
             self.fail(f"No JSON content from request to {self.url}")
 
