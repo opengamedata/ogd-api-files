@@ -11,16 +11,17 @@ from ogd.apis.utils.APIResponse import APIResponse, ResponseStatus
 from ogd.apis.utils.TestRequest import TestRequest
 from ogd.common.utils.Logger import Logger
 # import locals
-from tests.config.FileAPITestConfig import FileAPITestConfig
-from tests.config.t_config import settings
+from tests.config import t_config
+from tests.FileAPITestConfig import FileAPITestConfig
 
-_testing_cfg = FileAPITestConfig.FromDict(name="FileAPITestConfig", unparsed_elements=settings)
+_testing_cfg = FileAPITestConfig.FromDict(name="FileAPITestConfig", unparsed_elements=t_config.settings)
 _level       = logging.DEBUG if _testing_cfg.Verbose else logging.INFO
-Logger.std_logger.setLevel(_level)
 
 class test_Hello(TestCase):
     @classmethod
     def setUpClass(cls):
+        Logger.std_logger.setLevel(_level)
+
         cls.url     : str                         = f"{_testing_cfg.ExternEndpoint}/hello"
         Logger.Log(f"Sending request to {cls.url}", logging.INFO)
         cls.result  : Optional[requests.Response] = TestRequest(url=cls.url, request="GET", params={}, logger=Logger.std_logger)
