@@ -1,0 +1,64 @@
+# Workflow to test Legacy Web API on the CI server
+name: Testbed - LegacyWebAPI
+run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' && github.event.head_commit.message || 'Manual Run') }}
+on:
+  workflow_dispatch:
+  workflow_call:
+  push:
+    paths:
+    - '.github/workflows/TEST_LegacyWebAPI.yml'
+    - '.github/actions/test_config/**'
+    - 'tests/cases/t_LegacyWebAPI.py'
+    - 'tests/config/**'
+    - 'tests/schemas/**'
+    - 'requirements.txt'
+
+env:
+  DEPLOY_HOST: ${{ vars.OGD_STAGING_HOST }}
+  DEPLOY_DIR:                              ${{ vars.API_BASE_PATH }}/${{ github.event.repository.name }}/${{ github.ref_name }}
+  DEPLOY_URL:  ${{ vars.OGD_STAGING_HOST }}/${{ vars.API_BASE_URL }}/${{ github.event.repository.name }}/${{ github.ref_name }}/app.wsgi
+
+jobs:
+  run_testbed_files:
+    name: Run LegacyWebAPI Testbed
+    runs-on: ubuntu-22.04
+    concurrency:
+      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}
+      cancel-in-progress: false
+
+    steps:
+
+  # 1. Local checkout 
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Get Dependencies
+      uses: opengamedata/actions-setup-ogd-py-dependencies@v1.0
+      with:
+        python_version: ${{ vars.OGD_PYTHON_VERSION }}
+    - name: Get current version tag
+      id: version-tag
+      run: |
+        echo "VERSION_TAG=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
+        echo "SRC_REVISION=$(git rev-list -1 HEAD -- src/)" >> $GITHUB_OUTPUT
+    - name: Set up Config File
+      uses: ./.github/actions/test_config
+      with:
+          endpoint: ${{ env.DEPLOY_URL }}
+          api_version: ${{ steps.version-tag.outputs.VERSION_TAG }}-${{ github.ref_name }}-${{ steps.version-tag.outputs.SRC_REVISION }}
+          verbose_output: "True"
+
+  # 2. Build & configure remote environments
+
+  # 3. Perform export
+    - name: Execute testbed
+      run: python -m unittest ./tests/cases/t_LegacyWebAPI.py 
+
+  # 4. Cleanup & complete
+    - name: Announce test completed
+      run: echo "Tested LegacyWebAPI endpoint at ${{ env.DEPLOY_URL }}"
+    - name: Upload logs as artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        path: ./*.log
