@@ -18,16 +18,69 @@ _testing_cfg = FileAPITestConfig.FromDict(name="FileAPITestConfig", unparsed_ele
 _level       = logging.DEBUG if _testing_cfg.Verbose else logging.INFO
 Logger.std_logger.setLevel(_level)
 
-class test_GameDatasets(TestCase):
+@unittest.skip("This endpoint is not in use; needs access to database")
+class test_GameUsageByMonth(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.url    : str
         cls.result : Optional[requests.Response]
         cls.content : Optional[APIResponse]    = None
 
-        cls.url    = f"{_testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/list"
+        params = {
+            "game_id" : "AQUALAB",
+            "year"    : 2024,
+            "month"   : 1
+        }
+        cls.url    = f"{_testing_cfg.ExternEndpoint}/getGameUsageByMonth"
+        cls.result = TestRequest(url=cls.url, request="GET", params=params, logger=Logger.std_logger)
+        if cls.result is not None:
+            try:
+                _raw = cls.result.json()
+            except JSONDecodeError as err:
+                print(f"Could not parse {cls.result.text} to JSON!\n{err}")
+            else:
+                cls.content = APIResponse.FromDict(all_elements=_raw)
+
+    @classmethod
+    def tearDownClass(cls):
+        if cls.result is not None:
+            cls.result.close()
+
+    @staticmethod
+    def RunAll():
+        pass
+
+    def test_Responded(self):
+        if self.result is not None:
+            self.assertTrue(self.result.ok)
+        else:
+            self.fail(f"No result from request to {self.url}")
+
+    def test_Succeeded(self):
+        if self.content is not None:
+            self.assertEqual(self.content.Status, ResponseStatus.SUCCESS)
+        else:
+            self.fail(f"No JSON content from request to {self.url}")
+
+    # def test_Correct(self):
+    #     if self.result is not None:
+    #         self.assertEqual(self.result.json()["data"], {"message":"hello, world"})
+    #     else:
+    #         self.fail(f"No result from request to {self.url}")
+
+class test_MonthlyGameUsage(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.url    : str
+        cls.result : Optional[requests.Response]
+        cls.content : Optional[APIResponse]    = None
+
+        params = {
+            "game_id" : "AQUALAB"
+        }
+        cls.url    = f"{_testing_cfg.ExternEndpoint}/getMonthlyGameUsage"
         Logger.Log(f"Sending request to {cls.url}", logging.INFO)
-        cls.result = TestRequest(url=cls.url, request="GET", timeout=2, logger=Logger.std_logger)
+        cls.result = TestRequest(url=cls.url, request="GET", params=params, timeout=2, logger=Logger.std_logger)
         if cls.result is not None:
             try:
                 _raw = cls.result.json()
@@ -77,7 +130,7 @@ class test_GameDatasets(TestCase):
         else:
             self.fail(f"No JSON content from request to {self.url}")
 
-class test_GameDatasetInfo(TestCase):
+class test_GameFileInfoByMonth(TestCase):
     def setUp(self):
         self.url    : str
         self.result : Optional[requests.Response]
@@ -88,7 +141,7 @@ class test_GameDatasetInfo(TestCase):
             "year"    : 2024,
             "month"   : 1
         }
-        self.url    = f"{_testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/01/2024/"
+        self.url    = f"{_testing_cfg.ExternEndpoint}/getGameFileInfoByMonth"
         Logger.Log(f"Sending request to {self.url}", logging.INFO)
         self.result = TestRequest(url=self.url, request="GET", params=params, timeout=3, logger=Logger.std_logger)
         if self.result is not None:
