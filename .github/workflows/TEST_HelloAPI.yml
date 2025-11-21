@@ -41,11 +41,12 @@ jobs:
       id: version-tag
       run: |
         echo "VERSION_TAG=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
+        echo "SRC_REVISION=$(git rev-list -1 HEAD -- src/)" >> $GITHUB_OUTPUT
     - name: Set up Config File
       uses: ./.github/actions/test_config
       with:
           endpoint: ${{ env.DEPLOY_URL }}
-          api_version: ${{ steps.version-tag.outputs.VERSION_TAG }}-${{ github.ref_name }}-${{ github.sha }}
+          api_version: ${{ steps.version-tag.outputs.VERSION_TAG }}-${{ github.ref_name }}-${{ steps.version-tag.outputs.SRC_REVISION }}
           verbose_output: "True"
 
   # 2. Build & configure remote environments
