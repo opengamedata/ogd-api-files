@@ -10,10 +10,11 @@ from flask_restful import reqparse
 class SanitizedParams:
     """Dumb struct to store the sanitized params from a request
     """
-    def __init__(self, game_id:Optional[str], year:int, month:int):
-        self._game_id : Optional[str] = game_id
-        self._year    : int           = year
-        self._month   : int           = month
+    def __init__(self, game_id:Optional[str], year:int, month:int, default_date:Optional[datetime.date]=None):
+        default_date = default_date if default_date is not None else datetime.date.today()
+        self._game_id : Optional[str] = SanitizedParams.sanitizeGameId(game_id) if game_id is not None else None
+        self._year    : int           = SanitizedParams.sanitizeYear(year, default_date=default_date)
+        self._month   : int           = SanitizedParams.sanitizeMonth(month, default_date=default_date)
     
     @property
     def GameID(self) -> Optional[str]:
@@ -33,30 +34,36 @@ class SanitizedParams:
         return game_id.upper()
 
     @staticmethod
-    def sanitizeYear(year:Union[int, str], default_date:datetime.date=datetime.date.today()) -> int:
+    def sanitizeYear(year:Union[int, str], default_date:datetime.date) -> int:
         ret_val: int
 
-        if isinstance(year, int):
-            ret_val = year
-        else:
+        if not isinstance(year, int):
             if re.search("^[1-9]+$", str(year)) is None:
-                ret_val = default_date.year
+                year = default_date.year
             else:
-                ret_val = int(str(year))
+                year = int(str(year))
+
+        if year < 2000 or year > datetime.date.today().year:
+            year = default_date.year
+
+        ret_val = year
 
         return ret_val
 
     @staticmethod
-    def sanitizeMonth(month:Union[int, str], default_date:datetime.date=datetime.date.today()) -> int:
+    def sanitizeMonth(month:Union[int, str], default_date:datetime.date) -> int:
         ret_val: int
 
-        if isinstance(month, int):
-            ret_val = month
-        else:
+        if not isinstance(month, int):
             if re.search("^[1-9]+$", str(month)) is None:
-                ret_val = default_date.month
+                month = default_date.month
             else:
-                ret_val = int(str(month))
+                month = int(str(month))
+        
+        if month < 1 or month > 12:
+            month = default_date.month
+        
+        ret_val = month
 
         return ret_val
 
@@ -73,17 +80,11 @@ class SanitizedParams:
         args : Dict[str, Any] = parser.parse_args()
 
         game_id : Optional[str] = SanitizedParams.sanitizeGameId(args.get("game_id", ""))
-        year    : int           = SanitizedParams.sanitizeYear(args.get("year",  default_date.year))
-        month   : int           = SanitizedParams.sanitizeMonth(args.get("month", default_date.month))
+        year    : int           = SanitizedParams.sanitizeYear(args.get("year",  default_date.year), default_date=default_date)
+        month   : int           = SanitizedParams.sanitizeMonth(args.get("month", default_date.month), default_date=default_date)
 
         if game_id == "":
             game_id = None
-        
-        if month < 1 or month > 12:
-            month = default_date.month
-
-        if year < 2000 or year > datetime.date.today().year:
-            year = default_date.year
 
         return SanitizedParams(game_id=game_id, year=year, month=month)
-        return { "game_id": game_id, "year": year, "month": month }
+        # return { "game_id": game_id, "year": year, "month": month }
