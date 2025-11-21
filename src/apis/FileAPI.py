@@ -45,7 +45,7 @@ class FileAPI:
         # Expected WSGIScriptAlias URL path is /data
         api = Api(app)
         api.add_resource(FileAPI.GameDatasets, '/games/<game_id>/datasets/list')
-        api.add_resource(FileAPI.GameDataset,  '/games/<game_id>/datasets/<month>/<year>/files/')
+        api.add_resource(FileAPI.GameDatasetInfo,  '/games/<game_id>/datasets/<month>/<year>/files/')
         FileAPI.server_config = settings
 
     class GameDatasets(Resource):
@@ -132,7 +132,7 @@ class FileAPI:
 
             return ret_val.AsFlaskResponse
 
-    class GameDataset(Resource):
+    class GameDatasetInfo(Resource):
         """
         Get info on the files that are available for the given game in the given month & year
 
