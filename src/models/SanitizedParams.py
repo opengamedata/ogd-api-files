@@ -80,8 +80,8 @@ class SanitizedParams:
         args : Dict[str, Any] = parser.parse_args()
 
         game_id : Optional[str] = SanitizedParams.sanitizeGameId(args.get("game_id", ""))
-        year    : int           = SanitizedParams.sanitizeYear(args.get("year",  default_date.year), default_date=default_date)
-        month   : int           = SanitizedParams.sanitizeMonth(args.get("month", default_date.month), default_date=default_date)
+        year    : int           = args.get("year",  default_date.year)
+        month   : int           = args.get("month", default_date.month)
 
         if game_id == "":
             game_id = None
