@@ -1,9 +1,9 @@
 # standard imports
 import datetime, re
-from typing import Optional
+from typing import Any, Dict, Optional
 
 # 3rd-party imports
-from flask import request
+from flask_restful import reqparse
 
 # local imports
 
@@ -38,9 +38,15 @@ class SanitizedParams:
     def FromRequest(default_date:datetime.date=datetime.date.today()) -> 'SanitizedParams':
 
         # Extract query string parameters
-        game_id = SanitizedParams.sanitizeGameId(request.args.get("game_id", default ="", type=str))
-        year = request.args.get("year",   default=default_date.year, type=int)
-        month = request.args.get("month", default=default_date.month, type=int)
+        parser = reqparse.RequestParser()
+        parser.add_argument("game_id", type=str, nullable=True, required=False, default="",                 location="args")
+        parser.add_argument("year",    type=int, nullable=True, required=False, default=default_date.year,  location="args")
+        parser.add_argument("month",   type=int, nullable=True, required=False, default=default_date.month, location="args")
+        args : Dict[str, Any] = parser.parse_args()
+
+        game_id = SanitizedParams.sanitizeGameId(args.get("game_id", ""))
+        year    = args.get("year")  or default_date.year
+        month   = args.get("month") or default_date.month
 
         if game_id == "":
             game_id = None

@@ -11,18 +11,20 @@ from ogd.apis.utils.APIResponse import APIResponse, ResponseStatus
 from ogd.apis.utils.TestRequest import TestRequest
 from ogd.common.utils.Logger import Logger
 # import locals
-from tests.schemas.FileAPITestConfigSchema import FileAPITestConfigSchema
-from tests.config.t_config import settings
+from tests.config import t_config
+from tests.FileAPITestConfig import FileAPITestConfig
 
-_testing_cfg = FileAPITestConfigSchema.FromDict(name="FileAPITestConfig", all_elements=settings, logger=None)
+_testing_cfg = FileAPITestConfig.FromDict(name="FileAPITestConfig", unparsed_elements=t_config.settings)
 _level       = logging.DEBUG if _testing_cfg.Verbose else logging.INFO
-Logger.std_logger.setLevel(_level)
 
 class test_Hello(TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.url     : str                         = f"{_testing_cfg.ExternEndpoint}/"
-        cls.result  : Optional[requests.Response] = TestRequest(url=cls.url, request="GET", params={}, logger=Logger.std_logger)
+        Logger.std_logger.setLevel(_level)
+
+        cls.url     : str                         = f"{_testing_cfg.ExternEndpoint}/hello"
+        Logger.Log(f"Sending request to {cls.url}", logging.INFO)
+        cls.result  : Optional[requests.Response] = TestRequest(url=cls.url, request="GET", params={}, timeout=2, logger=Logger.std_logger)
         cls.content : Optional[APIResponse]    = None
         if cls.result is not None:
             try:
@@ -55,7 +57,7 @@ class test_Hello(TestCase):
 
     def test_Correct(self):
         if self.content is not None:
-            self.assertEqual(self.content.Message, "SUCCESS: hello, world")
+            self.assertEqual(self.content.Message, "Hello! You GETted successfully!")
         else:
             self.fail(f"No JSON content from request to {self.url}")
 
@@ -63,6 +65,7 @@ class test_Version(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.url    : str                         = f"{_testing_cfg.ExternEndpoint}/version"
+        Logger.Log(f"Sending request to {cls.url}", logging.INFO)
         cls.result : Optional[requests.Response] = TestRequest(url=cls.url, request="GET", params={}, logger=Logger.std_logger)
         cls.content : Optional[APIResponse]    = None
         if cls.result is not None:
