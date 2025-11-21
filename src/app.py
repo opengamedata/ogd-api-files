@@ -70,6 +70,15 @@ Logger.InitializeLogger(level=logging.INFO, use_logfile=False)
 
 
 try:
+    from apis.FileAPI import FileAPI
+except ImportError as err:
+    _logImportErr(msg="Could not import File API:", err=err)
+except Exception as err:
+    _logImportErr(msg="Could not import File API, general error:", err=err)
+else:
+    FileAPI.register(application, settings=_server_cfg)
+
+try:
     from apis.LegacyWebAPI import LegacyWebAPI
 except ImportError as err:
     _logImportErr(msg="Could not import Legacy Web API:", err=err)
