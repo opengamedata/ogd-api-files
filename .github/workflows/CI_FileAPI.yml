@@ -37,8 +37,8 @@ jobs:
     - name: Set up Config File
       uses: ./.github/actions/FileAPI_config
       with:
-          api_base: ${{ env.DEPLOY_DIR }}
-          api_version: ${{ steps.version-tag.outputs.VERSION_TAG }}-${{ github.ref_name }}-${{ github.sha }}
+          remote_app_path: ${{ env.DEPLOY_DIR }}
+          api_version:     ${{ steps.version-tag.outputs.VERSION_TAG }}-${{ github.ref_name }}-${{ github.sha }}
 
     # 2. Build 
 
