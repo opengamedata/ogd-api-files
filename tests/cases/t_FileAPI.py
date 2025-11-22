@@ -69,11 +69,11 @@ class test_GameDatasets(TestCase):
             self.assertIn("game_id", self.content.Value.keys(), "Response did not contain game_id")
             self.assertEqual(self.content.Value.get("game_id", "NOT FOUND"), "AQUALAB")
             # check sessions element
-            self.assertIn("sessions", self.content.Value.keys(), "Response did not contain sessions")
-            sessions = self.content.Value.get('sessions', [])
-            self.assertIsInstance(sessions, list)
-            self.assertGreaterEqual(len(sessions), 2) # Aqualab should definitely have more than 2 months
-            self.assertEqual(sessions[1], _expected_data)
+            self.assertIn("datasets", self.content.Value.keys(), "Response did not contain datasets")
+            datasets = self.content.Value.get('datasets', [])
+            self.assertIsInstance(datasets, list)
+            self.assertGreaterEqual(len(datasets), 2) # Aqualab should definitely have more than 2 months
+            self.assertEqual(datasets[1], _expected_data)
         else:
             self.fail(f"No JSON content from request to {self.url}")
 
