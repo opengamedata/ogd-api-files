@@ -23,7 +23,7 @@ jobs:
     name: Run LegacyWebAPI Testbed
     runs-on: ubuntu-22.04
     concurrency:
-      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}
+      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-legacyweb
       cancel-in-progress: false
 
     steps:

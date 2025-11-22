@@ -23,7 +23,7 @@ jobs:
     name: Run HelloAPI Testbed
     runs-on: ubuntu-22.04
     concurrency:
-      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}
+      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-hello
       cancel-in-progress: false
 
     steps:
