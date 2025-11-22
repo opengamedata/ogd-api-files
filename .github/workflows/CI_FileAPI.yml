@@ -48,7 +48,7 @@ jobs:
       with:
         username: ${{ secrets.VPN_USER }}
         password: ${{ secrets.VPN_PASS }}
-        endpoint: "uwmadison.vpn.wisc.edu"
+        endpoint: "soe.vpn.wisc.edu"
 
     - name: Deploy to Server
       uses: opengamedata/actions-deploy-project@v1.1
