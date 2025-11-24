@@ -246,8 +246,8 @@ class FileAPI:
 
                 # Convention for branch naming is lower-case with dashes,
                 # while game IDs are usually upper-case with underscores, so make sure we do the conversion
-                file_info["detectors_link"] = f"{GITHUB_BASE_URL}{_revision}/games/{_branch_name}/detectors" if _revision else None
-                file_info["features_link"]  = f"{GITHUB_BASE_URL}{_revision}/games/{_branch_name}/features"  if _revision else None
+                file_info["detectors_link"] = f"{GITHUB_BASE_URL}{_revision}/src/ogd/games/{_branch_name.upper()}/detectors" if _revision else None
+                file_info["features_link"]  = f"{GITHUB_BASE_URL}{_revision}/src/ogd/games/{_branch_name.upper()}/features"  if _revision else None
                 file_info["found_matching_range"] = True
 
                 ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=file_info)

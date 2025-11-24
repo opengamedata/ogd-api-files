@@ -112,11 +112,11 @@ class test_GameDatasetInfo(TestCase):
 
     def test_Correct(self):
         expected_data = {
-            "detectors_link":"https://github.com/opengamedata/opengamedata-core/tree/df72162/games/aqualab/detectors",
+            "detectors_link":"https://github.com/opengamedata/opengamedata-core/tree/df72162/src/ogd/games/AQUALAB/detectors",
             "events_codespace":"https://codespaces.new/opengamedata/opengamedata-samples/tree/aqualab?quickstart=1&devcontainer_path=.devcontainer%2Fevent-template%2Fdevcontainer.json",
             "events_file":"https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_all-events.zip",
             "events_template":"https://github.com/opengamedata/opengamedata-templates/tree/aqualab",
-            "features_link":"https://github.com/opengamedata/opengamedata-core/tree/df72162/games/aqualab/features",
+            "features_link":"https://github.com/opengamedata/opengamedata-core/tree/df72162/src/ogd/games/AQUALAB/features",
             "first_month":1,
             "first_year":2024,
             "found_matching_range":True,
