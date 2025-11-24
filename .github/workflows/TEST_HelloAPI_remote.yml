@@ -1,5 +1,5 @@
 # Workflow to test the "HelloAPI" portion of Files API on the CI server
-name: Testbed - HelloAPI
+name: Remote Testbed - HelloAPI
 run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' && github.event.head_commit.message || 'Manual Run') }}
 on:
   workflow_dispatch:
@@ -20,14 +20,17 @@ env:
   LOCAL_TEST_DIR: ./tests/cases/apis/HelloAPI/remote/
 
 jobs:
-  run_testbed_hello:
-    name: Run HelloAPI Testbed
+  run_testbed_hello_remote:
+    name: Run HelloAPI Remote Testbed
     runs-on: ubuntu-22.04
     concurrency:
       group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-hello
       cancel-in-progress: false
 
     steps:
+
+    - name: Announce testing
+      run: echo "Testing HelloAPI endpoint at ${{ env.DEPLOY_URL }}"
 
   # 1. Local checkout 
     - name: Checkout repository
@@ -57,9 +60,8 @@ jobs:
       run: python -m unittest discover -s ${{ env.LOCAL_TEST_DIR }}  -p "t_*.py" -t ./
 
   # 4. Cleanup & complete
-    - name: Announce test completed
-      run: echo "Tested HelloAPI endpoint at ${{ env.DEPLOY_URL }}"
     - name: Upload logs as artifacts
       uses: actions/upload-artifact@v4
       with:
+        name: "test-log"
         path: ./*.log
