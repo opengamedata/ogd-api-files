@@ -41,10 +41,41 @@ class FileAPI:
         """
         # Expected WSGIScriptAlias URL path is /data
         api = Api(app)
+        api.add_resource(FileAPI.GameList, '/games/list')
         api.add_resource(FileAPI.GameDatasets, '/games/<game_id>/datasets/list')
         api.add_resource(FileAPI.GameDatasetInfo,  '/games/<game_id>/datasets/<month>/<year>/files/')
         FileAPI.server_config = settings
 
+    class GameList(Resource):
+        """
+        Get the per-month number of sessions for a given game
+
+        Inputs:
+        - Game ID
+        Uses:
+        - Index file list
+        Outputs:
+        - Session count for each month of game's data
+        """
+        def get(self):
+            ret_val = APIResponse.Default(req_type=RESTType.GET)
+
+            # Pull the file list data into a dictionary
+            file_list_response                             = url_request.urlopen(FileAPI.server_config.FileListURL)
+            file_list_json     : Dict[str, Dict[str, Any]] = json.loads(file_list_response.read())
+            file_list          : DatasetRepositoryConfig   = DatasetRepositoryConfig.FromDict(name="file_list", unparsed_elements=file_list_json)
+
+            # If the given game isn't in our dictionary, or our dictionary doesn't have any date ranges for this game
+            if file_list.Games is None or len(file_list.Games) < 1:
+                ret_val.ServerErrored(msg=f"Game list not found, or had no datasets listed")
+                return ret_val.AsFlaskResponse
+
+            game_ids = [game for game in file_list.Games.keys()]
+
+            responseData = { "game_ids": game_ids }
+            ret_val.RequestSucceeded(msg="Retrieved monthly game usage", val=responseData)
+
+            return ret_val.AsFlaskResponse
 
     class GameDatasets(Resource):
         """
