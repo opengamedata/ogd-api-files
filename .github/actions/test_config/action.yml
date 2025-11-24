@@ -34,6 +34,9 @@ runs:
     - name: Set Endpoint Location
       run: sed -i 's@ENDPOINT_PLACEHOLDER@${{inputs.endpoint}}@g'            ${{ inputs.config_path }}/t_config.py
       shell: bash
+    - name: Check the config was successful
+      run: cat ${{ inputs.config_path }}/t_config.py
+      shell: bash
     - name: Set API Version
       run: sed -i 's@VERSION_PLACEHOLDER@${{inputs.api_version}}@g'          ${{ inputs.config_path }}/t_config.py
       shell: bash
