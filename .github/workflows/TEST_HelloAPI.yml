@@ -17,7 +17,7 @@ env:
   DEPLOY_HOST: ${{ vars.OGD_STAGING_HOST }}
   DEPLOY_DIR:                              ${{ vars.API_BASE_PATH }}/${{ github.event.repository.name }}/${{ github.ref_name }}
   DEPLOY_URL:  ${{ vars.OGD_STAGING_HOST }}/${{ vars.API_BASE_URL }}/${{ github.event.repository.name }}/${{ github.ref_name }}/app.wsgi
-  LOCAL_TEST_DIR: ./tests/cases/t_HelloAPI.py
+  LOCAL_TEST_DIR: ./tests/cases/apis/HelloAPI/remote/
 
 jobs:
   run_testbed_hello:
@@ -54,7 +54,7 @@ jobs:
 
   # 3. Perform export
     - name: Execute testbed
-      run: python -m unittest ${{ env.LOCAL_TEST_DIR }} 
+      run: python -m unittest discover -s ${{ env.LOCAL_TEST_DIR }}  -p "t_*.py" -t ./
 
   # 4. Cleanup & complete
     - name: Announce test completed
