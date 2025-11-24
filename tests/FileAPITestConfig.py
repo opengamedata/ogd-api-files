@@ -82,7 +82,7 @@ class FileAPITestConfig(TestConfig):
             valid_keys=["EXTERN_ENDPOINT"],
             to_type=str,
             default_value=FileAPITestConfig._DEFAULT_ENDPOINT,
-            remove_target=True,
+            remove_target=False,
             schema_name=schema_name
         )
 
@@ -97,7 +97,7 @@ class FileAPITestConfig(TestConfig):
             valid_keys=["API_VERSION"],
             to_type=str,
             default_value=FileAPITestConfig._DEFAULT_API_VERSION,
-            remove_target=True,
+            remove_target=False,
             schema_name=schema_name
         )
 
