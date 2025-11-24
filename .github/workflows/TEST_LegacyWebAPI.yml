@@ -17,7 +17,7 @@ env:
   DEPLOY_HOST: ${{ vars.OGD_STAGING_HOST }}
   DEPLOY_DIR:                              ${{ vars.API_BASE_PATH }}/${{ github.event.repository.name }}/${{ github.ref_name }}
   DEPLOY_URL:  ${{ vars.OGD_STAGING_HOST }}/${{ vars.API_BASE_URL }}/${{ github.event.repository.name }}/${{ github.ref_name }}/app.wsgi
-  LOCAL_TEST_DIR: ./tests/cases/t_LegacyWebAPI.py 
+  LOCAL_TEST_DIR: ./tests/cases/apis/LegacyWebAPI/t_LegacyWebAPI.py 
 
 jobs:
   run_testbed_files:
