@@ -41,6 +41,8 @@ jobs:
       uses: opengamedata/actions-setup-ogd-py-dependencies@v1.0
       with:
         python_version: ${{ vars.OGD_PYTHON_VERSION }}
+    - name: Local self-install
+      run: python -m pip install -e .
     - name: Get current version tag
       id: version-tag
       run: |
