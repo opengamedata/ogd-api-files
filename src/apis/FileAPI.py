@@ -9,7 +9,7 @@ from flask import Flask, current_app
 from flask_restful import Resource, Api
 
 # import ogd libraries
-from ogd.apis.utils.APIResponse import APIResponse, RESTType
+from ogd.apis.utils.APIResponse import APIResponse, RESTType, ResponseStatus
 
 # import ogd libraries
 from ogd.common.configs.storage.DatasetRepositoryConfig import DatasetRepositoryConfig
@@ -41,9 +41,35 @@ class FileAPI:
         """
         # Expected WSGIScriptAlias URL path is /data
         api = Api(app)
+        api.add_resource(FileAPI.FakeHello, '/games/<game_id>/hello')
         api.add_resource(FileAPI.GameDatasets, '/games/<game_id>/datasets/list')
         api.add_resource(FileAPI.GameDatasetInfo,  '/games/<game_id>/datasets/<month>/<year>/files/')
         FileAPI.server_config = settings
+
+    class FakeHello(Resource):
+        def get(self, game_id):
+            ret_val = APIResponse(
+                req_type = RESTType.GET,
+                val      = None,
+                msg      = f"Hello {game_id}! You GETted successfully!",
+                status   = ResponseStatus.SUCCESS)
+            return ret_val.AsDict
+
+        def post(self, game_id):
+            ret_val = APIResponse(
+                req_type = RESTType.POST,
+                val      = None,
+                msg      = f"Hello {game_id}! You POSTed successfully!",
+                status   = ResponseStatus.SUCCESS)
+            return ret_val.AsDict
+
+        def put(self, game_id):
+            ret_val = APIResponse(
+                req_type = RESTType.PUT,
+                val      = None,
+                msg      = f"Hello {game_id}! You PUTted successfully!",
+                status   = ResponseStatus.SUCCESS)
+            return ret_val.AsDict
 
     class GameDatasets(Resource):
         """
