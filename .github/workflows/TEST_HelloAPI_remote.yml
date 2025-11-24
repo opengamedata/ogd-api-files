@@ -1,32 +1,36 @@
 # Workflow to test the "HelloAPI" portion of Files API on the CI server
-name: Testbed - HelloAPI
+name: Remote Testbed - HelloAPI
 run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' && github.event.head_commit.message || 'Manual Run') }}
 on:
   workflow_dispatch:
   workflow_call:
   push:
     paths:
-    - '.github/workflows/TEST_HelloAPI.yml'
+    - '.github/workflows/TEST_HelloAPI_remote.yml'
     - '.github/actions/test_config/**'
-    - 'tests/cases/t_HelloAPI.py'
+    - 'tests/cases/apis/HelloAPI/**'
     - 'tests/config/**'
-    - 'tests/schemas/**'
+    - 'tests/FileAPITestConfig.py'
     - 'requirements.txt'
 
 env:
   DEPLOY_HOST: ${{ vars.OGD_STAGING_HOST }}
   DEPLOY_DIR:                              ${{ vars.API_BASE_PATH }}/${{ github.event.repository.name }}/${{ github.ref_name }}
   DEPLOY_URL:  ${{ vars.OGD_STAGING_HOST }}/${{ vars.API_BASE_URL }}/${{ github.event.repository.name }}/${{ github.ref_name }}/app.wsgi
+  LOCAL_TEST_DIR: ./tests/cases/apis/HelloAPI/remote/
 
 jobs:
-  run_testbed_hello:
-    name: Run HelloAPI Testbed
+  run_testbed_hello_remote:
+    name: Run HelloAPI Remote Testbed
     runs-on: ubuntu-22.04
     concurrency:
-      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}
+      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-hello
       cancel-in-progress: false
 
     steps:
+
+    - name: Announce testing
+      run: echo "Testing HelloAPI endpoint at ${{ env.DEPLOY_URL }}"
 
   # 1. Local checkout 
     - name: Checkout repository
@@ -41,24 +45,23 @@ jobs:
       id: version-tag
       run: |
         echo "VERSION_TAG=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
-        echo "SRC_REVISION=$(git rev-list -1 HEAD -- src/)" >> $GITHUB_OUTPUT
+      # echo "SRC_REVISION=$(git rev-list -1 HEAD -- src/)" >> $GITHUB_OUTPUT
     - name: Set up Config File
       uses: ./.github/actions/test_config
       with:
           endpoint: ${{ env.DEPLOY_URL }}
-          api_version: ${{ steps.version-tag.outputs.VERSION_TAG }}-${{ github.ref_name }}-${{ steps.version-tag.outputs.SRC_REVISION }}
+          api_version: ${{ steps.version-tag.outputs.VERSION_TAG }}-${{ github.ref_name }}-${{ github.sha }}
           verbose_output: "True"
 
   # 2. Build & configure remote environments
 
   # 3. Perform export
     - name: Execute testbed
-      run: python -m unittest ./tests/cases/t_HelloAPI.py 
+      run: python -m unittest discover -s ${{ env.LOCAL_TEST_DIR }}  -p "t_*.py" -t ./
 
   # 4. Cleanup & complete
-    - name: Announce test completed
-      run: echo "Tested HelloAPI endpoint at ${{ env.DEPLOY_URL }}"
     - name: Upload logs as artifacts
       uses: actions/upload-artifact@v4
       with:
+        name: "test-log"
         path: ./*.log

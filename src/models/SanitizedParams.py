@@ -1,6 +1,6 @@
 # standard imports
 import datetime, re
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 # 3rd-party imports
 from flask_restful import reqparse
@@ -10,10 +10,11 @@ from flask_restful import reqparse
 class SanitizedParams:
     """Dumb struct to store the sanitized params from a request
     """
-    def __init__(self, game_id:Optional[str], year:int, month:int):
-        self._game_id : Optional[str] = game_id
-        self._year    : int           = year
-        self._month   : int           = month
+    def __init__(self, game_id:Optional[str], year:int, month:int, default_date:Optional[datetime.date]=None):
+        default_date = default_date if default_date is not None else datetime.date.today()
+        self._game_id : Optional[str] = SanitizedParams.sanitizeGameId(game_id) if game_id is not None else None
+        self._year    : int           = SanitizedParams.sanitizeYear(year, default_date=default_date)
+        self._month   : int           = SanitizedParams.sanitizeMonth(month, default_date=default_date)
     
     @property
     def GameID(self) -> Optional[str]:
@@ -27,10 +28,44 @@ class SanitizedParams:
 
     # If the given game_id contains allowed characters, return it in UPPERCASE, otherwise return empty string
     @staticmethod
-    def sanitizeGameId(game_id: str) -> str:
+    def sanitizeGameId(game_id:str) -> str:
         if re.search("^[A-Za-z_]+$", game_id) is None:
             game_id = ""
         return game_id.upper()
+
+    @staticmethod
+    def sanitizeYear(year:Union[int, str], default_date:datetime.date) -> int:
+        ret_val: int
+
+        if not isinstance(year, int):
+            if re.search("^[1-9]+$", str(year)) is None:
+                year = default_date.year
+            else:
+                year = int(str(year))
+
+        if year < 2000 or year > datetime.date.today().year:
+            year = default_date.year
+
+        ret_val = year
+
+        return ret_val
+
+    @staticmethod
+    def sanitizeMonth(month:Union[int, str], default_date:datetime.date) -> int:
+        ret_val: int
+
+        if not isinstance(month, int):
+            if re.search("^[1-9]+$", str(month)) is None:
+                month = default_date.month
+            else:
+                month = int(str(month))
+        
+        if month < 1 or month > 12:
+            month = default_date.month
+        
+        ret_val = month
+
+        return ret_val
 
     # Shared utility function to retrieve game_id, year, and month from the request's query string.
     # Defaults are used if a value was not given or is invalid
@@ -44,18 +79,12 @@ class SanitizedParams:
         parser.add_argument("month",   type=int, nullable=True, required=False, default=default_date.month, location="args")
         args : Dict[str, Any] = parser.parse_args()
 
-        game_id = SanitizedParams.sanitizeGameId(args.get("game_id", ""))
-        year    = args.get("year")  or default_date.year
-        month   = args.get("month") or default_date.month
+        game_id : Optional[str] = SanitizedParams.sanitizeGameId(args.get("game_id", ""))
+        year    : int           = args.get("year",  default_date.year)
+        month   : int           = args.get("month", default_date.month)
 
         if game_id == "":
             game_id = None
-        
-        if month < 1 or month > 12:
-            month = default_date.month
-
-        if year < 2000 or year > datetime.date.today().year:
-            year = default_date.year
 
         return SanitizedParams(game_id=game_id, year=year, month=month)
-        return { "game_id": game_id, "year": year, "month": month }
+        # return { "game_id": game_id, "year": year, "month": month }

@@ -9,8 +9,12 @@ inputs:
     description: "The version of the API code."
     required: false
     default: 'Testing'
-  app_path:
-    description: "Local path to the wsgi app being deployed"
+  remote_app_path:
+    description: "Remote directory where WSGI app will be deployed, not including the file itself"
+    required: true
+    default: 'var/www/wsgi-bin/opengamedata/apis/files/'
+  local_app_path:
+    description: "Local path to the the WSGI app to be deployed"
     required: true
     default: 'src/app.wsgi'
   config_path:
@@ -24,8 +28,8 @@ runs:
       run: cp ${{ inputs.config_path }}/config.py.template ${{ inputs.config_path }}/config.py 
       shell: bash
     - name: Set API Version
-      run: sed -i 's@VERSION_PLACEHOLDER@${{inputs.api_version}}@g' ${{ inputs.config_path }}/config.py
+      run: sed -i 's@VERSION_PLACEHOLDER@${{inputs.api_version}}@g'  ${{ inputs.config_path }}/config.py
       shell: bash
     - name: Set API Base Path
-      run: sed -i 's@placeholder home@${{inputs.api_base}}@g'       ${{ inputs.app_path }}
+      run: sed -i 's@placeholder home@${{inputs.remote_app_path}}@g' ${{ inputs.local_app_path }}
       shell: bash

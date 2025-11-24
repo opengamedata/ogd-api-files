@@ -18,21 +18,16 @@ _testing_cfg = FileAPITestConfig.FromDict(name="FileAPITestConfig", unparsed_ele
 _level       = logging.DEBUG if _testing_cfg.Verbose else logging.INFO
 Logger.std_logger.setLevel(_level)
 
-@unittest.skip("This endpoint is not in use; needs access to database")
-class test_GameUsageByMonth(TestCase):
+class test_GameList(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.url    : str
         cls.result : Optional[requests.Response]
         cls.content : Optional[APIResponse]    = None
 
-        params = {
-            "game_id" : "AQUALAB",
-            "year"    : 2024,
-            "month"   : 1
-        }
-        cls.url    = f"{_testing_cfg.ExternEndpoint}/getGameUsageByMonth"
-        cls.result = TestRequest(url=cls.url, request="GET", params=params, logger=Logger.std_logger)
+        cls.url    = f"{_testing_cfg.ExternEndpoint}/games/list"
+        Logger.Log(f"Sending request to {cls.url}", logging.INFO)
+        cls.result = TestRequest(url=cls.url, request="GET", timeout=2, logger=Logger.std_logger)
         if cls.result is not None:
             try:
                 _raw = cls.result.json()
@@ -62,25 +57,29 @@ class test_GameUsageByMonth(TestCase):
         else:
             self.fail(f"No JSON content from request to {self.url}")
 
-    # def test_Correct(self):
-    #     if self.result is not None:
-    #         self.assertEqual(self.result.json()["data"], {"message":"hello, world"})
-    #     else:
-    #         self.fail(f"No result from request to {self.url}")
+    def test_Correct(self):
+        known_games = ["AQUALAB", "BLOOM"]
+        if self.content is not None:
+            self.assertIsInstance(self.content.Value, dict)
+            # check game ID
+            self.assertIn("game_ids", self.content.Value.keys(), "Response did not contain game_ids")
+            game_ids = self.content.Value.get("game_ids")
+            self.assertIsNotNone(game_ids, "Response had null game_ids")
+            for game in known_games:
+                self.assertIn(game, game_ids, f"No datasets for {game}")
+        else:
+            self.fail(f"No JSON content from request to {self.url}")
 
-class test_MonthlyGameUsage(TestCase):
+class test_GameDatasets(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.url    : str
         cls.result : Optional[requests.Response]
         cls.content : Optional[APIResponse]    = None
 
-        params = {
-            "game_id" : "AQUALAB"
-        }
-        cls.url    = f"{_testing_cfg.ExternEndpoint}/getMonthlyGameUsage"
+        cls.url    = f"{_testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/list"
         Logger.Log(f"Sending request to {cls.url}", logging.INFO)
-        cls.result = TestRequest(url=cls.url, request="GET", params=params, timeout=2, logger=Logger.std_logger)
+        cls.result = TestRequest(url=cls.url, request="GET", timeout=2, logger=Logger.std_logger)
         if cls.result is not None:
             try:
                 _raw = cls.result.json()
@@ -122,28 +121,23 @@ class test_MonthlyGameUsage(TestCase):
             self.assertIn("game_id", self.content.Value.keys(), "Response did not contain game_id")
             self.assertEqual(self.content.Value.get("game_id", "NOT FOUND"), "AQUALAB")
             # check sessions element
-            self.assertIn("sessions", self.content.Value.keys(), "Response did not contain sessions")
-            sessions = self.content.Value.get('sessions', [])
-            self.assertIsInstance(sessions, list)
-            self.assertGreaterEqual(len(sessions), 2) # Aqualab should definitely have more than 2 months
-            self.assertEqual(sessions[1], _expected_data)
+            self.assertIn("datasets", self.content.Value.keys(), "Response did not contain datasets")
+            datasets = self.content.Value.get('datasets', [])
+            self.assertIsInstance(datasets, list)
+            self.assertGreaterEqual(len(datasets), 2) # Aqualab should definitely have more than 2 months
+            self.assertEqual(datasets[1], _expected_data)
         else:
             self.fail(f"No JSON content from request to {self.url}")
 
-class test_GameFileInfoByMonth(TestCase):
+class test_GameDatasetInfo(TestCase):
     def setUp(self):
         self.url    : str
         self.result : Optional[requests.Response]
         self.content : Optional[APIResponse]    = None
 
-        params = {
-            "game_id" : "AQUALAB",
-            "year"    : 2024,
-            "month"   : 1
-        }
-        self.url    = f"{_testing_cfg.ExternEndpoint}/getGameFileInfoByMonth"
+        self.url    = f"{_testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/1/2024/files/"
         Logger.Log(f"Sending request to {self.url}", logging.INFO)
-        self.result = TestRequest(url=self.url, request="GET", params=params, timeout=3, logger=Logger.std_logger)
+        self.result = TestRequest(url=self.url, request="GET", timeout=3, logger=Logger.std_logger)
         if self.result is not None:
             try:
                 _raw = self.result.json()
@@ -170,11 +164,11 @@ class test_GameFileInfoByMonth(TestCase):
 
     def test_Correct(self):
         expected_data = {
-            "detectors_link":"https://github.com/opengamedata/opengamedata-core/tree/df72162/games/aqualab/detectors",
+            "detectors_link":"https://github.com/opengamedata/opengamedata-core/tree/42597ba/src/ogd/games/AQUALAB/detectors",
             "events_codespace":"https://codespaces.new/opengamedata/opengamedata-samples/tree/aqualab?quickstart=1&devcontainer_path=.devcontainer%2Fevent-template%2Fdevcontainer.json",
             "events_file":"https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_all-events.zip",
             "events_template":"https://github.com/opengamedata/opengamedata-templates/tree/aqualab",
-            "features_link":"https://github.com/opengamedata/opengamedata-core/tree/df72162/games/aqualab/features",
+            "features_link":"https://github.com/opengamedata/opengamedata-core/tree/42597ba/src/ogd/games/AQUALAB/features",
             "first_month":1,
             "first_year":2024,
             "found_matching_range":True,

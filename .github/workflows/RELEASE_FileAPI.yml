@@ -30,8 +30,8 @@ jobs:
     - name: Set up Config File
       uses: ./.github/actions/FileAPI_config
       with:
-          api_version: ${{ github.event.release.tag_name }}
-          api_base: ${{ env.DEPLOY_DIR }}
+          remote_app_path: ${{ env.DEPLOY_DIR }}
+          api_version:     ${{ github.event.release.tag_name }}
 
     # 2. Build 
 
@@ -59,12 +59,12 @@ jobs:
     - name: Announce deploy
       run: echo "Deployed API to ${{ env.DEPLOY_URL }}"
 
-  testbed_hello:
-    name: HelloAPI Testbed
+  testbed_hello_remote:
+    name: HelloAPI Remote Testbed
     needs: production_deploy
-    uses: ./.github/workflows/TEST_HelloAPI.yml
+    uses: ./.github/workflows/TEST_HelloAPI_remote.yml
 
   testbed_fileapi:
     name: FileAPI Testbed
     needs: production_deploy
-    uses: ./.github/workflows/TEST_HelloAPI.yml
+    uses: ./.github/workflows/TEST_FileAPI.yml
