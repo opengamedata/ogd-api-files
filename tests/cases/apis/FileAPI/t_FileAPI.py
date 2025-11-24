@@ -83,7 +83,7 @@ class test_GameDatasetInfo(TestCase):
         self.result : Optional[requests.Response]
         self.content : Optional[APIResponse]    = None
 
-        self.url    = f"{_testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/01/2024/files/files/files/files/files/files/files/files/"
+        self.url    = f"{_testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/01/2024/files/"
         Logger.Log(f"Sending request to {self.url}", logging.INFO)
         self.result = TestRequest(url=self.url, request="GET", timeout=3, logger=Logger.std_logger)
         if self.result is not None:
