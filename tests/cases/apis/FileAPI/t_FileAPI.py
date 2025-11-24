@@ -83,7 +83,7 @@ class test_GameDatasetInfo(TestCase):
         self.result : Optional[requests.Response]
         self.content : Optional[APIResponse]    = None
 
-        self.url    = f"{_testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/01/2024/files/"
+        self.url    = f"{_testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/1/2024/files/"
         Logger.Log(f"Sending request to {self.url}", logging.INFO)
         self.result = TestRequest(url=self.url, request="GET", timeout=3, logger=Logger.std_logger)
         if self.result is not None:
@@ -112,11 +112,11 @@ class test_GameDatasetInfo(TestCase):
 
     def test_Correct(self):
         expected_data = {
-            "detectors_link":"https://github.com/opengamedata/opengamedata-core/tree/f1d9c33/src/ogd/games/AQUALAB/detectors",
+            "detectors_link":"https://github.com/opengamedata/opengamedata-core/tree/42597ba/src/ogd/games/AQUALAB/detectors",
             "events_codespace":"https://codespaces.new/opengamedata/opengamedata-samples/tree/aqualab?quickstart=1&devcontainer_path=.devcontainer%2Fevent-template%2Fdevcontainer.json",
             "events_file":"https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_all-events.zip",
             "events_template":"https://github.com/opengamedata/opengamedata-templates/tree/aqualab",
-            "features_link":"https://github.com/opengamedata/opengamedata-core/tree/f1d9c33/src/ogd/games/AQUALAB/features",
+            "features_link":"https://github.com/opengamedata/opengamedata-core/tree/42597ba/src/ogd/games/AQUALAB/features",
             "first_month":1,
             "first_year":2024,
             "found_matching_range":True,

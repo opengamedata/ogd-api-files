@@ -1,10 +1,13 @@
 # import standard libraries
 import json
+import zipfile
 from datetime import date, timedelta
+from io import BytesIO
 from typing import Any, Dict, Optional
 from urllib import request as url_request
 
 # import 3rd-party libraries
+import requests
 from flask import Flask, current_app
 from flask_restful import Resource, Api
 
@@ -43,8 +46,8 @@ class FileAPI:
         api = Api(app)
         api.add_resource(FileAPI.GameDatasets, '/games/<game_id>/datasets/list')
         api.add_resource(FileAPI.GameDatasetInfo,  '/games/<game_id>/datasets/<month>/<year>/files/')
+        api.add_resource(FileAPI.PlayerFile,  '/games/<game_id>/datasets/<month>/<year>/files/player')
         FileAPI.server_config = settings
-
 
     class GameDatasets(Resource):
         """
@@ -226,6 +229,77 @@ class FileAPI:
                 file_info["found_matching_range"] = True
 
                 ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=file_info)
+            else:
+                ret_val.RequestErrored(msg=f"Dataset key {_matched_dataset.Key} was invalid.")
+
+            return ret_val.AsFlaskResponse
+
+    class PlayerFile(Resource):
+        """
+        Get the specific requested file
+
+        Inputs:
+        - Game ID
+        - Year
+        - Month
+        Outputs:
+        - DatasetSchema of most recently-exported dataset for game in month
+        """
+        def get(self, game_id, month, year):
+            ret_val = APIResponse.Default(req_type=RESTType.GET)
+
+            last_month = date.today().replace(day=1) - timedelta(days=1)
+            sanitized_request = SanitizedParams(game_id=game_id, year=year, month=month, default_date=last_month)
+
+        # 1. Get the list of datasets available on the server, for given game.
+            file_list_response                             = url_request.urlopen(FileAPI.server_config.FileListURL)
+            file_list_json     : Dict[str, Dict[str, Any]] = json.loads(file_list_response.read())
+            # HACK to make sure we've got a remote_url, working around bug in RepositoryIndexingConfig FromDict(...) implementation.
+            if "CONFIG" in file_list_json.keys() and isinstance(file_list_json["CONFIG"], dict):
+                if not "remote_url" in file_list_json["CONFIG"].keys():
+                    file_list_json["CONFIG"]["remote_url"] = file_list_json["CONFIG"].get("files_base", "https://opengamedata.fielddaylab.wisc.edu/")
+                if not "templates_url" in file_list_json["CONFIG"].keys():
+                    file_list_json["CONFIG"]["templates_url"] = file_list_json["CONFIG"].get("templates_base", "https://github.com/opengamedata/opengamedata-templates")
+            file_list          : DatasetRepositoryConfig   = DatasetRepositoryConfig.FromDict(name="file_list", unparsed_elements=file_list_json)
+            game_datasets      : DatasetCollectionSchema   = file_list.Games.get(sanitized_request.GameID or "NO GAME REQUESTED", DatasetCollectionSchema.Default())
+
+            # If we couldn't find the requested game in file_list.json, or the game didn't have any date ranges, skip.
+            if (sanitized_request.GameID is None):
+                ret_val.RequestErrored(msg=f"Bad GameID '{sanitized_request.GameID}'")
+                return ret_val.AsFlaskResponse
+            elif (len(game_datasets.Datasets) == 0):
+                ret_val.ServerErrored(msg=f"GameID '{sanitized_request.GameID}' did not have available datasets")
+                return ret_val.AsFlaskResponse
+            # Else, continue on.
+
+        # 2. Search for the most recently modified dataset that contains the requested month and year
+            _matched_dataset : Optional[DatasetSchema] = None
+            # Find the best match of a dataset to the requested month-year.
+            # If there was no requested month-year, we skip this step.
+            for _key, _dataset_schema in game_datasets.Datasets.items():
+                if _dataset_schema.Key.DateFrom and _dataset_schema.Key.DateTo:
+                    # If this range contains the given year & month
+                    if (sanitized_request.Year >= _dataset_schema.Key.DateFrom.year \
+                    and sanitized_request.Month >= _dataset_schema.Key.DateFrom.month \
+                    and sanitized_request.Year <= _dataset_schema.Key.DateTo.year \
+                    and sanitized_request.Month <= _dataset_schema.Key.DateTo.month):
+                        if _dataset_schema.IsNewerThan(_matched_dataset):
+                            _matched_dataset = _dataset_schema
+                else:
+                    current_app.logger.debug(f"Dataset key {_dataset_schema.Key} was invalid.")
+
+            if _matched_dataset is None:
+                _matched_dataset = list(game_datasets.Datasets.values())[-1]
+            if _matched_dataset.Key.DateFrom and _matched_dataset.Key.DateTo:
+                player_file_link = f"{file_list.RemoteURL}{_matched_dataset.PlayersFile}" if _matched_dataset.PlayersFile is not None else None
+                if player_file_link:
+                    player_list_response = requests.get(player_file_link, stream=True)
+                    with zipfile.ZipFile(BytesIO(player_list_response.content)) as zipped:
+                        
+
+                    ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=file_info)
+                else:
+                    ret_val.RequestErrored(msg=f"Dataset for {game_id} from {f'{month:02}/{year:04}'} was not found.")
             else:
                 ret_val.RequestErrored(msg=f"Dataset key {_matched_dataset.Key} was invalid.")
 
