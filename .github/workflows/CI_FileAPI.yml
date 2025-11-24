@@ -65,10 +65,10 @@ jobs:
     - name: Announce deploy
       run: echo "Deployed to ${{ env.DEPLOY_URL }}"
 
-  testbed_hello:
-    name: HelloAPI Testbed
+  testbed_hello_remote:
+    name: HelloAPI Remote Testbed
     needs: ci_deploy
-    uses: ./.github/workflows/TEST_HelloAPI.yml
+    uses: ./.github/workflows/TEST_HelloAPI_remote.yml
 
   testbed_fileapi:
     name: FileAPI Testbed
