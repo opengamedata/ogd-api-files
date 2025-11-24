@@ -5,10 +5,8 @@ from typing import Any, Dict, Optional
 from urllib import request as url_request
 
 # import 3rd-party libraries
-from flask import Flask, request, Response, current_app
-from flask_restful import Resource, Api, reqparse
-from flask_restful.inputs import datetime_from_iso8601
-from werkzeug.exceptions import BadRequest
+from flask import Flask, current_app
+from flask_restful import Resource, Api
 
 # import ogd libraries
 from ogd.apis.utils.APIResponse import APIResponse, RESTType
@@ -21,7 +19,6 @@ from ogd.common.schemas.datasets.DatasetCollectionSchema import DatasetCollectio
 # import local files
 from configs.FileAPIConfig import FileAPIConfig
 from models.SanitizedParams import SanitizedParams
-from interfaces.BigQueryInterface import BigQueryInterface
 
 class FileAPI:
     """Class to define an API matching the original website API.
