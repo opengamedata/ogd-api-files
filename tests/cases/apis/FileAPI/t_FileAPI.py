@@ -18,6 +18,58 @@ _testing_cfg = FileAPITestConfig.FromDict(name="FileAPITestConfig", unparsed_ele
 _level       = logging.DEBUG if _testing_cfg.Verbose else logging.INFO
 Logger.std_logger.setLevel(_level)
 
+class test_GameList(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.url    : str
+        cls.result : Optional[requests.Response]
+        cls.content : Optional[APIResponse]    = None
+
+        cls.url    = f"{_testing_cfg.ExternEndpoint}/games/list"
+        Logger.Log(f"Sending request to {cls.url}", logging.INFO)
+        cls.result = TestRequest(url=cls.url, request="GET", timeout=2, logger=Logger.std_logger)
+        if cls.result is not None:
+            try:
+                _raw = cls.result.json()
+            except JSONDecodeError as err:
+                print(f"Could not parse {cls.result.text} to JSON!\n{err}")
+            else:
+                cls.content = APIResponse.FromDict(all_elements=_raw)
+
+    @classmethod
+    def tearDownClass(cls):
+        if cls.result is not None:
+            cls.result.close()
+
+    @staticmethod
+    def RunAll():
+        pass
+
+    def test_Responded(self):
+        if self.result is not None:
+            self.assertTrue(self.result.ok)
+        else:
+            self.fail(f"No result from request to {self.url}")
+
+    def test_Succeeded(self):
+        if self.content is not None:
+            self.assertEqual(self.content.Status, ResponseStatus.SUCCESS)
+        else:
+            self.fail(f"No JSON content from request to {self.url}")
+
+    def test_Correct(self):
+        known_games = ["AQUALAB", "BLOOM"]
+        if self.content is not None:
+            self.assertIsInstance(self.content.Value, dict)
+            # check game ID
+            self.assertIn("game_ids", self.content.Value.keys(), "Response did not contain game_ids")
+            game_ids = self.content.Value.get("game_ids")
+            self.assertIsNotNone(game_ids, "Response had null game_ids")
+            for game in known_games:
+                self.assertIn(game, game_ids, f"No datasets for {game}")
+        else:
+            self.fail(f"No JSON content from request to {self.url}")
+
 class test_GameDatasets(TestCase):
     @classmethod
     def setUpClass(cls):
