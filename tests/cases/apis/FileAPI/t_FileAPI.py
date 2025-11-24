@@ -83,14 +83,9 @@ class test_GameDatasetInfo(TestCase):
         self.result : Optional[requests.Response]
         self.content : Optional[APIResponse]    = None
 
-        params = {
-            "game_id" : "AQUALAB",
-            "year"    : 2024,
-            "month"   : 1
-        }
-        self.url    = f"{_testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/01/2024/"
+        self.url    = f"{_testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/01/2024/files/files/files/files/files/files/files/files/"
         Logger.Log(f"Sending request to {self.url}", logging.INFO)
-        self.result = TestRequest(url=self.url, request="GET", params=params, timeout=3, logger=Logger.std_logger)
+        self.result = TestRequest(url=self.url, request="GET", timeout=3, logger=Logger.std_logger)
         if self.result is not None:
             try:
                 _raw = self.result.json()
