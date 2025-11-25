@@ -193,8 +193,8 @@ class test_GameFileInfoByMonth(TestCase):
         # HACK: Currently, there's some mismatches in naming conventions between old and new, as well as in how we're parsing out what's what.
         # So, temporarily changing the "expected" from what would be truly ideal behavior, to what is expected given the shortcomings of the packages we're depending on.
         # This allows us to watch for regressions due to changes in the FileAPI code, and can be reverted when we get upstream improvements to the packages/what's actually named what on the server
-        expected_data['raw_file'] = expected_data['events_file']
-        expected_data['events_file'] = None
+        # expected_data['raw_file'] = expected_data['events_file']
+        # expected_data['events_file'] = None
 
         if self.content is not None:
             self.assertEqual(self.content.Value.keys(), expected_data.keys(), msg="Mismatching keys between response and expected")
