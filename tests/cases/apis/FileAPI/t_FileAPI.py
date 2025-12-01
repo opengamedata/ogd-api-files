@@ -66,7 +66,7 @@ class test_GameList(TestCase):
             game_ids = self.content.Value.get("game_ids")
             self.assertIsNotNone(game_ids, "Response had null game_ids")
             for game in known_games:
-                self.assertIn(game, game_ids, f"No datasets for {game}")
+                self.assertIn(game, known_games, f"No datasets for {game}")
         else:
             self.fail(f"No JSON content from request to {self.url}")
 
@@ -78,7 +78,7 @@ class test_GameDatasets(TestCase):
         cls.content : Optional[APIResponse]    = None
 
         cls.url    = f"{_testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/list"
-        Logger.Log(f"Sending request to {cls.url}", logging.INFO)
+        Logger.Log(f"Sending request to {cls.url}", logging.WARNING)
         cls.result = TestRequest(url=cls.url, request="GET", timeout=2, logger=Logger.std_logger)
         if cls.result is not None:
             try:
