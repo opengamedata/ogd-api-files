@@ -7,6 +7,7 @@ from typing import Any, Dict, Optional
 from urllib import request as url_request
 
 # import 3rd-party libraries
+import pandas as pd
 import requests
 from flask import Flask, current_app
 from flask_restful import Resource, Api
@@ -333,9 +334,10 @@ class FileAPI:
                 if player_file_link:
                     player_list_response = requests.get(player_file_link, stream=True)
                     with zipfile.ZipFile(BytesIO(player_list_response.content)) as zipped:
-                        
-
-                    ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=file_info)
+                        for f_name in zipped.namelist():
+                            if f_name.endswith(".tsv"):
+                                data = pd.read_csv(zipped.open(f_name))
+                                ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=data.to_json())
                 else:
                     ret_val.RequestErrored(msg=f"Dataset for {game_id} from {f'{month:02}/{year:04}'} was not found.")
             else:
