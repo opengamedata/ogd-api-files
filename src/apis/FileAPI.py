@@ -345,6 +345,6 @@ class FileAPI:
                     ret_val.RequestErrored(msg=f"Dataset key {_matched_dataset.Key} was invalid.")
             except Exception as err:
                 ret_val.ServerErrored(msg=f"Server experienced an error retrieving player dataset from {f'{month:02}/{year:04}'} for {game_id}.")
-                current_app.logger.error(f"Uncaught {type(err)} in PlayerList: {err}")
+                current_app.logger.error(f"Uncaught {type(err)} in PlayerList:\n{err}\n{err.__traceback__}")
 
             return ret_val.AsFlaskResponse
