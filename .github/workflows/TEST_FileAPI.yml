@@ -12,6 +12,10 @@ on:
     - 'tests/config/**'
     - 'tests/FileAPITestConfig.py'
     - 'requirements.txt'
+    - '!.github/workflows/CI_FileAPI.yml'
+    - '!.github/actions/**'
+    - '!src/**'
+    - '!requirements.txt'
 
 env:
   DEPLOY_HOST:    ${{ vars.OGD_STAGING_HOST }}

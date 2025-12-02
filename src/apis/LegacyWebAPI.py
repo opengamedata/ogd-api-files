@@ -125,12 +125,24 @@ class LegacyWebAPI:
             # Pull the file list data into a dictionary
             file_list_response                             = url_request.urlopen(LegacyWebAPI.server_config.FileListURL)
             file_list_json     : Dict[str, Dict[str, Any]] = json.loads(file_list_response.read())
-            # HACK to make sure we've got a remote_url, working around bug in RepositoryIndexingConfig FromDict(...) implementation.
+
+            # *** HACK ***
+            # To make sure we've got a remote_url, working around bug in RepositoryIndexingConfig FromDict(...) implementation.
             if "CONFIG" in file_list_json.keys() and isinstance(file_list_json["CONFIG"], dict):
                 if not "remote_url" in file_list_json["CONFIG"].keys():
                     file_list_json["CONFIG"]["remote_url"] = file_list_json["CONFIG"].get("files_base", "https://opengamedata.fielddaylab.wisc.edu/")
                 if not "templates_url" in file_list_json["CONFIG"].keys():
                     file_list_json["CONFIG"]["templates_url"] = file_list_json["CONFIG"].get("templates_base", "https://github.com/opengamedata/opengamedata-templates")
+            # *** HACK ***
+
+            # *** HACK ***
+            # To make sure we convert keys to what parsing will correctly parse out to correct elements, convert events_file to all_events_file, and raw_file to events_file
+            for game in [key for key in file_list_json.keys() if key != "CONFIG"]:
+                for dataset in file_list_json[game].keys():
+                    file_list_json[game][dataset]["all_events_file"] = file_list_json[game][dataset]["events_file"]
+                    file_list_json[game][dataset]["events_file"] = file_list_json[game][dataset]["raw_file"]
+            # *** HACK ***
+
             file_list          : DatasetRepositoryConfig   = DatasetRepositoryConfig.FromDict(name="file_list", unparsed_elements=file_list_json)
             game_datasets      : DatasetCollectionSchema   = file_list.Games.get(game_id, DatasetCollectionSchema.Default())
 
@@ -207,12 +219,23 @@ class LegacyWebAPI:
         # 1. Get the list of datasets available on the server, for given game.
             file_list_response                             = url_request.urlopen(LegacyWebAPI.server_config.FileListURL)
             file_list_json     : Dict[str, Dict[str, Any]] = json.loads(file_list_response.read())
-            # HACK to make sure we've got a remote_url, working around bug in RepositoryIndexingConfig FromDict(...) implementation.
+            # *** HACK ***
+            # To make sure we've got a remote_url, working around bug in RepositoryIndexingConfig FromDict(...) implementation.
             if "CONFIG" in file_list_json.keys() and isinstance(file_list_json["CONFIG"], dict):
                 if not "remote_url" in file_list_json["CONFIG"].keys():
                     file_list_json["CONFIG"]["remote_url"] = file_list_json["CONFIG"].get("files_base", "https://opengamedata.fielddaylab.wisc.edu/")
                 if not "templates_url" in file_list_json["CONFIG"].keys():
                     file_list_json["CONFIG"]["templates_url"] = file_list_json["CONFIG"].get("templates_base", "https://github.com/opengamedata/opengamedata-templates")
+            # *** HACK ***
+
+            # *** HACK ***
+            # To make sure we convert keys to what parsing will correctly parse out to correct elements, convert events_file to all_events_file, and raw_file to events_file
+            for game in [key for key in file_list_json.keys() if key != "CONFIG"]:
+                for dataset in file_list_json[game].keys():
+                    file_list_json[game][dataset]["all_events_file"] = file_list_json[game][dataset]["events_file"]
+                    file_list_json[game][dataset]["events_file"] = file_list_json[game][dataset]["raw_file"]
+            # *** HACK ***
+
             file_list          : DatasetRepositoryConfig   = DatasetRepositoryConfig.FromDict(name="file_list", unparsed_elements=file_list_json)
             game_datasets      : DatasetCollectionSchema   = file_list.Games.get(sanitized_request.GameID or "NO GAME REQUESTED", DatasetCollectionSchema.Default())
 
