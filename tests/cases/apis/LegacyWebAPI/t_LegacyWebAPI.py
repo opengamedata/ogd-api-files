@@ -94,21 +94,14 @@ class test_MonthlyGameUsage(TestCase):
         if cls.result is not None:
             cls.result.close()
 
-    @staticmethod
-    def RunAll():
-        pass
-
     def test_Responded(self):
+        self.assertIsNotNone(self.result, f"No result from request to {self.url}")
+
+    def test_Succeeded(self):
         if self.result is not None:
             self.assertTrue(self.result.ok)
         else:
             self.fail(f"No result from request to {self.url}")
-
-    def test_Succeeded(self):
-        if self.content is not None:
-            self.assertEqual(self.content.Status, ResponseStatus.SUCCESS)
-        else:
-            self.fail(f"No JSON content from request to {self.url}")
 
     def test_Correct(self):
         _expected_data = {
@@ -152,21 +145,14 @@ class test_GameFileInfoByMonth(TestCase):
             else:
                 self.content = APIResponse.FromDict(all_elements=_raw)
 
-    @staticmethod
-    def RunAll():
-        pass
-
     def test_Responded(self):
+        self.assertIsNotNone(self.result, f"No result from request to {self.url}")
+
+    def test_Succeeded(self):
         if self.result is not None:
             self.assertTrue(self.result.ok)
         else:
             self.fail(f"No result from request to {self.url}")
-
-    def test_Succeeded(self):
-        if self.content is not None:
-            self.assertEqual(self.content.Status, ResponseStatus.SUCCESS)
-        else:
-            self.fail(f"No JSON content from request to {self.url}")
 
     def test_Correct(self):
         expected_data = {

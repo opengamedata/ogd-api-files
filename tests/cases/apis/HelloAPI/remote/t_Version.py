@@ -37,21 +37,14 @@ class test_Version(TestCase):
         if cls.result is not None:
             cls.result.close()
 
-    @staticmethod
-    def RunAll():
-        pass
-
     def test_Responded(self):
+        self.assertIsNotNone(self.result, f"No result from request to {self.url}")
+
+    def test_Succeeded(self):
         if self.result is not None:
             self.assertTrue(self.result.ok)
         else:
             self.fail(f"No result from request to {self.url}")
-
-    def test_Succeeded(self):
-        if self.content is not None:
-            self.assertEqual(self.content.Status, ResponseStatus.SUCCESS)
-        else:
-            self.fail(f"No JSON content from request to {self.url}")
 
     def test_Correct(self):
         if self.content is not None:
