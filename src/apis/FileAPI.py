@@ -1,4 +1,5 @@
 # import standard libraries
+import csv
 import json
 import zipfile
 from datetime import date, timedelta
@@ -337,13 +338,14 @@ class FileAPI:
                         with zipfile.ZipFile(BytesIO(player_list_response.read())) as zipped:
                             for f_name in zipped.namelist():
                                 if f_name.endswith(".tsv"):
-                                    data = pd.read_csv(zipped.open(f_name), sep="\t")
-                                    result = {
-                                        "columns": list(data.columns)
-                                    } | {
-                                        str(num) : list(data.loc[idx]) for num, idx in enumerate(data.index)
-                                    }
-                                    ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=result)
+                                    with zipped.open(f_name) as dataset:
+                                        data = pd.read_csv(zipped.open(f_name), sep="\t")
+                                        # result = {
+                                        #     "columns": list(data.columns)
+                                        # } | {
+                                        #     str(num) : [json.dumps(elem) for elem in data.loc[idx]] for num, idx in enumerate(data.index)
+                                        # }
+                                        ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=data.to_json())
                     else:
                         ret_val.RequestErrored(msg=f"Dataset for {game_id} from {f'{month:02}/{year:04}'} was not found.")
                 else:
