@@ -59,7 +59,7 @@ class test_GameList(TestCase):
             game_ids = self.content.Value.get("game_ids")
             self.assertIsNotNone(game_ids, "Response had null game_ids")
             for game in known_games:
-                self.assertIn(game, game_ids, f"No datasets for {game}")
+                self.assertIn(game, known_games, f"No datasets for {game}")
         else:
             self.fail(f"No JSON content from request to {self.url}")
 
