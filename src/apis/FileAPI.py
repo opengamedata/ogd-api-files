@@ -337,7 +337,7 @@ class FileAPI:
                         with zipfile.ZipFile(BytesIO(player_list_response.read())) as zipped:
                             for f_name in zipped.namelist():
                                 if f_name.endswith(".tsv"):
-                                    data = pd.read_csv(zipped.open(f_name))
+                                    data = pd.read_csv(zipped.open(f_name), sep="\t")
                                     result = {
                                         "columns": list(data.columns)
                                     } | {
