@@ -78,7 +78,7 @@ class test_GameDatasets(TestCase):
         cls.content : Optional[APIResponse]    = None
 
         cls.url    = f"{_testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/list"
-        Logger.Log(f"Sending request to {cls.url}", logging.WARNING)
+        Logger.Log(f"Sending request to {cls.url}", logging.INFO)
         cls.result = TestRequest(url=cls.url, request="GET", timeout=2, logger=Logger.std_logger)
         if cls.result is not None:
             try:
