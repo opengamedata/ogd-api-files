@@ -49,7 +49,7 @@ class FileAPI:
         api.add_resource(FileAPI.GameList, '/games/list')
         api.add_resource(FileAPI.GameDatasets, '/games/<game_id>/datasets/list')
         api.add_resource(FileAPI.GameDatasetInfo,  '/games/<game_id>/datasets/<month>/<year>/files/')
-        api.add_resource(FileAPI.PlayerFile,  '/games/<game_id>/datasets/<month>/<year>/files/player')
+        api.add_resource(FileAPI.DataFile,  '/games/<game_id>/datasets/<month>/<year>/files/<file_type>')
         FileAPI.server_config = settings
 
     class GameList(Resource):
@@ -274,7 +274,7 @@ class FileAPI:
 
             return ret_val.AsFlaskResponse
 
-    class PlayerFile(Resource):
+    class DataFile(Resource):
         """
         Get the specific requested file
 
@@ -285,7 +285,7 @@ class FileAPI:
         Outputs:
         - DatasetSchema of most recently-exported dataset for game in month
         """
-        def get(self, game_id, month, year):
+        def get(self, game_id, month, year, file_type):
             ret_val = APIResponse.Default(req_type=RESTType.GET)
 
             try:
@@ -332,10 +332,22 @@ class FileAPI:
                 if _matched_dataset is None:
                     _matched_dataset = list(game_datasets.Datasets.values())[-1]
                 if _matched_dataset.Key.DateFrom and _matched_dataset.Key.DateTo:
-                    player_file_link = f"{file_list.RemoteURL}{_matched_dataset.PlayersFile.as_posix()}" if _matched_dataset.PlayersFile is not None else None
-                    if player_file_link:
-                        player_list_response = url_request.urlopen(player_file_link)
-                        with zipfile.ZipFile(BytesIO(player_list_response.read())) as zipped:
+                    file_link = None
+                    missing_file_msg = f"Dataset for {game_id} from {f'{month:02}/{year:04}'} was not found."
+                    match str(file_type).upper():
+                        case "SESSION":
+                            file_link = f"{file_list.RemoteURL}{_matched_dataset.SessionsFile.as_posix()}"   if _matched_dataset.SessionsFile   is not None else None
+                        case "PLAYER":
+                            file_link = f"{file_list.RemoteURL}{_matched_dataset.PlayersFile.as_posix()}"    if _matched_dataset.PlayersFile    is not None else None
+                        case "POPULATION":
+                            file_link = f"{file_list.RemoteURL}{_matched_dataset.PopulationFile.as_posix()}" if _matched_dataset.PopulationFile is not None else None
+                        case "EVENT":
+                            missing_file_msg="Event files are not yet supported."
+                        case _:
+                            missing_file_msg=f"Unrecognized file type {file_type}."
+                    if file_link:
+                        datafile_response = url_request.urlopen(file_link)
+                        with zipfile.ZipFile(BytesIO(datafile_response.read())) as zipped:
                             for f_name in zipped.namelist():
                                 if f_name.endswith(".tsv"):
                                     data = pd.read_csv(zipped.open(f_name), sep="\t").replace({float('nan'):None})
@@ -347,14 +359,14 @@ class FileAPI:
                                     }
                                     ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=result)
                     else:
-                        ret_val.RequestErrored(msg=f"Dataset for {game_id} from {f'{month:02}/{year:04}'} was not found.")
+                        ret_val.RequestErrored(msg=missing_file_msg)
                 else:
                     ret_val.RequestErrored(msg=f"Dataset key {_matched_dataset.Key} was invalid.")
             except url_error.HTTPError as err:
-                current_app.logger.error(f"Could not get player file from {player_file_link}, got error: {err}")
-                ret_val.ServerErrored(msg=f"Server experienced an error retrieving player dataset from {f'{month:02}/{year:04}'} for {game_id}.")
+                current_app.logger.error(f"HTTP error getting {file_type} file from {file_link}:\n{err}")
+                ret_val.ServerErrored(msg=f"Server experienced an error retrieving {file_type} file from {f'{month:02}/{year:04}'} for {game_id}.")
             except Exception as err:
-                ret_val.ServerErrored(msg=f"Server experienced an error retrieving player dataset from {f'{month:02}/{year:04}'} for {game_id}.")
-                current_app.logger.error(f"Uncaught {type(err)} in PlayerList:\n{err}\n{err.__traceback__}")
+                current_app.logger.error(f"Uncaught {type(err)} getting {file_type} file from {file_link}:\n{err}\n{err.__traceback__}")
+                ret_val.ServerErrored(msg=f"Server experienced an error retrieving {file_type} file from {f'{month:02}/{year:04}'} for {game_id}.")
 
             return ret_val.AsFlaskResponse
