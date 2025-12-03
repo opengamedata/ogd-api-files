@@ -338,13 +338,18 @@ class FileAPI:
                             for f_name in zipped.namelist():
                                 if f_name.endswith(".tsv"):
                                     data = pd.read_csv(zipped.open(f_name))
-                                    ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=data.to_json())
+                                    result = {
+                                        "columns": list(data.columns)
+                                    } | {
+                                        str(num) : list(data.loc[idx]) for num, idx in enumerate(data.index)
+                                    }
+                                    ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=result)
                     else:
                         ret_val.RequestErrored(msg=f"Dataset for {game_id} from {f'{month:02}/{year:04}'} was not found.")
                 else:
                     ret_val.RequestErrored(msg=f"Dataset key {_matched_dataset.Key} was invalid.")
             except url_error.HTTPError as err:
-                current_app.logger.error(f"Could not get player file from {player_file_link}, got eror: {err}")
+                current_app.logger.error(f"Could not get player file from {player_file_link}, got error: {err}")
                 ret_val.ServerErrored(msg=f"Server experienced an error retrieving player dataset from {f'{month:02}/{year:04}'} for {game_id}.")
             except Exception as err:
                 ret_val.ServerErrored(msg=f"Server experienced an error retrieving player dataset from {f'{month:02}/{year:04}'} for {game_id}.")
