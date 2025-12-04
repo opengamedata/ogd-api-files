@@ -350,7 +350,8 @@ class FileAPI:
                         with zipfile.ZipFile(BytesIO(datafile_response.read())) as zipped:
                             for f_name in zipped.namelist():
                                 if f_name.endswith(".tsv"):
-                                    data = pd.read_csv(zipped.open(f_name), sep="\t", dtype=object).replace({float('nan'):None})
+                                    data = pd.read_csv(zipped.open(f_name), sep="\t").replace({float('nan'):None})
+                                    data = self._secondaryParse(data)
                                     result = {
                                         "columns": list(data.columns)
                                     } | {
@@ -369,3 +370,14 @@ class FileAPI:
                 ret_val.ServerErrored(msg=f"Server experienced an error retrieving {file_type} file from {f'{month:02}/{year:04}'} for {game_id}.")
 
             return ret_val.AsFlaskResponse
+
+        @staticmethod
+        def _secondaryParse(df:pd.DataFrame) -> pd.DataFrame:
+            json_cols = [col for col in df.select_dtypes("object").columns if set(map(type, df[col])) == {str} and df[col].iloc[0][0] in {"[", "{"}]
+            for col in json_cols:
+                df[col] = df[col].apply(json.loads)
+            df = df.astype({col:"object" for col in df.select_dtypes("int64").columns})
+            df = df.astype({col:"object" for col in df.select_dtypes("bool").columns})
+
+            return df
+
