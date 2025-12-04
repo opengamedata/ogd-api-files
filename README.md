@@ -1,10 +1,57 @@
 # opengamedata-api-files
 
-This is the backend api used by https://github.com/opengamedata/opengamedata-website
+This is the OpenGameData dataset/file repository API.
 
-# Getting Started:
+Its primary use is for getting information about what data is available from the fileserver used by [opengamedata.fielddaylab.wisc.edu](opengamedata.fielddaylab.wisc.edu), but could be used for any repository of datasets using the OpenGameData pipeline.
 
-## Running the app locally via the development Flask server:
+## API endpoints
+
+The latest release of the API supports the endpoints listed below.
+Experimental endpoints that have not yet been included in a release but are intended for inclusion in future versions are labeled as such.
+
+The term "dataset" refers to all data for a specific month of play from a specific game.
+For any given dataset, the data may include game events, post-hoc "detector" events, session-level features, player-level features, or population-level features.
+
+### Game-Level Endpoints
+
+`/games/list` (experimental/upcoming)
+
+* Retrieve a list of all games for which at least one dataset exists.
+
+`/games/<game_id>/datasets/list` (experimental/upcoming)
+
+* Retrieve a list of datasets and associated session counts for a specific game. At present, this is identical to the `/MonthlyGameUsage` legacy endpoint.
+
+### Dataset-Level Endpoints
+
+`/games/<game_id>/datasets/<month>/<year>/files/` (experimental/upcoming)
+
+* Get detailed info on the files and other resources that are available for a specific dataset. At present, this is identical to the `/getGameFileInfoByMonth` legacy endpoint.
+
+### File-Level Endpoints
+
+`/games/<game_id>/datasets/<month>/<year>/files/<file_type>` (experimental/upcoming)
+
+* Retrieve the contents of a specific dataset file. Valid `file_type`s are `population`, `player`, and `session`.
+
+### Legacy Endpoints
+
+Endpoints used by the OpenGameData website, which use an outdated convention.
+We intend to deprecate these in the near future.
+
+`/MonthlyGameUsage`
+
+* Retrieve a list of datasets and associated session counts for a specific game.
+* Query string params: game_id
+
+`/getGameFileInfoByMonth`
+
+* Get detailed info on the files and other resources that are available for a specific dataset.
+* Query string params: game_id, year, month
+
+## Developer Instructions
+
+### Running the app locally via the development Flask server
 
 Steps to run:
 
@@ -13,11 +60,3 @@ Steps to run:
 3. If you don't have a config/config.py file for local development, copy config/config.py.template to config/config.py to create one. Populate config.py with secret values as needed.
 4. Run `flask run` or `flask run --debug`.
 5. A web server should be running at http://localhost:5000
-
-# API endpoints:
-
-`/getGameUsageByMonth`
-Query string params: game_id, year, month
-
-`/getGameFileInfoByMonth`
-Query string params: game_id, year, month
