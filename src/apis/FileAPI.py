@@ -375,7 +375,10 @@ class FileAPI:
         def _secondaryParse(df:pd.DataFrame) -> pd.DataFrame:
             json_cols = [col for col in df.select_dtypes("object").columns if set(map(type, df[col])) == {str} and df[col].iloc[0][0] in {"[", "{"}]
             for col in json_cols:
-                df[col] = df[col].apply(json.loads)
+                try:
+                    df[col] = df[col].apply(json.loads)
+                except json.decoder.JSONDecodeError as err:
+                    current_app.logger.debug(f"Column {col} was identified as JSON-format, but could not be parsed:\n{err}")
             df = df.astype({col:"object" for col in df.select_dtypes("int64").columns})
             df = df.astype({col:"object" for col in df.select_dtypes("bool").columns})
 
