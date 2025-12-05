@@ -121,12 +121,7 @@ class FileAPI:
                 ret_val.ServerErrored(msg=f"GameID '{game_id}' not found in list of games with datasets, or had no datasets listed")
                 return ret_val.AsFlaskResponse
 
-            first_month = None
-            first_year  = None
-            lastYear    = None
-            lastMonth   = None
-
-            total_sessions_by_yyyymm = {}
+            sessions = []
 
             # rangeKey format is GAMEID_YYYYMMDD_to_YYYYMMDD or GAME_ID_YYYYMMDD_to_YYYYYMMDD
             for _datset_id,_dataset in game_datasets.Datasets.items():
@@ -134,40 +129,12 @@ class FileAPI:
                 # If this rangeKey matches the expected format
                 if _dataset.Key.DateFrom: # len(rangeKeyParts) == 4:
                     # Capture the number of sessions for this YYYYMM
-                    _year_month = _dataset.Key.DateFrom.strftime("%Y%m")
-                    total_sessions_by_yyyymm[_year_month] = _dataset.SessionCount
+                    sessions.append({
+                        "year": _dataset.Key.DateFrom.year,
+                        "month": _dataset.Key.DateFrom.month,
+                        "total_sessions": _dataset.SessionCount
+                    })
 
-                    # The ranges in file_list_json should be chronologically ordered, but manually determining the first & last months here just in case
-                    if first_year is None or first_month is None or _dataset.Key.DateFrom.year < first_year:
-                        first_year = _dataset.Key.DateFrom.year
-                        first_month = _dataset.Key.DateFrom.month
-                    elif _dataset.Key.DateFrom.year == first_year and _dataset.Key.DateFrom.month < first_month:
-                        first_month = _dataset.Key.DateFrom.month
-                    
-                    if lastYear is None or lastMonth is None or _dataset.Key.DateFrom.year > lastYear:
-                        lastYear = _dataset.Key.DateFrom.year
-                        lastMonth = _dataset.Key.DateFrom.month
-                    elif lastYear == _dataset.Key.DateFrom.year and lastMonth < _dataset.Key.DateFrom.month:
-                        lastMonth = _dataset.Key.DateFrom.month
-
-
-            # Iterate through all of the months from the first month+year to last month+year, since the ranges have gaps
-            # Default the number of sessions to zero for months we don't have data
-            sessions = []
-            if first_year is not None and first_month is not None and lastYear is not None and lastMonth is not None:
-                startRangeMonth = first_month
-                for year in range(first_year, lastYear + 1):
-                    endRangeMonth = lastMonth if year == lastYear else 12
-                    for month in range(startRangeMonth, endRangeMonth + 1):
-                        # If file_list.json has an entry for this month
-                        _year_month = f"{year}{month:02}" # {month:02} => 0-pad width 2
-                        sessions.append({
-                            "year": year,
-                            "month": month,
-                            "total_sessions": total_sessions_by_yyyymm.get(_year_month, 0)
-                            "has_sessions": 
-                        })
-                    startRangeMonth = 1
 
             responseData = { "game_id": game_id, "datasets": sessions }
             ret_val.RequestSucceeded(msg="Retrieved monthly game usage", val=responseData)
