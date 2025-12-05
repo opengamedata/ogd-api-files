@@ -353,9 +353,10 @@ class FileAPI:
                                     data = pd.read_csv(zipped.open(f_name), sep="\t").replace({float('nan'):None})
                                     data = self._secondaryParse(data)
                                     result = {
-                                        "columns": list(data.columns)
-                                    } | {
-                                        str(num) : list(data.loc[idx]) for num, idx in enumerate(data.index)
+                                        "columns": list(data.columns),
+                                        "rows": [
+                                            data.loc[idx].to_dict() for idx in data.index
+                                        ]
                                     }
                                     ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=result)
                     else:
