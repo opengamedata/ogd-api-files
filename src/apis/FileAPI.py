@@ -354,9 +354,7 @@ class FileAPI:
                                     data = self._secondaryParse(data)
                                     result = {
                                         "columns": list(data.columns),
-                                        "rows": [
-                                            data.loc[idx].to_dict() for idx in data.index
-                                        ]
+                                        "rows": list(data.apply(lambda series : series.to_dict(), axis=1))
                                     }
                                     ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=result)
                     else:
