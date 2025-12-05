@@ -52,6 +52,20 @@ class FileAPI:
         api.add_resource(FileAPI.DataFile,  '/games/<game_id>/datasets/<month>/<year>/files/<file_type>')
         FileAPI.server_config = settings
 
+    @staticmethod
+    def _getFileList(url:str) -> DatasetRepositoryConfig:
+        # Pull the file list data into a dictionary
+        file_list_response                             = url_request.urlopen(url)
+        file_list_json     : Dict[str, Dict[str, Any]] = json.loads(file_list_response.read())
+        # HACK to make sure we've got a remote_url, working around bug in RepositoryIndexingConfig FromDict(...) implementation.
+        if "CONFIG" in file_list_json.keys() and isinstance(file_list_json["CONFIG"], dict):
+            if not "remote_url" in file_list_json["CONFIG"].keys():
+                file_list_json["CONFIG"]["remote_url"] = file_list_json["CONFIG"].get("files_base", "https://opengamedata.fielddaylab.wisc.edu/")
+            if not "templates_url" in file_list_json["CONFIG"].keys():
+                file_list_json["CONFIG"]["templates_url"] = file_list_json["CONFIG"].get("templates_base", "https://github.com/opengamedata/opengamedata-templates")
+        file_list          : DatasetRepositoryConfig   = DatasetRepositoryConfig.FromDict(name="file_list", unparsed_elements=file_list_json)
+        return file_list
+
     class GameList(Resource):
         """
         Get the per-month number of sessions for a given game
@@ -66,16 +80,7 @@ class FileAPI:
         def get(self):
             ret_val = APIResponse.Default(req_type=RESTType.GET)
 
-            # Pull the file list data into a dictionary
-            file_list_response                             = url_request.urlopen(FileAPI.server_config.FileListURL)
-            file_list_json     : Dict[str, Dict[str, Any]] = json.loads(file_list_response.read())
-            # HACK to make sure we've got a remote_url, working around bug in RepositoryIndexingConfig FromDict(...) implementation.
-            if "CONFIG" in file_list_json.keys() and isinstance(file_list_json["CONFIG"], dict):
-                if not "remote_url" in file_list_json["CONFIG"].keys():
-                    file_list_json["CONFIG"]["remote_url"] = file_list_json["CONFIG"].get("files_base", "https://opengamedata.fielddaylab.wisc.edu/")
-                if not "templates_url" in file_list_json["CONFIG"].keys():
-                    file_list_json["CONFIG"]["templates_url"] = file_list_json["CONFIG"].get("templates_base", "https://github.com/opengamedata/opengamedata-templates")
-            file_list          : DatasetRepositoryConfig   = DatasetRepositoryConfig.FromDict(name="file_list", unparsed_elements=file_list_json)
+            file_list     : DatasetRepositoryConfig = FileAPI._getFileList(FileAPI.server_config.FileListURL)
 
             # If the given game isn't in our dictionary, or our dictionary doesn't have any date ranges for this game
             if file_list.Games is None or len(file_list.Games) < 1:
@@ -108,17 +113,8 @@ class FileAPI:
                 ret_val.RequestErrored(msg=f"Bad GameID '{game_id}'")
                 return ret_val.AsFlaskResponse
 
-            # Pull the file list data into a dictionary
-            file_list_response                             = url_request.urlopen(FileAPI.server_config.FileListURL)
-            file_list_json     : Dict[str, Dict[str, Any]] = json.loads(file_list_response.read())
-            # HACK to make sure we've got a remote_url, working around bug in RepositoryIndexingConfig FromDict(...) implementation.
-            if "CONFIG" in file_list_json.keys() and isinstance(file_list_json["CONFIG"], dict):
-                if not "remote_url" in file_list_json["CONFIG"].keys():
-                    file_list_json["CONFIG"]["remote_url"] = file_list_json["CONFIG"].get("files_base", "https://opengamedata.fielddaylab.wisc.edu/")
-                if not "templates_url" in file_list_json["CONFIG"].keys():
-                    file_list_json["CONFIG"]["templates_url"] = file_list_json["CONFIG"].get("templates_base", "https://github.com/opengamedata/opengamedata-templates")
-            file_list          : DatasetRepositoryConfig   = DatasetRepositoryConfig.FromDict(name="file_list", unparsed_elements=file_list_json)
-            game_datasets      : DatasetCollectionSchema   = file_list.Games.get(game_id, DatasetCollectionSchema.Default())
+            file_list     : DatasetRepositoryConfig = FileAPI._getFileList(FileAPI.server_config.FileListURL)
+            game_datasets : DatasetCollectionSchema = file_list.Games.get(game_id, DatasetCollectionSchema.Default())
 
             # If the given game isn't in our dictionary, or our dictionary doesn't have any date ranges for this game
             if not game_id in file_list.Games or len(file_list.Games[game_id].Datasets) == 0:
@@ -165,7 +161,12 @@ class FileAPI:
                     for month in range(startRangeMonth, endRangeMonth + 1):
                         # If file_list.json has an entry for this month
                         _year_month = f"{year}{month:02}" # {month:02} => 0-pad width 2
-                        sessions.append({ "year": year, "month": month, "total_sessions": total_sessions_by_yyyymm.get(_year_month, 0)})
+                        sessions.append({
+                            "year": year,
+                            "month": month,
+                            "total_sessions": total_sessions_by_yyyymm.get(_year_month, 0)
+                            "has_sessions": 
+                        })
                     startRangeMonth = 1
 
             responseData = { "game_id": game_id, "datasets": sessions }
@@ -191,16 +192,8 @@ class FileAPI:
             sanitized_request = SanitizedParams(game_id=game_id, year=year, month=month, default_date=last_month)
 
         # 1. Get the list of datasets available on the server, for given game.
-            file_list_response                             = url_request.urlopen(FileAPI.server_config.FileListURL)
-            file_list_json     : Dict[str, Dict[str, Any]] = json.loads(file_list_response.read())
-            # HACK to make sure we've got a remote_url, working around bug in RepositoryIndexingConfig FromDict(...) implementation.
-            if "CONFIG" in file_list_json.keys() and isinstance(file_list_json["CONFIG"], dict):
-                if not "remote_url" in file_list_json["CONFIG"].keys():
-                    file_list_json["CONFIG"]["remote_url"] = file_list_json["CONFIG"].get("files_base", "https://opengamedata.fielddaylab.wisc.edu/")
-                if not "templates_url" in file_list_json["CONFIG"].keys():
-                    file_list_json["CONFIG"]["templates_url"] = file_list_json["CONFIG"].get("templates_base", "https://github.com/opengamedata/opengamedata-templates")
-            file_list          : DatasetRepositoryConfig   = DatasetRepositoryConfig.FromDict(name="file_list", unparsed_elements=file_list_json)
-            game_datasets      : DatasetCollectionSchema   = file_list.Games.get(sanitized_request.GameID or "NO GAME REQUESTED", DatasetCollectionSchema.Default())
+            file_list     : DatasetRepositoryConfig = FileAPI._getFileList(FileAPI.server_config.FileListURL)
+            game_datasets : DatasetCollectionSchema = file_list.Games.get(sanitized_request.GameID or "NO GAME REQUESTED", DatasetCollectionSchema.Default())
 
             # If we couldn't find the requested game in file_list.json, or the game didn't have any date ranges, skip.
             if (sanitized_request.GameID is None):
@@ -293,16 +286,8 @@ class FileAPI:
                 sanitized_request = SanitizedParams(game_id=game_id, year=year, month=month, default_date=last_month)
 
             # 1. Get the list of datasets available on the server, for given game.
-                file_list_response                             = url_request.urlopen(FileAPI.server_config.FileListURL)
-                file_list_json     : Dict[str, Dict[str, Any]] = json.loads(file_list_response.read())
-                # HACK to make sure we've got a remote_url, working around bug in RepositoryIndexingConfig FromDict(...) implementation.
-                if "CONFIG" in file_list_json.keys() and isinstance(file_list_json["CONFIG"], dict):
-                    if not "remote_url" in file_list_json["CONFIG"].keys():
-                        file_list_json["CONFIG"]["remote_url"] = file_list_json["CONFIG"].get("files_base", "https://opengamedata.fielddaylab.wisc.edu/")
-                    if not "templates_url" in file_list_json["CONFIG"].keys():
-                        file_list_json["CONFIG"]["templates_url"] = file_list_json["CONFIG"].get("templates_base", "https://github.com/opengamedata/opengamedata-templates")
-                file_list          : DatasetRepositoryConfig   = DatasetRepositoryConfig.FromDict(name="file_list", unparsed_elements=file_list_json)
-                game_datasets      : DatasetCollectionSchema   = file_list.Games.get(sanitized_request.GameID or "NO GAME REQUESTED", DatasetCollectionSchema.Default())
+                file_list     : DatasetRepositoryConfig = FileAPI._getFileList(FileAPI.server_config.FileListURL)
+                game_datasets : DatasetCollectionSchema = file_list.Games.get(sanitized_request.GameID or "NO GAME REQUESTED", DatasetCollectionSchema.Default())
 
                 # If we couldn't find the requested game in file_list.json, or the game didn't have any date ranges, skip.
                 if (sanitized_request.GameID is None):
