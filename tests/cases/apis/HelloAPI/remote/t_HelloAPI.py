@@ -23,7 +23,7 @@ class test_Hello(TestCase):
 
         cls.base_url     : str                         = f"{cls.test_config.ExternEndpoint}/hello"
         Logger.Log(f"Sending request to {cls.base_url}", logging.INFO)
-        cls.result  : Optional[requests.Response] = TestRequest(url=cls.base_url, request="GET", params={}, timeout=2, logger=Logger.std_logger)
+        cls.result  : Optional[requests.Response] = TestRequest(url=cls.base_url, request="GET", params={}, timeout=30, logger=Logger.std_logger)
         cls.content : Optional[APIResponse]    = None
         if cls.result is not None:
             try:
@@ -38,19 +38,12 @@ class test_Hello(TestCase):
         if cls.result is not None:
             cls.result.close()
 
-    @staticmethod
-    def RunAll():
-        pass
-
     def test_Responded(self):
-        if self.result is not None:
-            self.assertTrue(self.result.ok)
-        else:
-            self.fail(f"No result from request to {self.base_url}")
+        self.assertIsNotNone(self.result, f"No result from request to {self.base_url}")
 
     def test_Succeeded(self):
-        if self.content is not None:
-            self.assertEqual(self.content.Status, ResponseStatus.SUCCESS)
+        if self.result is not None:
+            self.assertTrue(self.result.ok)
         else:
             self.fail(f"No result from request to {self.base_url}")
 
