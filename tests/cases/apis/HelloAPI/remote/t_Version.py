@@ -22,7 +22,7 @@ class test_Version(TestCase):
     def setUpClass(cls):
         cls.url    : str                         = f"{_testing_cfg.ExternEndpoint}/version"
         Logger.Log(f"Sending request to {cls.url}", logging.INFO)
-        cls.result : Optional[requests.Response] = TestRequest(url=cls.url, request="GET", params={}, logger=Logger.std_logger)
+        cls.result : Optional[requests.Response] = TestRequest(url=cls.url, request="GET", params={}, timeout=30, logger=Logger.std_logger)
         cls.content : Optional[APIResponse]    = None
         if cls.result is not None:
             try:

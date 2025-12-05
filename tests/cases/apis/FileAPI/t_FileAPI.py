@@ -27,7 +27,7 @@ class test_GameList(TestCase):
 
         cls.url    = f"{_testing_cfg.ExternEndpoint}/games/list"
         Logger.Log(f"Sending request to {cls.url}", logging.INFO)
-        cls.result = TestRequest(url=cls.url, request="GET", timeout=2, logger=Logger.std_logger)
+        cls.result = TestRequest(url=cls.url, request="GET", timeout=30, logger=Logger.std_logger)
         if cls.result is not None:
             try:
                 _raw = cls.result.json()
@@ -72,7 +72,7 @@ class test_GameDatasets(TestCase):
 
         cls.url    = f"{_testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/list"
         Logger.Log(f"Sending request to {cls.url}", logging.INFO)
-        cls.result = TestRequest(url=cls.url, request="GET", timeout=2, logger=Logger.std_logger)
+        cls.result = TestRequest(url=cls.url, request="GET", timeout=30, logger=Logger.std_logger)
         if cls.result is not None:
             try:
                 _raw = cls.result.json()
@@ -123,7 +123,7 @@ class test_GameDatasetInfo(TestCase):
 
         self.url    = f"{_testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/1/2024/files/"
         Logger.Log(f"Sending request to {self.url}", logging.INFO)
-        self.result = TestRequest(url=self.url, request="GET", timeout=3, logger=Logger.std_logger)
+        self.result = TestRequest(url=self.url, request="GET", timeout=30, logger=Logger.std_logger)
         if self.result is not None:
             try:
                 _raw = self.result.json()

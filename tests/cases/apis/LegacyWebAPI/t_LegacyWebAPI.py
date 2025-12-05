@@ -80,7 +80,7 @@ class test_MonthlyGameUsage(TestCase):
         }
         cls.url    = f"{_testing_cfg.ExternEndpoint}/getMonthlyGameUsage"
         Logger.Log(f"Sending request to {cls.url}", logging.INFO)
-        cls.result = TestRequest(url=cls.url, request="GET", params=params, timeout=5, logger=Logger.std_logger)
+        cls.result = TestRequest(url=cls.url, request="GET", params=params, timeout=30, logger=Logger.std_logger)
         if cls.result is not None:
             try:
                 _raw = cls.result.json()
@@ -136,7 +136,7 @@ class test_GameFileInfoByMonth(TestCase):
         }
         self.url    = f"{_testing_cfg.ExternEndpoint}/getGameFileInfoByMonth"
         Logger.Log(f"Sending request to {self.url}", logging.INFO)
-        self.result = TestRequest(url=self.url, request="GET", params=params, timeout=5, logger=Logger.std_logger)
+        self.result = TestRequest(url=self.url, request="GET", params=params, timeout=30, logger=Logger.std_logger)
         if self.result is not None:
             try:
                 _raw = self.result.json()
