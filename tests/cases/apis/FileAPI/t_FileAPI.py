@@ -51,7 +51,14 @@ class test_GameList(TestCase):
             self.fail(f"No result from request to {self.url}")
 
     def test_Correct(self):
-        known_games = ["AQUALAB", "BLOOM"]
+        known_games = [
+            "AQUALAB", "BACTERIA", "BALLOON", "BLOOM", "CRYSTAL",
+            "CYCLE_CARBON", "CYCLE_NITROGEN", "CYCLE_WATER", "EARTHQUAKE",
+            "ICECUBE", "JOURNALISM", "JOWILDER", "LAKELAND", "MAGNET",
+            "MASHOPOLIS", "PENGUINS", "PENNYCOOK", "SHADOWSPECT", "SHIPWRECKS",
+            "THERMOLAB", "THERMOVR", "TRANSFORMATION_QUEST", "WAVES",
+            "WEATHER_STATION", "WIND"
+        ]
         if self.content is not None and self.content.Value is not None:
             self.assertIsInstance(self.content.Value, dict)
             # check game ID
