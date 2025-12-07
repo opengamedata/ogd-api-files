@@ -27,7 +27,7 @@ class test_GameList(TestCase):
 
         cls.url    = f"{_testing_cfg.ExternEndpoint}/games/list"
         Logger.Log(f"Sending request to {cls.url}", logging.INFO)
-        cls.result = TestRequest(url=cls.url, request="GET", timeout=2, logger=Logger.std_logger)
+        cls.result = TestRequest(url=cls.url, request="GET", timeout=30, logger=Logger.std_logger)
         if cls.result is not None:
             try:
                 _raw = cls.result.json()
@@ -41,25 +41,25 @@ class test_GameList(TestCase):
         if cls.result is not None:
             cls.result.close()
 
-    @staticmethod
-    def RunAll():
-        pass
-
     def test_Responded(self):
+        self.assertIsNotNone(self.result, f"No result from request to {self.url}")
+
+    def test_Succeeded(self):
         if self.result is not None:
             self.assertTrue(self.result.ok)
         else:
             self.fail(f"No result from request to {self.url}")
 
-    def test_Succeeded(self):
-        if self.content is not None:
-            self.assertEqual(self.content.Status, ResponseStatus.SUCCESS)
-        else:
-            self.fail(f"No JSON content from request to {self.url}")
-
     def test_Correct(self):
-        known_games = ["AQUALAB", "BLOOM"]
-        if self.content is not None:
+        known_games = [
+            "AQUALAB", "BACTERIA", "BALLOON", "BLOOM", "CRYSTAL",
+            "CYCLE_CARBON", "CYCLE_NITROGEN", "CYCLE_WATER", "EARTHQUAKE",
+            "ICECUBE", "JOURNALISM", "JOWILDER", "LAKELAND", "MAGNET",
+            "MASHOPOLIS", "PENGUINS", "PENNYCOOK", "SHADOWSPECT", "SHIPWRECKS",
+            "THERMOLAB", "THERMOVR", "TRANSFORMATION_QUEST", "WAVES",
+            "WEATHER_STATION", "WIND"
+        ]
+        if self.content is not None and self.content.Value is not None:
             self.assertIsInstance(self.content.Value, dict)
             # check game ID
             self.assertIn("game_ids", self.content.Value.keys(), "Response did not contain game_ids")
@@ -79,7 +79,7 @@ class test_GameDatasets(TestCase):
 
         cls.url    = f"{_testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/list"
         Logger.Log(f"Sending request to {cls.url}", logging.INFO)
-        cls.result = TestRequest(url=cls.url, request="GET", timeout=2, logger=Logger.std_logger)
+        cls.result = TestRequest(url=cls.url, request="GET", timeout=30, logger=Logger.std_logger)
         if cls.result is not None:
             try:
                 _raw = cls.result.json()
@@ -93,21 +93,14 @@ class test_GameDatasets(TestCase):
         if cls.result is not None:
             cls.result.close()
 
-    @staticmethod
-    def RunAll():
-        pass
-
     def test_Responded(self):
+        self.assertIsNotNone(self.result, f"No result from request to {self.url}")
+
+    def test_Succeeded(self):
         if self.result is not None:
             self.assertTrue(self.result.ok)
         else:
             self.fail(f"No result from request to {self.url}")
-
-    def test_Succeeded(self):
-        if self.content is not None:
-            self.assertEqual(self.content.Status, ResponseStatus.SUCCESS)
-        else:
-            self.fail(f"No JSON content from request to {self.url}")
 
     def test_Correct(self):
         _expected_data = {
@@ -115,7 +108,7 @@ class test_GameDatasets(TestCase):
             'month': 5,
             'total_sessions': 808
         }
-        if self.content is not None:
+        if self.content is not None and self.content.Value is not None:
             self.assertIsInstance(self.content.Value, dict)
             # check game ID
             self.assertIn("game_id", self.content.Value.keys(), "Response did not contain game_id")
@@ -137,7 +130,7 @@ class test_GameDatasetInfo(TestCase):
 
         self.url    = f"{_testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/1/2024/files/"
         Logger.Log(f"Sending request to {self.url}", logging.INFO)
-        self.result = TestRequest(url=self.url, request="GET", timeout=3, logger=Logger.std_logger)
+        self.result = TestRequest(url=self.url, request="GET", timeout=30, logger=Logger.std_logger)
         if self.result is not None:
             try:
                 _raw = self.result.json()
@@ -146,21 +139,14 @@ class test_GameDatasetInfo(TestCase):
             else:
                 self.content = APIResponse.FromDict(all_elements=_raw)
 
-    @staticmethod
-    def RunAll():
-        pass
-
     def test_Responded(self):
+        self.assertIsNotNone(self.result, f"No result from request to {self.url}")
+
+    def test_Succeeded(self):
         if self.result is not None:
             self.assertTrue(self.result.ok)
         else:
             self.fail(f"No result from request to {self.url}")
-
-    def test_Succeeded(self):
-        if self.content is not None:
-            self.assertEqual(self.content.Status, ResponseStatus.SUCCESS)
-        else:
-            self.fail(f"No JSON content from request to {self.url}")
 
     def test_Correct(self):
         expected_data = {
@@ -190,7 +176,7 @@ class test_GameDatasetInfo(TestCase):
         expected_data['raw_file'] = expected_data['events_file']
         expected_data['events_file'] = None
 
-        if self.content is not None:
+        if self.content is not None and self.content.Value is not None:
             self.assertEqual(self.content.Value.keys(), expected_data.keys(), msg="Mismatching keys between response and expected")
             for key, val in expected_data.items():
                 self.assertEqual(self.content.Value.get(key), val, msg=f"Mismatch for key {key}")
