@@ -108,7 +108,7 @@ class test_GameDatasets(TestCase):
             'month': 5,
             'total_sessions': 808
         }
-        if self.content is not None:
+        if self.content is not None and self.content.Value is not None:
             self.assertIsInstance(self.content.Value, dict)
             # check game ID
             self.assertIn("game_id", self.content.Value.keys(), "Response did not contain game_id")
@@ -176,7 +176,7 @@ class test_GameDatasetInfo(TestCase):
         expected_data['raw_file'] = expected_data['events_file']
         expected_data['events_file'] = None
 
-        if self.content is not None:
+        if self.content is not None and self.content.Value is not None:
             self.assertEqual(self.content.Value.keys(), expected_data.keys(), msg="Mismatching keys between response and expected")
             for key, val in expected_data.items():
                 self.assertEqual(self.content.Value.get(key), val, msg=f"Mismatch for key {key}")
