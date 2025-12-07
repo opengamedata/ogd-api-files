@@ -31,7 +31,7 @@ class test_Hello(TestCase):
             except JSONDecodeError as err:
                 print(f"Could not parse {cls.result.text} to JSON!\n{err}")
             else:
-                cls.content = APIResponse.FromDict(all_elements=_raw)
+                cls.content = APIResponse.FromDict(all_elements=_raw, status=ResponseStatus(cls.result.status_code))
 
     @classmethod
     def tearDownClass(cls):
