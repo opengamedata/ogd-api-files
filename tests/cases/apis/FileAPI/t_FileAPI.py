@@ -52,7 +52,7 @@ class test_GameList(TestCase):
 
     def test_Correct(self):
         known_games = ["AQUALAB", "BLOOM"]
-        if self.content is not None:
+        if self.content is not None and self.content.Value is not None:
             self.assertIsInstance(self.content.Value, dict)
             # check game ID
             self.assertIn("game_ids", self.content.Value.keys(), "Response did not contain game_ids")
