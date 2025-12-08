@@ -104,9 +104,12 @@ class test_GameDatasets(TestCase):
 
     def test_Correct(self):
         _expected_data = {
-            'year': 2021,
-            'month': 5,
-            'total_sessions': 808
+            'year': 2022,
+            'month': 8,
+            'total_sessions': 357,
+            "sessions_file"   : "https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20220801_to_20220831_0c348a5_session-features.zip",
+            "players_file"    : "https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20220801_to_20220831_0c348a5_player-features.zip",
+            "population_file" : "https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20220801_to_20220831_0c348a5_population-features.zip"
         }
         if self.content is not None and self.content.Value is not None:
             self.assertIsInstance(self.content.Value, dict)
@@ -117,8 +120,8 @@ class test_GameDatasets(TestCase):
             self.assertIn("datasets", self.content.Value.keys(), "Response did not contain datasets")
             datasets = self.content.Value.get('datasets', [])
             self.assertIsInstance(datasets, list)
-            self.assertGreaterEqual(len(datasets), 2) # Aqualab should definitely have more than 2 months
-            self.assertEqual(datasets[1], _expected_data)
+            self.assertGreaterEqual(len(datasets), 17) # Aqualab should definitely have more than 17 months, as long as it's been around.
+            self.assertEqual(datasets[17], _expected_data)
         else:
             self.fail(f"No JSON content from request to {self.url}")
 
