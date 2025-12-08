@@ -130,9 +130,12 @@ class FileAPI:
                 if _dataset.Key.DateFrom: # len(rangeKeyParts) == 4:
                     # Capture the number of sessions for this YYYYMM
                     sessions.append({
-                        "year": _dataset.Key.DateFrom.year,
-                        "month": _dataset.Key.DateFrom.month,
-                        "total_sessions": _dataset.SessionCount
+                        "year"            : _dataset.Key.DateFrom.year,
+                        "month"           : _dataset.Key.DateFrom.month,
+                        "total_sessions"  : _dataset.SessionCount,
+                        "sessions_file"   : f"{file_list.RemoteURL}{_dataset.SessionsFile}"   if _dataset.SessionsFile   is not None else None,
+                        "players_file"    : f"{file_list.RemoteURL}{_dataset.PlayersFile}"    if _dataset.PlayersFile    is not None else None,
+                        "population_file" : f"{file_list.RemoteURL}{_dataset.PopulationFile}" if _dataset.PopulationFile is not None else None
                     })
 
 
