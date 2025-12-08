@@ -14,40 +14,62 @@ For any given dataset, the data may include game events, post-hoc "detector" eve
 
 ### Game-Level Endpoints
 
-`/games/list` (experimental/upcoming)
+* `/games/list` (experimental/upcoming)  
 
-* Retrieve a list of all games for which at least one dataset exists.
+  Retrieve a list of all games for which at least one dataset exists.
 
-`/games/<game_id>/datasets/list` (experimental/upcoming)
+* `/games/<game_id>/datasets/list` (experimental/upcoming)  
 
-* Retrieve a list of datasets and associated session counts for a specific game. At present, this is identical to the `/MonthlyGameUsage` legacy endpoint.
+  Retrieve a list of datasets and associated session counts for a specific game.
+
+  Approximately equivalent to the `/MonthlyGameUsage` legacy endpoint.
+  However, the legacy endpoint includes additional entries for non-existent datasets that lie within the range of all extant datasets, with the session counts set to 0.
+
+  Example:
+  ```bash
+  curl https://ogd-staging.fielddaylab.wisc.edu/path/to/app.wsgi/games/AQUALAB/datasets/list
+  ```
+
+  ```json
+  response = {
+    "type": "GET",
+    "val": {
+      "game_id": "AQUALAB",
+      "datasets": [
+        ...
+        {"year": 2025, "month": 9, "total_sessions": 4908},
+        {"year": 2025, "month": 10, "total_sessions": 4763},
+        {"year": 2025, "month": 11, "total_sessions": 5339}
+      ]
+    },
+    "msg": "SUCCESS: Retrieved monthly game usage"
+  }
+  ```
 
 ### Dataset-Level Endpoints
 
-`/games/<game_id>/datasets/<month>/<year>/files/` (experimental/upcoming)
+* `/games/<game_id>/datasets/<month>/<year>/files/` (experimental/upcoming)
 
-* Get detailed info on the files and other resources that are available for a specific dataset. At present, this is identical to the `/getGameFileInfoByMonth` legacy endpoint.
+  Get detailed info on the files and other resources that are available for a specific dataset. At present, this is identical to the `/getGameFileInfoByMonth` legacy endpoint.
 
 ### File-Level Endpoints
 
-`/games/<game_id>/datasets/<month>/<year>/files/<file_type>` (experimental/upcoming)
+* `/games/<game_id>/datasets/<month>/<year>/files/<file_type>` (experimental/upcoming)
 
-* Retrieve the contents of a specific dataset file. Valid `file_type`s are `population`, `player`, and `session`.
+  Retrieve the contents of a specific dataset file. Valid `file_type`s are `population`, `player`, and `session`.
 
 ### Legacy Endpoints
 
 Endpoints used by the OpenGameData website, which use an outdated convention.
 We intend to deprecate these in the near future.
 
-`/MonthlyGameUsage`
+* `/MonthlyGameUsage` : Retrieve a list of datasets and associated session counts for a specific game.
 
-* Retrieve a list of datasets and associated session counts for a specific game.
-* Query string params: game_id
+  Query string params: `game_id`
 
-`/getGameFileInfoByMonth`
+* `/getGameFileInfoByMonth` : Get detailed info on the files and other resources that are available for a specific dataset.
 
-* Get detailed info on the files and other resources that are available for a specific dataset.
-* Query string params: game_id, year, month
+  Query string params: `game_id`, `year`, `month`
 
 ## Developer Instructions
 
