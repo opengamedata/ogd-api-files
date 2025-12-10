@@ -23,6 +23,11 @@ class FileAPITestConfig(TestConfig):
 
     # *** BUILT-INS & PROPERTIES ***
 
+    def __new__(cls, *args, **kwargs):
+        if not hasattr(cls, '_instance'):
+            cls._instance = super(FileAPITestConfig, cls).__new__(cls)
+        return cls._instance
+
     def __init__(self, name:str,
                  extern_endpoint:Optional[str]=None, api_version:Optional[str]=None,
                  verbose:Optional[bool]=None, enabled_tests:Optional[Dict[str, bool]]=None,
@@ -30,13 +35,20 @@ class FileAPITestConfig(TestConfig):
 
         unparsed_elements : Map = other_elements or {}
 
-        self._extern_server : str
-        self._api_version   : str
+        if not hasattr(self, '_initialized'):
+            self._extern_server : str
+            self._api_version   : str
 
-        self._extern_server = extern_endpoint if extern_endpoint is not None else self._parseExternEndpoint(unparsed_elements=unparsed_elements, schema_name=name)
-        self._api_version   = api_version     if api_version     is not None else self._parseAPIVersion(unparsed_elements=unparsed_elements, schema_name=name)
+            self._extern_server = extern_endpoint if extern_endpoint is not None else self._parseExternEndpoint(unparsed_elements=unparsed_elements, schema_name=name)
+            self._api_version   = api_version     if api_version     is not None else self._parseAPIVersion(unparsed_elements=unparsed_elements, schema_name=name)
 
-        super().__init__(name=name, verbose=verbose, enabled_tests=enabled_tests, other_elements=unparsed_elements)
+            super().__init__(
+                name=name,
+                verbose=verbose,
+                enabled_tests=enabled_tests,
+                other_elements=unparsed_elements
+            )
+            self._initialized = True
 
     @property
     def ExternEndpoint(self) -> str:
