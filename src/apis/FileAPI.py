@@ -19,6 +19,7 @@ from ogd.common.schemas.datasets.DatasetSchema import DatasetSchema
 from ogd.common.schemas.datasets.DatasetCollectionSchema import DatasetCollectionSchema
 
 # import local files
+from apis.resources.GameList import GameList
 from configs.FileAPIConfig import FileAPIConfig
 from models.SanitizedParams import SanitizedParams
 from utils.utils import GetFileList
@@ -44,39 +45,11 @@ class FileAPI:
         """
         # Expected WSGIScriptAlias URL path is /data
         api = Api(app)
-        api.add_resource(FileAPI.GameList, '/games/list')
+        api.add_resource(GameList, '/games/list')
         api.add_resource(FileAPI.GameDatasets, '/games/<game_id>/datasets/list')
         api.add_resource(FileAPI.GameDatasetInfo,  '/games/<game_id>/datasets/<month>/<year>/files/')
         api.add_resource(FileAPI.DataFile,  '/games/<game_id>/datasets/<month>/<year>/files/<file_type>')
         FileAPI.server_config = settings
-
-    class GameList(Resource):
-        """
-        Get the per-month number of sessions for a given game
-
-        Inputs:
-        - Game ID
-        Uses:
-        - Index file list
-        Outputs:
-        - Session count for each month of game's data
-        """
-        def get(self):
-            ret_val = APIResponse.Default(req_type=RESTType.GET)
-
-            file_list     : DatasetRepositoryConfig = GetFileList(FileAPI.server_config.FileListURL)
-
-            # If the given game isn't in our dictionary, or our dictionary doesn't have any date ranges for this game
-            if file_list.Games is None or len(file_list.Games) < 1:
-                ret_val.ServerErrored(msg=f"Game list not found, or had no datasets listed")
-                return ret_val.AsFlaskResponse
-
-            game_ids = [game for game in file_list.Games.keys()]
-
-            responseData = { "game_ids": game_ids }
-            ret_val.RequestSucceeded(msg="Retrieved monthly game usage", val=responseData)
-
-            return ret_val.AsFlaskResponse
 
     class GameDatasets(Resource):
         """
