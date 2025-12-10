@@ -67,7 +67,7 @@ class test_GameList(TestCase):
 
     def test_Succeeded(self):
         if self.result is not None:
-            self.assertTrue(self.result.ok)
+            self.assertEqual(self.result.status_code, 200)
         else:
             self.fail(f"No result from request to {self.url}")
 
@@ -166,7 +166,7 @@ class test_GameDatasetInfo(TestCase):
         self.result : Optional[requests.Response]
         self.content : Optional[APIResponse]    = None
 
-        self.url    = f"{cls.testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/1/2024/files/"
+        self.url    = f"{self.testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/1/2024/files/"
         Logger.Log(f"Sending request to {self.url}", logging.INFO)
         self.result = TestRequest(url=self.url, request="GET", timeout=30, logger=Logger.std_logger)
         if self.result is not None:
