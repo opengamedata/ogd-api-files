@@ -18,7 +18,7 @@ from src.apis.FileAPI import FileAPI
 from tests.FileAPITestConfig import FileAPITestConfig
 from tests.config.t_config import settings
 
-class test_GameList(TestCase):
+class test_GameList_local(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.url    : str
@@ -91,7 +91,7 @@ class test_GameList(TestCase):
         else:
             self.fail(f"No JSON content from request to {self.url}")
 
-class test_GameDatasets(TestCase):
+class test_GameDatasets_local(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.url    : str
@@ -152,7 +152,7 @@ class test_GameDatasets(TestCase):
         else:
             self.fail(f"No JSON content from request to {self.url}")
 
-class test_GameDatasetInfo(TestCase):
+class test_GameDatasetInfo_local(TestCase):
     @classmethod
     def setUpClass(cls):
         # 1. Get testing config
