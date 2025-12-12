@@ -13,18 +13,22 @@ class SanitizedParams:
     def __init__(self, game_id:Optional[str], year:int, month:int, default_date:Optional[datetime.date]=None):
         default_date = default_date if default_date is not None else datetime.date.today()
         self._game_id : Optional[str] = SanitizedParams.sanitizeGameId(game_id) if game_id is not None else None
-        self._year    : int           = SanitizedParams.sanitizeYear(year, default_date=default_date)
-        self._month   : int           = SanitizedParams.sanitizeMonth(month, default_date=default_date)
+        self._year    : Optional[int] = SanitizedParams.sanitizeYear(year, default_date=default_date)
+        self._month   : Optional[int] = SanitizedParams.sanitizeMonth(month, default_date=default_date)
     
     @property
     def GameID(self) -> Optional[str]:
         return self._game_id
     @property
-    def Year(self) -> int:
+    def Year(self) -> Optional[int]:
         return self._year
     @property
-    def Month(self) -> int:
+    def Month(self) -> Optional[int]:
         return self._month
+
+    @property
+    def IsValid(self) -> bool:
+        return None not in {self.GameID, self.Year, self.Month}
 
     # If the given game_id contains allowed characters, return it in UPPERCASE, otherwise return empty string
     @staticmethod
