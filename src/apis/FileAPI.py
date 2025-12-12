@@ -67,7 +67,7 @@ class FileAPI:
         return file_list
 
     @staticmethod
-    def _MatchDataset(sanitized_request:SanitizedParams, game_datasets:DatasetCollectionSchema) -> Optional[DatasetSchema]:
+    def _matchDataset(sanitized_request:SanitizedParams, game_datasets:DatasetCollectionSchema) -> Optional[DatasetSchema]:
         _matched_dataset : Optional[DatasetSchema] = None
 
         # Find the best match of a dataset to the requested month-year.
@@ -198,7 +198,7 @@ class FileAPI:
             # Else, continue on.
 
         # 2. Search for the most recently modified dataset that contains the requested month and year
-            _matched_dataset : Optional[DatasetSchema] = FileAPI._MatchDataset(sanitized_request=sanitized_request, game_datasets=game_datasets)
+            _matched_dataset : Optional[DatasetSchema] = FileAPI._matchDataset(sanitized_request=sanitized_request, game_datasets=game_datasets)
 
             if _matched_dataset and _matched_dataset.Key.DateFrom and _matched_dataset.Key.DateTo:
                 file_info = {}
@@ -278,7 +278,7 @@ class FileAPI:
                 # Else, continue on.
 
             # 2. Search for the most recently modified dataset that contains the requested month and year
-                _matched_dataset : Optional[DatasetSchema] = FileAPI._MatchDataset(sanitized_request=sanitized_request, game_datasets=game_datasets)
+                _matched_dataset : Optional[DatasetSchema] = FileAPI._matchDataset(sanitized_request=sanitized_request, game_datasets=game_datasets)
 
                 if _matched_dataset and _matched_dataset.Key.DateFrom and _matched_dataset.Key.DateTo:
                     file_link = None
