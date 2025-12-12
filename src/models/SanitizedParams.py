@@ -10,20 +10,19 @@ from flask_restful import reqparse
 class SanitizedParams:
     """Dumb struct to store the sanitized params from a request
     """
-    def __init__(self, game_id:Optional[str], year:int, month:int, default_date:Optional[datetime.date]=None):
-        default_date = default_date if default_date is not None else datetime.date.today()
-        self._game_id : Optional[str] = SanitizedParams.sanitizeGameId(game_id) if game_id is not None else None
-        self._year    : Optional[int] = SanitizedParams.sanitizeYear(year, default_date=default_date)
-        self._month   : Optional[int] = SanitizedParams.sanitizeMonth(month, default_date=default_date)
+    def __init__(self, game_id:str, year:int, month:int):
+        self._game_id : str = game_id
+        self._year    : int = year
+        self._month   : int = month
     
     @property
-    def GameID(self) -> Optional[str]:
+    def GameID(self) -> str:
         return self._game_id
     @property
-    def Year(self) -> Optional[int]:
+    def Year(self) -> int:
         return self._year
     @property
-    def Month(self) -> Optional[int]:
+    def Month(self) -> int:
         return self._month
 
     @property
@@ -32,10 +31,13 @@ class SanitizedParams:
 
     # If the given game_id contains allowed characters, return it in UPPERCASE, otherwise return empty string
     @staticmethod
-    def sanitizeGameId(game_id:str) -> str:
-        if re.search("^[A-Za-z_]+$", game_id) is None:
-            game_id = ""
-        return game_id.upper()
+    def sanitizeGameId(game_id:str) -> Optional[str]:
+        ret_val: Optional[str] = None
+
+        if re.search("^[A-Za-z_]+$", game_id) is not None:
+            ret_val = game_id.upper()
+
+        return ret_val
 
     @staticmethod
     def sanitizeYear(year:Union[int, str]) -> Optional[int]:
@@ -63,10 +65,20 @@ class SanitizedParams:
 
         return ret_val
 
+    @staticmethod
+    def FromParams(game_id:Optional[str], year:int, month:int) -> Optional["SanitizedParams"]:
+        _game_id : Optional[str] = SanitizedParams.sanitizeGameId(game_id) if game_id is not None else None
+        _year    : Optional[int] = SanitizedParams.sanitizeYear(year)
+        _month   : Optional[int] = SanitizedParams.sanitizeMonth(month)
+        if _game_id is not None and _year is not None and _month is not None:
+            return SanitizedParams(game_id=_game_id, year=_year, month=_month)
+        else:
+            return None
+
     # Shared utility function to retrieve game_id, year, and month from the request's query string.
     # Defaults are used if a value was not given or is invalid
     @staticmethod
-    def FromRequest(default_date:datetime.date=datetime.date.today()) -> 'SanitizedParams':
+    def FromRequest(default_date:datetime.date=datetime.date.today()) -> Optional['SanitizedParams']:
 
         # Extract query string parameters
         parser = reqparse.RequestParser()
@@ -82,5 +94,5 @@ class SanitizedParams:
         if game_id == "":
             game_id = None
 
-        return SanitizedParams(game_id=game_id, year=year, month=month)
+        return SanitizedParams.FromParams(game_id=game_id, year=year, month=month)
         # return { "game_id": game_id, "year": year, "month": month }
