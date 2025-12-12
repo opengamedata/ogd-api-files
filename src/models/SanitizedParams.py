@@ -55,7 +55,7 @@ class SanitizedParams:
         ret_val: int
 
         if not isinstance(month, int):
-            if re.search("^[0-9]+$", str(month)) is None:
+            if re.search("^[0-1]?[1-9]$", str(month)) is None:
                 month = default_date.month
             else:
                 month = int(str(month))
