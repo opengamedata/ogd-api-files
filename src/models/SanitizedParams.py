@@ -34,36 +34,28 @@ class SanitizedParams:
         return game_id.upper()
 
     @staticmethod
-    def sanitizeYear(year:Union[int, str], default_date:datetime.date) -> int:
-        ret_val: int
+    def sanitizeYear(year:Union[int, str]) -> Optional[int]:
+        ret_val: Optional[int] = None
 
         if not isinstance(year, int):
-            if re.search("^[0-9]+$", str(year)) is None:
-                year = default_date.year
-            else:
+            if re.search("^[0-9]+$", str(year)) is not None:
                 year = int(str(year))
 
-        if year < 2000 or year > datetime.date.today().year:
-            year = default_date.year
-
-        ret_val = year
+        if ret_val and ret_val not in range(2000, datetime.date.today().year+1):
+            ret_val = None
 
         return ret_val
 
     @staticmethod
-    def sanitizeMonth(month:Union[int, str], default_date:datetime.date) -> int:
-        ret_val: int
+    def sanitizeMonth(month:Union[int, str]) -> Optional[int]:
+        ret_val: Optional[int] = None
 
         if not isinstance(month, int):
-            if re.search("^[0-9]+$", str(month)) is None:
-                month = default_date.month
-            else:
-                month = int(str(month))
+            if re.search("^[0-9]+$", str(month)) is not None:
+                ret_val = int(str(month))
         
-        if month < 1 or month > 12:
-            month = default_date.month
-        
-        ret_val = month
+        if ret_val and ret_val not in range(1, 12+1):
+            ret_val = None
 
         return ret_val
 
