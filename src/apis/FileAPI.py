@@ -66,6 +66,29 @@ class FileAPI:
         file_list          : DatasetRepositoryConfig   = DatasetRepositoryConfig.FromDict(name="file_list", unparsed_elements=file_list_json)
         return file_list
 
+    @staticmethod
+    def _MatchDataset(sanitized_request:SanitizedParams, game_datasets:DatasetCollectionSchema) -> Optional[DatasetSchema]:
+        _matched_dataset : Optional[DatasetSchema] = None
+
+        # Find the best match of a dataset to the requested month-year.
+        # If there was no requested month-year, we skip this step.
+        for _key, _dataset_schema in game_datasets.Datasets.items():
+            if _dataset_schema.Key.DateFrom and _dataset_schema.Key.DateTo:
+                # If this range contains the given year & month
+                if (sanitized_request.Year >= _dataset_schema.Key.DateFrom.year \
+                and sanitized_request.Month >= _dataset_schema.Key.DateFrom.month \
+                and sanitized_request.Year <= _dataset_schema.Key.DateTo.year \
+                and sanitized_request.Month <= _dataset_schema.Key.DateTo.month):
+                    if _dataset_schema.IsNewerThan(_matched_dataset):
+                        _matched_dataset = _dataset_schema
+            else:
+                current_app.logger.debug(f"Dataset key {_dataset_schema.Key} was invalid.")
+
+            if _matched_dataset is None:
+                _matched_dataset = list(game_datasets.Datasets.values())[-1] if not len(game_datasets.Datasets.values()) < 1 else None
+
+        return _matched_dataset
+
     class GameList(Resource):
         """
         Get the per-month number of sessions for a given game
@@ -175,24 +198,9 @@ class FileAPI:
             # Else, continue on.
 
         # 2. Search for the most recently modified dataset that contains the requested month and year
-            _matched_dataset : Optional[DatasetSchema] = None
-            # Find the best match of a dataset to the requested month-year.
-            # If there was no requested month-year, we skip this step.
-            for _key, _dataset_schema in game_datasets.Datasets.items():
-                if _dataset_schema.Key.DateFrom and _dataset_schema.Key.DateTo:
-                    # If this range contains the given year & month
-                    if (sanitized_request.Year >= _dataset_schema.Key.DateFrom.year \
-                    and sanitized_request.Month >= _dataset_schema.Key.DateFrom.month \
-                    and sanitized_request.Year <= _dataset_schema.Key.DateTo.year \
-                    and sanitized_request.Month <= _dataset_schema.Key.DateTo.month):
-                        if _dataset_schema.IsNewerThan(_matched_dataset):
-                            _matched_dataset = _dataset_schema
-                else:
-                    current_app.logger.debug(f"Dataset key {_dataset_schema.Key} was invalid.")
+            _matched_dataset : Optional[DatasetSchema] = FileAPI._MatchDataset(sanitized_request=sanitized_request, game_datasets=game_datasets)
 
-            if _matched_dataset is None:
-                _matched_dataset = list(game_datasets.Datasets.values())[-1]
-            if _matched_dataset.Key.DateFrom and _matched_dataset.Key.DateTo:
+            if _matched_dataset and _matched_dataset.Key.DateFrom and _matched_dataset.Key.DateTo:
                 file_info = {}
 
                 # If this range contains the given year & month
@@ -233,7 +241,8 @@ class FileAPI:
 
                 ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=file_info)
             else:
-                ret_val.RequestErrored(msg=f"Dataset key {_matched_dataset.Key} was invalid.")
+                _msg = f"Dataset key {_matched_dataset.Key} was invalid." if _matched_dataset else "No datasets found!"
+                ret_val.RequestErrored(msg=_msg)
 
             return ret_val.AsFlaskResponse
 
@@ -269,24 +278,9 @@ class FileAPI:
                 # Else, continue on.
 
             # 2. Search for the most recently modified dataset that contains the requested month and year
-                _matched_dataset : Optional[DatasetSchema] = None
-                # Find the best match of a dataset to the requested month-year.
-                # If there was no requested month-year, we skip this step.
-                for _key, _dataset_schema in game_datasets.Datasets.items():
-                    if _dataset_schema.Key.DateFrom and _dataset_schema.Key.DateTo:
-                        # If this range contains the given year & month
-                        if (sanitized_request.Year >= _dataset_schema.Key.DateFrom.year \
-                        and sanitized_request.Month >= _dataset_schema.Key.DateFrom.month \
-                        and sanitized_request.Year <= _dataset_schema.Key.DateTo.year \
-                        and sanitized_request.Month <= _dataset_schema.Key.DateTo.month):
-                            if _dataset_schema.IsNewerThan(_matched_dataset):
-                                _matched_dataset = _dataset_schema
-                    else:
-                        current_app.logger.debug(f"Dataset key {_dataset_schema.Key} was invalid.")
+                _matched_dataset : Optional[DatasetSchema] = FileAPI._MatchDataset(sanitized_request=sanitized_request, game_datasets=game_datasets)
 
-                if _matched_dataset is None:
-                    _matched_dataset = list(game_datasets.Datasets.values())[-1]
-                if _matched_dataset.Key.DateFrom and _matched_dataset.Key.DateTo:
+                if _matched_dataset and _matched_dataset.Key.DateFrom and _matched_dataset.Key.DateTo:
                     file_link = None
                     missing_file_msg = f"Dataset for {game_id} from {f'{month:02}/{year:04}'} was not found."
                     match str(file_type).upper():
@@ -315,7 +309,8 @@ class FileAPI:
                     else:
                         ret_val.RequestErrored(msg=missing_file_msg)
                 else:
-                    ret_val.RequestErrored(msg=f"Dataset key {_matched_dataset.Key} was invalid.")
+                    _msg = f"Dataset key {_matched_dataset.Key} was invalid." if _matched_dataset else "No datasets found!"
+                    ret_val.RequestErrored(msg=_msg)
             except url_error.HTTPError as err:
                 current_app.logger.error(f"HTTP error getting {file_type} file from {file_link}:\n{err}")
                 ret_val.ServerErrored(msg=f"Server experienced an error retrieving {file_type} file from {f'{month:02}/{year:04}'} for {game_id}.")
