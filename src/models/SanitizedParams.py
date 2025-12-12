@@ -78,18 +78,18 @@ class SanitizedParams:
     # Shared utility function to retrieve game_id, year, and month from the request's query string.
     # Defaults are used if a value was not given or is invalid
     @staticmethod
-    def FromRequest(default_date:datetime.date=datetime.date.today()) -> Optional['SanitizedParams']:
+    def FromRequest() -> Optional['SanitizedParams']:
 
         # Extract query string parameters
         parser = reqparse.RequestParser()
-        parser.add_argument("game_id", type=str, nullable=True, required=False, default="",                 location="args")
-        parser.add_argument("year",    type=int, nullable=True, required=False, default=default_date.year,  location="args")
-        parser.add_argument("month",   type=int, nullable=True, required=False, default=default_date.month, location="args")
+        parser.add_argument("game_id", type=str, nullable=True, required=False, default="", location="args")
+        parser.add_argument("year",    type=int, nullable=True, required=False, default="", location="args")
+        parser.add_argument("month",   type=int, nullable=True, required=False, default="", location="args")
         args : Dict[str, Any] = parser.parse_args()
 
         game_id : Optional[str] = SanitizedParams.sanitizeGameId(args.get("game_id", ""))
-        year    : int           = args.get("year",  default_date.year)
-        month   : int           = args.get("month", default_date.month)
+        year    : int           = args.get("year", 0)
+        month   : int           = args.get("month", 0)
 
         if game_id == "":
             game_id = None
