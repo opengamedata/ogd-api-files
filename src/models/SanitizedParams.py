@@ -38,7 +38,7 @@ class SanitizedParams:
         ret_val: int
 
         if not isinstance(year, int):
-            if re.search("^[1-9]+$", str(year)) is None:
+            if re.search("^[0-9]+$", str(year)) is None:
                 year = default_date.year
             else:
                 year = int(str(year))
