@@ -84,9 +84,6 @@ class FileAPI:
             else:
                 current_app.logger.debug(f"Dataset key {_dataset_schema.Key} was invalid.")
 
-            if _matched_dataset is None:
-                _matched_dataset = list(game_datasets.Datasets.values())[-1] if not len(game_datasets.Datasets.values()) < 1 else None
-
         return _matched_dataset
 
     class GameList(Resource):
