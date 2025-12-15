@@ -46,10 +46,12 @@ class FileAPI:
         """
         # Expected WSGIScriptAlias URL path is /data
         api = Api(app)
-        api.add_resource(FileAPI.GameList, '/games/list')
-        api.add_resource(FileAPI.GameDatasets, '/games/<game_id>/datasets/list')
-        api.add_resource(FileAPI.GameDatasetInfo,  '/games/<game_id>/datasets/<month>/<year>/files/')
-        api.add_resource(FileAPI.DataFile,  '/games/<game_id>/datasets/<month>/<year>/files/<file_type>')
+        api.add_resource(FileAPI.GameList,         '/games')
+        api.add_resource(FileAPI.GameSummary,      '/games/<game_id>')
+        api.add_resource(FileAPI.GameDatasets,     '/games/<game_id>/datasets')
+        api.add_resource(FileAPI.GameDatasetsYear, '/games/<game_id>/datasets/<year>')
+        api.add_resource(FileAPI.GameDatasetInfo,  '/games/<game_id>/datasets/<year>/<month>')
+        api.add_resource(FileAPI.DataFile,         '/games/<game_id>/datasets/<year>/<month>/<file_type>')
         FileAPI.server_config = settings
 
     @staticmethod
@@ -68,14 +70,12 @@ class FileAPI:
 
     class GameList(Resource):
         """
-        Get the per-month number of sessions for a given game
+        Get list of games for which datasets exist
 
         Inputs:
-        - Game ID
-        Uses:
-        - Index file list
+        - N/A
         Outputs:
-        - Session count for each month of game's data
+        - game_id for all games in the dataset store.
         """
         def get(self):
             ret_val = APIResponse.Default(req_type=RESTType.GET)
@@ -91,6 +91,22 @@ class FileAPI:
 
             responseData = { "game_ids": game_ids }
             ret_val.RequestSucceeded(msg="Retrieved monthly game usage", val=responseData)
+
+            return ret_val.AsFlaskResponse
+
+    class GameSummary(Resource):
+        """
+        Get a summary of a single game
+
+        Inputs:
+        - Game ID
+        Outputs:
+        - Not implemented
+        """
+        def get(self):
+            ret_val = APIResponse.Default(req_type=RESTType.GET)
+
+            ret_val.ServerErrored("This endpoint is not yet implemented!")
 
             return ret_val.AsFlaskResponse
 
@@ -141,6 +157,22 @@ class FileAPI:
 
             responseData = { "game_id": game_id, "datasets": sessions }
             ret_val.RequestSucceeded(msg="Retrieved monthly game usage", val=responseData)
+
+            return ret_val.AsFlaskResponse
+
+    class GameDatasetsYear(Resource):
+        """
+        Get a list of datasets within a single year for a game
+
+        Inputs:
+        - Game ID, Year
+        Outputs:
+        - Not implemented
+        """
+        def get(self):
+            ret_val = APIResponse.Default(req_type=RESTType.GET)
+
+            ret_val.ServerErrored("This endpoint is not yet implemented!")
 
             return ret_val.AsFlaskResponse
 
