@@ -151,14 +151,13 @@ class test_GameDatasetInfo(TestCase):
         else:
             self.fail(f"No result from request to {self.url}")
 
-    @unittest.skip(reason="Temporarily turning this off until we solve bug that is returning the wrong info for certain months, so that we can test for other regressions in the meantime.")
     def test_Correct(self):
         expected_data = {
-            "detectors_link":"https://github.com/opengamedata/opengamedata-core/tree/42597ba/src/ogd/games/AQUALAB/detectors",
+            "detectors_link":"https://github.com/opengamedata/opengamedata-core/tree/df72162/src/ogd/games/AQUALAB/detectors",
             "events_codespace":"https://codespaces.new/opengamedata/opengamedata-samples/tree/aqualab?quickstart=1&devcontainer_path=.devcontainer%2Fevent-template%2Fdevcontainer.json",
             "events_file":"https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_all-events.zip",
             "events_template":"https://github.com/opengamedata/opengamedata-templates/tree/aqualab",
-            "features_link":"https://github.com/opengamedata/opengamedata-core/tree/42597ba/src/ogd/games/AQUALAB/features",
+            "features_link":"https://github.com/opengamedata/opengamedata-core/tree/df72162/src/ogd/games/AQUALAB/features",
             "first_month":1,
             "first_year":2024,
             "found_matching_range":True,
@@ -184,6 +183,42 @@ class test_GameDatasetInfo(TestCase):
             self.assertEqual(self.content.Value.keys(), expected_data.keys(), msg="Mismatching keys between response and expected")
             for key, val in expected_data.items():
                 self.assertEqual(self.content.Value.get(key), val, msg=f"Mismatch for key {key}")
+        else:
+            self.fail(f"No JSON content from request to {self.url}")
+
+class test_GameDatasetInfo_notfound(TestCase):
+    def setUp(self):
+        self.url    : str
+        self.result : Optional[requests.Response]
+        self.content : Optional[APIResponse]    = None
+
+        self.url    = f"{_testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/1/2021/files/"
+        Logger.Log(f"Sending request to {self.url}", logging.INFO)
+        self.result = TestRequest(url=self.url, request="GET", timeout=30, logger=Logger.std_logger)
+        if self.result is not None:
+            try:
+                _raw = self.result.json()
+            except JSONDecodeError as err:
+                print(f"Could not parse {self.result.text} to JSON!\n{err}")
+            else:
+                self.content = APIResponse.FromDict(all_elements=_raw)
+
+    def test_Responded(self):
+        self.assertIsNotNone(self.result, f"No result from request to {self.url}")
+
+    def test_Errored(self):
+        if self.result is not None:
+            self.assertFalse(self.result.ok)
+        else:
+            self.fail(f"No result from request to {self.url}")
+
+    def test_Correct(self):
+        expected_msg = "ERROR: Could not find a dataset for AQUALAB in 01/2021"
+
+        if self.content is not None:
+            self.assertIsNone(self.content.Value)
+            if self.content.Message is not None:
+                self.assertEqual(self.content.Message, expected_msg, msg="Mismatching messages between response and expected")
         else:
             self.fail(f"No JSON content from request to {self.url}")
 

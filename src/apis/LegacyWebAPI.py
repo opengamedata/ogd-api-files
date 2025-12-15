@@ -69,32 +69,38 @@ class LegacyWebAPI:
             ret_val = APIResponse.Default(req_type=RESTType.GET)
 
             last_month = date.today().replace(day=1) - timedelta(days=1)
-            sanitized_request = SanitizedParams.FromRequest(default_date=last_month)
+            sanitized_params = SanitizedParams.FromRequest()
+            if sanitized_params is None:
+                last_month = date.today().replace(day=1) - timedelta(days=1)
+                sanitized_params = SanitizedParams.FromParams(game_id="", year=last_month.year, month=last_month.month)
 
-            if sanitized_request.GameID is None or sanitized_request.GameID == "":
-                ret_val.RequestErrored(msg=f"Bad GameID '{sanitized_request.GameID}'")
-                return ret_val.AsFlaskResponse
+            if sanitized_params is not None:
+                if sanitized_params.GameID is None or sanitized_params.GameID == "":
+                    ret_val.RequestErrored(msg=f"Bad GameID '{sanitized_params.GameID}'")
+                    return ret_val.AsFlaskResponse
 
-            # If we don't have a mapping for the given game
-            if not sanitized_request.GameID in LegacyWebAPI.server_config.GameMapping:
-                ret_val.ServerErrored(msg=f"GameID '{sanitized_request.GameID}' not found in available games")
-                return ret_val.AsFlaskResponse
+                # If we don't have a mapping for the given game
+                if not sanitized_params.GameID in LegacyWebAPI.server_config.GameMapping:
+                    ret_val.ServerErrored(msg=f"GameID '{sanitized_params.GameID}' not found in available games")
+                    return ret_val.AsFlaskResponse
 
-            total_monthly_sessions = 0
-            sessions_by_day = {}
+                total_monthly_sessions = 0
+                sessions_by_day = {}
 
-            bqInterface = BigQueryInterface(LegacyWebAPI.server_config.GameMapping[sanitized_request.GameID])
-            total_monthly_sessions = bqInterface.GetTotalSessionsForMonth(sanitized_request.Year, sanitized_request.Month)
-            sessions_by_day        = bqInterface.GetSessionsPerDayForMonth(sanitized_request.Year, sanitized_request.Month)
+                bqInterface = BigQueryInterface(LegacyWebAPI.server_config.GameMapping[sanitized_params.GameID])
+                total_monthly_sessions = bqInterface.GetTotalSessionsForMonth(sanitized_params.Year, sanitized_params.Month)
+                sessions_by_day        = bqInterface.GetSessionsPerDayForMonth(sanitized_params.Year, sanitized_params.Month)
 
-            responseData = {
-                "game_id": sanitized_request.GameID,
-                "selected_month": sanitized_request.Month,
-                "selected_year": sanitized_request.Year,
-                "total_monthly_sessions": total_monthly_sessions,
-                "sessions_by_day": sessions_by_day
-            }
-            ret_val.RequestSucceeded(msg="Retrieved game usage by month", val=responseData)
+                responseData = {
+                    "game_id": sanitized_params.GameID,
+                    "selected_month": sanitized_params.Month,
+                    "selected_year": sanitized_params.Year,
+                    "total_monthly_sessions": total_monthly_sessions,
+                    "sessions_by_day": sessions_by_day
+                }
+                ret_val.RequestSucceeded(msg="Retrieved game usage by month", val=responseData)
+            else:
+                ret_val.RequestErrored(msg=f"Could not get GameUsageByMonth, one or more parameters were invalid.")
 
             return ret_val.AsFlaskResponse
 
@@ -213,100 +219,105 @@ class LegacyWebAPI:
         def get(self):
             ret_val = APIResponse.Default(req_type=RESTType.GET)
 
-            last_month = date.today().replace(day=1) - timedelta(days=1)
-            sanitized_request = SanitizedParams.FromRequest(default_date=last_month)
+            sanitized_params = SanitizedParams.FromRequest()
+            if sanitized_params is None:
+                last_month = date.today().replace(day=1) - timedelta(days=1)
+                sanitized_params = SanitizedParams.FromParams(game_id="", year=last_month.year, month=last_month.month)
 
         # 1. Get the list of datasets available on the server, for given game.
-            file_list_response                             = url_request.urlopen(LegacyWebAPI.server_config.FileListURL)
-            file_list_json     : Dict[str, Dict[str, Any]] = json.loads(file_list_response.read())
-            # *** HACK ***
-            # To make sure we've got a remote_url, working around bug in RepositoryIndexingConfig FromDict(...) implementation.
-            if "CONFIG" in file_list_json.keys() and isinstance(file_list_json["CONFIG"], dict):
-                if not "remote_url" in file_list_json["CONFIG"].keys():
-                    file_list_json["CONFIG"]["remote_url"] = file_list_json["CONFIG"].get("files_base", "https://opengamedata.fielddaylab.wisc.edu/")
-                if not "templates_url" in file_list_json["CONFIG"].keys():
-                    file_list_json["CONFIG"]["templates_url"] = file_list_json["CONFIG"].get("templates_base", "https://github.com/opengamedata/opengamedata-templates")
-            # *** HACK ***
+            if sanitized_params is not None:
+                file_list_response                             = url_request.urlopen(LegacyWebAPI.server_config.FileListURL)
+                file_list_json     : Dict[str, Dict[str, Any]] = json.loads(file_list_response.read())
+                # *** HACK ***
+                # To make sure we've got a remote_url, working around bug in RepositoryIndexingConfig FromDict(...) implementation.
+                if "CONFIG" in file_list_json.keys() and isinstance(file_list_json["CONFIG"], dict):
+                    if not "remote_url" in file_list_json["CONFIG"].keys():
+                        file_list_json["CONFIG"]["remote_url"] = file_list_json["CONFIG"].get("files_base", "https://opengamedata.fielddaylab.wisc.edu/")
+                    if not "templates_url" in file_list_json["CONFIG"].keys():
+                        file_list_json["CONFIG"]["templates_url"] = file_list_json["CONFIG"].get("templates_base", "https://github.com/opengamedata/opengamedata-templates")
+                # *** HACK ***
 
-            # *** HACK ***
-            # To make sure we convert keys to what parsing will correctly parse out to correct elements, convert events_file to all_events_file, and raw_file to events_file
-            for game in [key for key in file_list_json.keys() if key != "CONFIG"]:
-                for dataset in file_list_json[game].keys():
-                    file_list_json[game][dataset]["all_events_file"] = file_list_json[game][dataset]["events_file"]
-                    file_list_json[game][dataset]["events_file"] = file_list_json[game][dataset]["raw_file"]
-            # *** HACK ***
+                # *** HACK ***
+                # To make sure we convert keys to what parsing will correctly parse out to correct elements, convert events_file to all_events_file, and raw_file to events_file
+                for game in [key for key in file_list_json.keys() if key != "CONFIG"]:
+                    for dataset in file_list_json[game].keys():
+                        file_list_json[game][dataset]["all_events_file"] = file_list_json[game][dataset]["events_file"]
+                        file_list_json[game][dataset]["events_file"] = file_list_json[game][dataset]["raw_file"]
+                # *** HACK ***
 
-            file_list          : DatasetRepositoryConfig   = DatasetRepositoryConfig.FromDict(name="file_list", unparsed_elements=file_list_json)
-            game_datasets      : DatasetCollectionSchema   = file_list.Games.get(sanitized_request.GameID or "NO GAME REQUESTED", DatasetCollectionSchema.Default())
+                file_list          : DatasetRepositoryConfig   = DatasetRepositoryConfig.FromDict(name="file_list", unparsed_elements=file_list_json)
+                game_datasets      : DatasetCollectionSchema   = file_list.Games.get(sanitized_params.GameID or "NO GAME REQUESTED", DatasetCollectionSchema.Default())
 
-            # If we couldn't find the requested game in file_list.json, or the game didn't have any date ranges, skip.
-            if (sanitized_request.GameID is None):
-                ret_val.RequestErrored(msg=f"Bad GameID '{sanitized_request.GameID}'")
-                return ret_val.AsFlaskResponse
-            elif (len(game_datasets.Datasets) == 0):
-                ret_val.ServerErrored(msg=f"GameID '{sanitized_request.GameID}' did not have available datasets")
-                return ret_val.AsFlaskResponse
-            # Else, continue on.
+                # If we couldn't find the requested game in file_list.json, or the game didn't have any date ranges, skip.
+                if (sanitized_params.GameID is None):
+                    ret_val.RequestErrored(msg=f"Bad GameID '{sanitized_params.GameID}'")
+                    return ret_val.AsFlaskResponse
+                elif (len(game_datasets.Datasets) == 0):
+                    ret_val.ServerErrored(msg=f"GameID '{sanitized_params.GameID}' did not have available datasets")
+                    return ret_val.AsFlaskResponse
+                # Else, continue on.
 
-        # 2. Search for the most recently modified dataset that contains the requested month and year
-            _matched_dataset : Optional[DatasetSchema] = None
-            # Find the best match of a dataset to the requested month-year.
-            # If there was no requested month-year, we skip this step.
-            for _key, _dataset_schema in game_datasets.Datasets.items():
-                if _dataset_schema.Key.DateFrom and _dataset_schema.Key.DateTo:
+            # 2. Search for the most recently modified dataset that contains the requested month and year
+                _matched_dataset : Optional[DatasetSchema] = None
+                # Find the best match of a dataset to the requested month-year.
+                # If there was no requested month-year, we skip this step.
+                for _key, _dataset_schema in game_datasets.Datasets.items():
+                    if _dataset_schema.Key.DateFrom and _dataset_schema.Key.DateTo:
+                        # If this range contains the given year & month
+                        if (sanitized_params.Year >= _dataset_schema.Key.DateFrom.year \
+                        and sanitized_params.Month >= _dataset_schema.Key.DateFrom.month \
+                        and sanitized_params.Year <= _dataset_schema.Key.DateTo.year \
+                        and sanitized_params.Month <= _dataset_schema.Key.DateTo.month):
+                            if _dataset_schema.IsNewerThan(_matched_dataset):
+                                _matched_dataset = _dataset_schema
+                    else:
+                        current_app.logger.debug(f"Dataset key {_dataset_schema.Key} was invalid.")
+
+                if _matched_dataset is None:
+                    _matched_dataset = list(game_datasets.Datasets.values())[-1]
+                if _matched_dataset.Key.DateFrom and _matched_dataset.Key.DateTo:
+                    file_info = {}
+
                     # If this range contains the given year & month
-                    if (sanitized_request.Year >= _dataset_schema.Key.DateFrom.year \
-                    and sanitized_request.Month >= _dataset_schema.Key.DateFrom.month \
-                    and sanitized_request.Year <= _dataset_schema.Key.DateTo.year \
-                    and sanitized_request.Month <= _dataset_schema.Key.DateTo.month):
-                        if _dataset_schema.IsNewerThan(_matched_dataset):
-                            _matched_dataset = _dataset_schema
+                    # Base URLs
+                    CODESPACES_BASE_URL : str = "https://codespaces.new/opengamedata/opengamedata-samples/tree/"
+                    GITHUB_BASE_URL     : str = "https://github.com/opengamedata/opengamedata-core/tree/"
+                    
+                    # Date information
+                    file_info["first_year"]  = _matched_dataset.Key.DateFrom.year
+                    file_info["first_month"] = _matched_dataset.Key.DateFrom.month
+                    file_info["last_year"]   = _matched_dataset.Key.DateTo.year
+                    file_info["last_month"]  = _matched_dataset.Key.DateTo.month
+                    _branch_name     = sanitized_params.GameID.lower().replace('_', '-')
+                    _revision        = _matched_dataset.OGDRevision or None
+
+                    # Files
+                    file_info["raw_file"]        = f"{file_list.RemoteURL}{_matched_dataset.GameEventsFile}" if _matched_dataset.GameEventsFile is not None else None
+                    file_info["events_file"]     = f"{file_list.RemoteURL}{_matched_dataset.AllEventsFile}"  if _matched_dataset.AllEventsFile  is not None else None
+                    file_info["sessions_file"]   = f"{file_list.RemoteURL}{_matched_dataset.SessionsFile}"   if _matched_dataset.SessionsFile   is not None else None
+                    file_info["players_file"]    = f"{file_list.RemoteURL}{_matched_dataset.PlayersFile}"    if _matched_dataset.PlayersFile    is not None else None
+                    file_info["population_file"] = f"{file_list.RemoteURL}{_matched_dataset.PopulationFile}" if _matched_dataset.PopulationFile is not None else None
+
+                    # Templates
+                    file_info["events_template"]     = f"{file_list.TemplatesBase}{_matched_dataset.EventsTemplate}"     if _matched_dataset.EventsTemplate     is not None else None
+                    file_info["sessions_template"]   = f"{file_list.TemplatesBase}{_matched_dataset.SessionsTemplate}"   if _matched_dataset.SessionsTemplate   is not None else None
+                    file_info["players_template"]    = f"{file_list.TemplatesBase}{_matched_dataset.PlayersTemplate}"    if _matched_dataset.PlayersTemplate    is not None else None
+                    file_info["population_template"] = f"{file_list.TemplatesBase}{_matched_dataset.PopulationTemplate}" if _matched_dataset.PopulationTemplate is not None else None
+
+                    file_info["events_codespace"]   = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fevent-template%2Fdevcontainer.json"
+                    file_info["sessions_codespace"] = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fplayer-template%2Fdevcontainer.json"
+                    file_info["players_codespace"]  = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fsession-template%2Fdevcontainer.json"
+
+                    # Convention for branch naming is lower-case with dashes,
+                    # while game IDs are usually upper-case with underscores, so make sure we do the conversion
+                    file_info["detectors_link"] = f"{GITHUB_BASE_URL}{_revision}/games/{_branch_name}/detectors" if _revision else None
+                    file_info["features_link"]  = f"{GITHUB_BASE_URL}{_revision}/games/{_branch_name}/features"  if _revision else None
+                    file_info["found_matching_range"] = True
+
+                    ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=file_info)
                 else:
-                    current_app.logger.debug(f"Dataset key {_dataset_schema.Key} was invalid.")
-
-            if _matched_dataset is None:
-                _matched_dataset = list(game_datasets.Datasets.values())[-1]
-            if _matched_dataset.Key.DateFrom and _matched_dataset.Key.DateTo:
-                file_info = {}
-
-                # If this range contains the given year & month
-                # Base URLs
-                CODESPACES_BASE_URL : str = "https://codespaces.new/opengamedata/opengamedata-samples/tree/"
-                GITHUB_BASE_URL     : str = "https://github.com/opengamedata/opengamedata-core/tree/"
-                
-                # Date information
-                file_info["first_year"]  = _matched_dataset.Key.DateFrom.year
-                file_info["first_month"] = _matched_dataset.Key.DateFrom.month
-                file_info["last_year"]   = _matched_dataset.Key.DateTo.year
-                file_info["last_month"]  = _matched_dataset.Key.DateTo.month
-                _branch_name     = sanitized_request.GameID.lower().replace('_', '-')
-                _revision        = _matched_dataset.OGDRevision or None
-
-                # Files
-                file_info["raw_file"]        = f"{file_list.RemoteURL}{_matched_dataset.GameEventsFile}" if _matched_dataset.GameEventsFile is not None else None
-                file_info["events_file"]     = f"{file_list.RemoteURL}{_matched_dataset.AllEventsFile}"  if _matched_dataset.AllEventsFile  is not None else None
-                file_info["sessions_file"]   = f"{file_list.RemoteURL}{_matched_dataset.SessionsFile}"   if _matched_dataset.SessionsFile   is not None else None
-                file_info["players_file"]    = f"{file_list.RemoteURL}{_matched_dataset.PlayersFile}"    if _matched_dataset.PlayersFile    is not None else None
-                file_info["population_file"] = f"{file_list.RemoteURL}{_matched_dataset.PopulationFile}" if _matched_dataset.PopulationFile is not None else None
-
-                # Templates
-                file_info["events_template"]     = f"{file_list.TemplatesBase}{_matched_dataset.EventsTemplate}"     if _matched_dataset.EventsTemplate     is not None else None
-                file_info["sessions_template"]   = f"{file_list.TemplatesBase}{_matched_dataset.SessionsTemplate}"   if _matched_dataset.SessionsTemplate   is not None else None
-                file_info["players_template"]    = f"{file_list.TemplatesBase}{_matched_dataset.PlayersTemplate}"    if _matched_dataset.PlayersTemplate    is not None else None
-                file_info["population_template"] = f"{file_list.TemplatesBase}{_matched_dataset.PopulationTemplate}" if _matched_dataset.PopulationTemplate is not None else None
-
-                file_info["events_codespace"]   = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fevent-template%2Fdevcontainer.json"
-                file_info["sessions_codespace"] = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fplayer-template%2Fdevcontainer.json"
-                file_info["players_codespace"]  = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fsession-template%2Fdevcontainer.json"
-
-                # Convention for branch naming is lower-case with dashes,
-                # while game IDs are usually upper-case with underscores, so make sure we do the conversion
-                file_info["detectors_link"] = f"{GITHUB_BASE_URL}{_revision}/games/{_branch_name}/detectors" if _revision else None
-                file_info["features_link"]  = f"{GITHUB_BASE_URL}{_revision}/games/{_branch_name}/features"  if _revision else None
-                file_info["found_matching_range"] = True
-
-                ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=file_info)
+                    ret_val.RequestErrored(msg=f"Dataset key {_matched_dataset.Key} was invalid.")
             else:
-                ret_val.RequestErrored(msg=f"Dataset key {_matched_dataset.Key} was invalid.")
+                ret_val.RequestErrored(msg=f"Could not GetFileInfoByMonth, one or more parameters were invalid.")
 
             return ret_val.AsFlaskResponse
