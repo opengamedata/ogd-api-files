@@ -45,7 +45,7 @@ class SanitizedParams:
 
         if not isinstance(year, int):
             if re.search("^[0-9]+$", str(year)) is not None:
-                year = int(str(year))
+                ret_val = int(str(year))
 
         if ret_val and ret_val not in range(2000, datetime.date.today().year+1):
             ret_val = None
