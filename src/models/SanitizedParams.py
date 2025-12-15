@@ -1,5 +1,6 @@
 # standard imports
 import datetime, re
+import builtins
 from typing import Any, Dict, Optional, Union
 
 # 3rd-party imports
@@ -43,9 +44,15 @@ class SanitizedParams:
     def sanitizeYear(year:Union[int, str]) -> Optional[int]:
         ret_val: Optional[int] = None
 
-        if not isinstance(year, int):
-            if re.search("^[0-9]+$", str(year)) is not None:
-                ret_val = int(str(year))
+        match type(year):
+            case builtins.int:
+                ret_val = int(year)
+            case builtins.str:
+                if re.search("^[0-9]+$", str(year)) is not None:
+                    ret_val = int(year)
+            case _:
+                if re.search("^[0-9]+$", str(year)) is not None:
+                    ret_val = int(str(year))
 
         if ret_val and ret_val not in range(2000, datetime.date.today().year+1):
             ret_val = None
@@ -56,9 +63,15 @@ class SanitizedParams:
     def sanitizeMonth(month:Union[int, str]) -> Optional[int]:
         ret_val: Optional[int] = None
 
-        if not isinstance(month, int):
-            if re.search("^[0-9]+$", str(month)) is not None:
-                ret_val = int(str(month))
+        match type(month):
+            case builtins.int:
+                ret_val = int(month)
+            case builtins.str:
+                if re.search("^[0-9]+$", str(month)) is not None:
+                    ret_val = int(month)
+            case _:
+                if re.search("^[0-9]+$", str(month)) is not None:
+                    ret_val = int(str(month))
         
         if ret_val and ret_val not in range(1, 12+1):
             ret_val = None
