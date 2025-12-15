@@ -179,20 +179,22 @@ class FileAPI:
             ret_val = APIResponse.Default(req_type=RESTType.GET)
 
             try:
-                last_month = date.today().replace(day=1) - timedelta(days=1)
-                sanitized_request = SanitizedParams(game_id=game_id, year=year, month=month, default_date=last_month)
+                sanitized_request = SanitizedParams.FromParams(game_id=game_id, year=year, month=month)
 
             # 1. Get the list of datasets available on the server, for given game.
-                file_list     : DatasetRepositoryConfig = FileAPI._getFileList(FileAPI.server_config.FileListURL)
-                game_datasets : DatasetCollectionSchema = file_list.Games.get(sanitized_request.GameID or "NO GAME REQUESTED", DatasetCollectionSchema.Default())
+                if sanitized_request:
+                    file_list     : DatasetRepositoryConfig = FileAPI._getFileList(FileAPI.server_config.FileListURL)
+                    game_datasets : DatasetCollectionSchema = file_list.Games.get(sanitized_request.GameID or "NO GAME REQUESTED", DatasetCollectionSchema.Default())
 
-                # If we couldn't find the requested game in file_list.json, or the game didn't have any date ranges, skip.
-                if (sanitized_request.GameID is None):
-                    ret_val.RequestErrored(msg=f"Bad GameID '{sanitized_request.GameID}'")
-                    return ret_val.AsFlaskResponse
-                elif (len(game_datasets.Datasets) == 0):
-                    ret_val.RequestErrored(msg=f"GameID '{sanitized_request.GameID}' has no available datasets", status=ResponseStatus.ERR_NOTFOUND)
-                    return ret_val.AsFlaskResponse
+                    # If we couldn't find the requested game in file_list.json, or the game didn't have any date ranges, skip.
+                    if (sanitized_request.GameID is None):
+                        ret_val.RequestErrored(msg=f"Bad GameID '{sanitized_request.GameID}'")
+                        return ret_val.AsFlaskResponse
+                    elif (len(game_datasets.Datasets) == 0):
+                        ret_val.RequestErrored(msg=f"GameID '{sanitized_request.GameID}' has no available datasets", status=ResponseStatus.ERR_NOTFOUND)
+                        return ret_val.AsFlaskResponse
+                else:
+                    raise ValueError("Could not process inputs!")
             except Exception as err:
                 current_app.logger.error(f"{type(err)} error processing request inputs:\n{err}")
                 ret_val.ServerErrored("Unexpected error processing request inputs.")
@@ -264,21 +266,24 @@ class FileAPI:
             ret_val = APIResponse.Default(req_type=RESTType.GET)
 
             try:
-                last_month = date.today().replace(day=1) - timedelta(days=1)
-                sanitized_request = SanitizedParams(game_id=game_id, year=year, month=month, default_date=last_month)
+                sanitized_request = SanitizedParams.FromParams(game_id=game_id, year=year, month=month)
 
             # 1. Get the list of datasets available on the server, for given game.
-                file_list     : DatasetRepositoryConfig = FileAPI._getFileList(FileAPI.server_config.FileListURL)
-                game_datasets : DatasetCollectionSchema = file_list.Games.get(sanitized_request.GameID or "NO GAME REQUESTED", DatasetCollectionSchema.Default())
+                if sanitized_request:
+                    file_list     : DatasetRepositoryConfig = FileAPI._getFileList(FileAPI.server_config.FileListURL)
+                    game_datasets : DatasetCollectionSchema = file_list.Games.get(sanitized_request.GameID or "NO GAME REQUESTED", DatasetCollectionSchema.Default())
 
-                # If we couldn't find the requested game in file_list.json, or the game didn't have any date ranges, skip.
-                if (sanitized_request.GameID is None):
-                    ret_val.RequestErrored(msg=f"Bad GameID '{sanitized_request.GameID}'")
-                    return ret_val.AsFlaskResponse
-                elif (len(game_datasets.Datasets) == 0):
-                    ret_val.ServerErrored(msg=f"GameID '{sanitized_request.GameID}' did not have available datasets")
-                    return ret_val.AsFlaskResponse
-            except Exception:
+                    # If we couldn't find the requested game in file_list.json, or the game didn't have any date ranges, skip.
+                    if (sanitized_request.GameID is None):
+                        ret_val.RequestErrored(msg=f"Bad GameID '{sanitized_request.GameID}'")
+                        return ret_val.AsFlaskResponse
+                    elif (len(game_datasets.Datasets) == 0):
+                        ret_val.ServerErrored(msg=f"GameID '{sanitized_request.GameID}' did not have available datasets")
+                        return ret_val.AsFlaskResponse
+                else:
+                    raise ValueError("Could not process inputs!")
+            except Exception as err:
+                current_app.logger.error(f"{type(err)} error processing request inputs:\n{err}")
                 ret_val.ServerErrored("Unexpected error processing request inputs.")
             else:
             # 2. Search for the most recently modified dataset that contains the requested month and year
