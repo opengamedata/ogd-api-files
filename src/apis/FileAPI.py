@@ -191,9 +191,10 @@ class FileAPI:
                     ret_val.RequestErrored(msg=f"Bad GameID '{sanitized_request.GameID}'")
                     return ret_val.AsFlaskResponse
                 elif (len(game_datasets.Datasets) == 0):
-                    ret_val.ServerErrored(msg=f"GameID '{sanitized_request.GameID}' did not have available datasets")
+                    ret_val.RequestErrored(msg=f"GameID '{sanitized_request.GameID}' has no available datasets", status=ResponseStatus.ERR_NOTFOUND)
                     return ret_val.AsFlaskResponse
-            except Exception:
+            except Exception as err:
+                current_app.logger.error(f"{type(err)} error processing request inputs:\n{err}")
                 ret_val.ServerErrored("Unexpected error processing request inputs.")
             else:
             # 2. Search for the most recently modified dataset that contains the requested month and year
