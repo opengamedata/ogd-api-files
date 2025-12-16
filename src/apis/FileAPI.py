@@ -15,14 +15,14 @@ from flask_restful import Resource, Api
 # import ogd libraries
 from ogd.apis.utils.APIResponse import APIResponse, RESTType, ResponseStatus
 from ogd.common.configs.storage.DatasetRepositoryConfig import DatasetRepositoryConfig
-from ogd.common.schemas.datasets.DatasetSchema import DatasetSchema
 from ogd.common.schemas.datasets.DatasetCollectionSchema import DatasetCollectionSchema
+from ogd.common.schemas.datasets.DatasetSchema import DatasetSchema
 
 # import local files
 from apis.resources.GameList import GameList
 from apis.configs.FileAPIConfig import FileAPIConfig
 from models.SanitizedParams import SanitizedParams
-from utils.utils import GetFileList
+from utils.utils import GetFileList, MatchDatasetRequest
 
 class FileAPI:
     """Class to define an API matching the original website API.
@@ -50,26 +50,6 @@ class FileAPI:
         api.add_resource(FileAPI.GameDatasetInfo,  '/games/<game_id>/datasets/<month>/<year>/files/')
         api.add_resource(FileAPI.DataFile,  '/games/<game_id>/datasets/<month>/<year>/files/<file_type>')
         FileAPI.server_config = settings
-
-    @staticmethod
-    def _matchDataset(sanitized_request:SanitizedParams, game_datasets:DatasetCollectionSchema) -> Optional[DatasetSchema]:
-        _matched_dataset : Optional[DatasetSchema] = None
-
-        # Find the best match of a dataset to the requested month-year.
-        # If there was no requested month-year, we skip this step.
-        for _key, _dataset_schema in game_datasets.Datasets.items():
-            if _dataset_schema.Key.DateFrom and _dataset_schema.Key.DateTo:
-                # If this range contains the given year & month
-                if (sanitized_request.Year >= _dataset_schema.Key.DateFrom.year \
-                and sanitized_request.Month >= _dataset_schema.Key.DateFrom.month \
-                and sanitized_request.Year <= _dataset_schema.Key.DateTo.year \
-                and sanitized_request.Month <= _dataset_schema.Key.DateTo.month):
-                    if _dataset_schema.IsNewerThan(_matched_dataset):
-                        _matched_dataset = _dataset_schema
-            else:
-                current_app.logger.debug(f"Dataset key {_dataset_schema.Key} was invalid.")
-
-        return _matched_dataset
 
     class GameDatasets(Resource):
         """
@@ -157,7 +137,7 @@ class FileAPI:
                 ret_val.ServerErrored("Unexpected error processing request inputs.")
             else:
             # 2. Search for the most recently modified dataset that contains the requested month and year
-                _matched_dataset : Optional[DatasetSchema] = FileAPI._matchDataset(sanitized_request=sanitary_params, game_datasets=game_datasets)
+                _matched_dataset : Optional[DatasetSchema] = MatchDatasetRequest(sanitary_request=sanitary_params, available_datasets=game_datasets)
 
                 if _matched_dataset:
                     if _matched_dataset.Key.DateFrom and _matched_dataset.Key.DateTo:
@@ -245,7 +225,7 @@ class FileAPI:
             else:
             # 2. Search for the most recently modified dataset that contains the requested month and year
                 try:
-                    _matched_dataset : Optional[DatasetSchema] = FileAPI._matchDataset(sanitized_request=sanitary_params, game_datasets=game_datasets)
+                    _matched_dataset : Optional[DatasetSchema] = MatchDatasetRequest(sanitary_request=sanitary_params, available_datasets=game_datasets)
 
                     if _matched_dataset:
                         if _matched_dataset.Key.DateFrom and _matched_dataset.Key.DateTo:
