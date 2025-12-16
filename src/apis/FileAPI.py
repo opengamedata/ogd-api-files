@@ -52,20 +52,6 @@ class FileAPI:
         FileAPI.server_config = settings
 
     @staticmethod
-    def _getFileList(url:str) -> DatasetRepositoryConfig:
-        # Pull the file list data into a dictionary
-        file_list_response                             = url_request.urlopen(url)
-        file_list_json     : Dict[str, Dict[str, Any]] = json.loads(file_list_response.read())
-        # HACK to make sure we've got a remote_url, working around bug in RepositoryIndexingConfig FromDict(...) implementation.
-        if "CONFIG" in file_list_json.keys() and isinstance(file_list_json["CONFIG"], dict):
-            if not "remote_url" in file_list_json["CONFIG"].keys():
-                file_list_json["CONFIG"]["remote_url"] = file_list_json["CONFIG"].get("files_base", "https://opengamedata.fielddaylab.wisc.edu/")
-            if not "templates_url" in file_list_json["CONFIG"].keys():
-                file_list_json["CONFIG"]["templates_url"] = file_list_json["CONFIG"].get("templates_base", "https://github.com/opengamedata/opengamedata-templates")
-        file_list          : DatasetRepositoryConfig   = DatasetRepositoryConfig.FromDict(name="file_list", unparsed_elements=file_list_json)
-        return file_list
-
-    @staticmethod
     def _matchDataset(sanitized_request:SanitizedParams, game_datasets:DatasetCollectionSchema) -> Optional[DatasetSchema]:
         _matched_dataset : Optional[DatasetSchema] = None
 
@@ -154,7 +140,7 @@ class FileAPI:
 
             # 1. Get the list of datasets available on the server, for given game.
                 if sanitary_params:
-                    file_list     : DatasetRepositoryConfig = FileAPI._getFileList(FileAPI.server_config.FileListURL)
+                    file_list     : DatasetRepositoryConfig = GetFileList(FileAPI.server_config.FileListURL)
                     game_datasets : DatasetCollectionSchema = file_list.Games.get(sanitary_params.GameID or "NO GAME REQUESTED", DatasetCollectionSchema.Default())
 
                     # If we couldn't find the requested game in file_list.json, or the game didn't have any date ranges, skip.
@@ -241,7 +227,7 @@ class FileAPI:
 
             # 1. Get the list of datasets available on the server, for given game.
                 if sanitary_params:
-                    file_list     : DatasetRepositoryConfig = FileAPI._getFileList(FileAPI.server_config.FileListURL)
+                    file_list     : DatasetRepositoryConfig = GetFileList(FileAPI.server_config.FileListURL)
                     game_datasets : DatasetCollectionSchema = file_list.Games.get(sanitary_params.GameID or "NO GAME REQUESTED", DatasetCollectionSchema.Default())
 
                     # If we couldn't find the requested game in file_list.json, or the game didn't have any date ranges, skip.
