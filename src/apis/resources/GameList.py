@@ -25,7 +25,8 @@ class GameList(Resource):
         ret_val = APIResponse.Default(req_type=RESTType.GET)
 
         try:
-            file_list : DatasetRepositoryConfig = GetFileList(FileAPIConfig("FileAPIConfig", {}).FileListURL)
+            cfg       : FileAPIConfig           = FileAPIConfig("FileAPIConfig", {})
+            file_list : DatasetRepositoryConfig = GetFileList(cfg.FileListURL)
 
             # If the given game isn't in our dictionary, or our dictionary doesn't have any date ranges for this game
             if file_list.Games is None or len(file_list.Games) < 1:
