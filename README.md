@@ -22,7 +22,7 @@ Broadly speaking, the file API has a 3-level hierarchy of data about game datase
 
   Retrieve a list of all games for which at least one dataset exists.
 
-* `/games/<game_id>/` (experimental/upcoming)  
+* `/games/<game_id>/` (not implemented/upcoming)  
 
   Retrieve a summary of the game and its datasets
 
