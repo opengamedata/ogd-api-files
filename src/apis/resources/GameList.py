@@ -1,5 +1,5 @@
 # import 3rd-party libraries
-from flask import Flask, current_app
+from flask import current_app
 from flask_restful import Resource
 
 # import ogd libraries
@@ -24,16 +24,18 @@ class GameList(Resource):
     def get(self):
         ret_val = APIResponse.Default(req_type=RESTType.GET)
 
-        file_list     : DatasetRepositoryConfig = GetFileList(FileAPIConfig("FileAPIConfig", {}).FileListURL)
+        try:
+            file_list : DatasetRepositoryConfig = GetFileList(FileAPIConfig("FileAPIConfig", {}).FileListURL)
 
-        # If the given game isn't in our dictionary, or our dictionary doesn't have any date ranges for this game
-        if file_list.Games is None or len(file_list.Games) < 1:
-            ret_val.ServerErrored(msg=f"Game list not found, or had no datasets listed")
-            return ret_val.AsFlaskResponse
-
-        game_ids = [game for game in file_list.Games.keys()]
-
-        responseData = { "game_ids": game_ids }
-        ret_val.RequestSucceeded(msg="Retrieved monthly game usage", val=responseData)
+            # If the given game isn't in our dictionary, or our dictionary doesn't have any date ranges for this game
+            if file_list.Games is None or len(file_list.Games) < 1:
+                ret_val.RequestErrored(msg="Could not find any games!", status=ResponseStatus.ERR_NOTFOUND)
+            else:
+                responseData = { "game_ids": list(file_list.Games.keys()) }
+                ret_val.RequestSucceeded(msg="Retrieved list of games with available datasets", val=responseData)
+        except Exception as err:
+            msg = "Unexpected error while retrieving list of games with available datasets!"
+            current_app.logger.error(f"{msg}\n{type(err)}:\n{err}")
+            ret_val.ServerErrored(msg=msg)
 
         return ret_val.AsFlaskResponse
