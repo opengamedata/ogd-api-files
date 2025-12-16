@@ -7,7 +7,7 @@ from ogd.apis.utils.APIResponse import APIResponse, RESTType, ResponseStatus
 from ogd.common.configs.storage.DatasetRepositoryConfig import DatasetRepositoryConfig
 
 # import local files
-from configs.FileAPIConfig import FileAPIConfig
+from apis.configs.FileAPIConfig import FileAPIConfig
 from utils.utils import GetFileList
 
 class GameList(Resource):
