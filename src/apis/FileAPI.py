@@ -20,6 +20,7 @@ from ogd.common.schemas.datasets.DatasetSchema import DatasetSchema
 
 # import local files
 from apis.resources.GameList import GameList
+from apis.resources.DatasetList import DatasetList
 from apis.configs.FileAPIConfig import FileAPIConfig
 from models.SanitizedParams import SanitizedParams
 from utils.utils import GetFileList, MatchDatasetRequest
@@ -45,61 +46,11 @@ class FileAPI:
         """
         # Expected WSGIScriptAlias URL path is /data
         api = Api(app)
-        api.add_resource(GameList, '/games/list')
-        api.add_resource(FileAPI.GameDatasets, '/games/<game_id>/datasets/list')
+        api.add_resource(GameList,    '/games/list')
+        api.add_resource(DatasetList, '/games/<game_id>/datasets/list')
         api.add_resource(FileAPI.GameDatasetInfo,  '/games/<game_id>/datasets/<month>/<year>/files/')
         api.add_resource(FileAPI.DataFile,  '/games/<game_id>/datasets/<month>/<year>/files/<file_type>')
         FileAPI.server_config = settings
-
-    class GameDatasets(Resource):
-        """
-        Get the per-month number of sessions for a given game
-
-        Inputs:
-        - Game ID
-        Uses:
-        - Index file list
-        Outputs:
-        - Session count for each month of game's data
-        """
-        def get(self, game_id):
-            ret_val = APIResponse.Default(req_type=RESTType.GET)
-            
-            game_id = SanitizedParams.sanitizeGameId(game_id)
-            if game_id is None or game_id == "":
-                ret_val.RequestErrored(msg=f"Bad GameID '{game_id}'")
-                return ret_val.AsFlaskResponse
-
-            file_list     : DatasetRepositoryConfig = GetFileList(FileAPI.server_config.FileListURL)
-            game_datasets : DatasetCollectionSchema = file_list.Games.get(game_id, DatasetCollectionSchema.Default())
-
-            # If the given game isn't in our dictionary, or our dictionary doesn't have any date ranges for this game
-            if not game_id in file_list.Games or len(file_list.Games[game_id].Datasets) == 0:
-                ret_val.ServerErrored(msg=f"GameID '{game_id}' not found in list of games with datasets, or had no datasets listed")
-                return ret_val.AsFlaskResponse
-
-            sessions = []
-
-            # rangeKey format is GAMEID_YYYYMMDD_to_YYYYMMDD or GAME_ID_YYYYMMDD_to_YYYYYMMDD
-            for _datset_id,_dataset in game_datasets.Datasets.items():
-
-                # If this rangeKey matches the expected format
-                if _dataset.Key.DateFrom: # len(rangeKeyParts) == 4:
-                    # Capture the number of sessions for this YYYYMM
-                    sessions.append({
-                        "year"            : _dataset.Key.DateFrom.year,
-                        "month"           : _dataset.Key.DateFrom.month,
-                        "total_sessions"  : _dataset.SessionCount,
-                        "sessions_file"   : f"{file_list.RemoteURL}{_dataset.SessionsFile}"   if _dataset.SessionsFile   is not None else None,
-                        "players_file"    : f"{file_list.RemoteURL}{_dataset.PlayersFile}"    if _dataset.PlayersFile    is not None else None,
-                        "population_file" : f"{file_list.RemoteURL}{_dataset.PopulationFile}" if _dataset.PopulationFile is not None else None
-                    })
-
-
-            responseData = { "game_id": game_id, "datasets": sessions }
-            ret_val.RequestSucceeded(msg="Retrieved monthly game usage", val=responseData)
-
-            return ret_val.AsFlaskResponse
 
     class GameDatasetInfo(Resource):
         """
