@@ -8,8 +8,6 @@ from apis.resources.DatasetList import DatasetList
 from apis.resources.DatasetInfo import DatasetInfo
 from apis.resources.DatasetFile import DatasetFile
 from apis.configs.FileAPIConfig import FileAPIConfig
-from models.SanitizedParams import SanitizedParams
-from utils.utils import GetFileList, MatchDatasetRequest
 
 class FileAPI:
     """Class to define an API matching the original website API.
