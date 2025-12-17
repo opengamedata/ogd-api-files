@@ -31,7 +31,7 @@ class FileAPI:
         # Expected WSGIScriptAlias URL path is /data
         api = Api(app)
         api.add_resource(GameList,    '/games/list')
-        api.add_resource(DatasetList, '/games/<str:game_id>/datasets/list')
-        api.add_resource(DatasetInfo, '/games/<str:game_id>/datasets/<int:month>/<int:year>/files/')
-        api.add_resource(DatasetFile, '/games/<str:game_id>/datasets/<int:month>/<int:year>/files/<str:file_type>')
+        api.add_resource(DatasetList, '/games/<string:game_id>/datasets/list')
+        api.add_resource(DatasetInfo, '/games/<string:game_id>/datasets/<int:month>/<int:year>/files/')
+        api.add_resource(DatasetFile, '/games/<string:game_id>/datasets/<int:month>/<int:year>/files/<string:file_type>')
         FileAPI.server_config = settings
