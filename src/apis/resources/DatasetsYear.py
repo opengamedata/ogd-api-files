@@ -11,7 +11,7 @@ from apis.configs.FileAPIConfig import FileAPIConfig
 from utils.utils import GetFileList
 
 
-class GameDatasetsYear(Resource):
+class DatasetsYear(Resource):
     """
     Get a list of datasets within a single year for a game
 

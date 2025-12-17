@@ -3,8 +3,8 @@ from flask import Flask
 from flask_restful import Api
 
 # import local files
-from apis.resources.Game import GameSummary
 from apis.resources.GameList import GameList
+from apis.resources.GameSummary import GameSummary
 from apis.resources.DatasetList import DatasetList
 from apis.resources.DatasetInfo import DatasetInfo
 from apis.resources.DatasetFile import DatasetFile
