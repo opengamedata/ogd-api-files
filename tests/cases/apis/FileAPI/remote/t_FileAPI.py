@@ -131,7 +131,7 @@ class test_GameDatasetInfo(TestCase):
         self.result : Optional[requests.Response]
         self.content : Optional[APIResponse]    = None
 
-        self.url    = f"{_testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/1/2024"
+        self.url    = f"{_testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/2024/1"
         Logger.Log(f"Sending request to {self.url}", logging.INFO)
         self.result = TestRequest(url=self.url, request="GET", timeout=30, logger=Logger.std_logger)
         if self.result is not None:
@@ -192,7 +192,7 @@ class test_GameDatasetInfo_notfound(TestCase):
         self.result : Optional[requests.Response]
         self.content : Optional[APIResponse]    = None
 
-        self.url    = f"{_testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/1/2021"
+        self.url    = f"{_testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/2021/1"
         Logger.Log(f"Sending request to {self.url}", logging.INFO)
         self.result = TestRequest(url=self.url, request="GET", timeout=30, logger=Logger.std_logger)
         if self.result is not None:
