@@ -10,7 +10,7 @@ from ogd.common.utils.Logger import Logger
 
 # import local files
 from config.config import settings
-from configs.FileAPIConfig import FileAPIConfig
+from apis.configs.FileAPIConfig import FileAPIConfig
 
 # By default we'll log to the WSGI errors stream which ends up in the Apache error log
 logHandlers = {
@@ -53,7 +53,7 @@ logRootHandlers = ['wsgi']
 
 application = Flask(__name__)
 
-_server_cfg = FileAPIConfig.FromDict(name="DataAPIConfiguration", all_elements=settings)
+_server_cfg = FileAPIConfig.FromDict(name="DataAPIConfiguration", unparsed_elements=settings)
 
 # Allow cross-origin requests from any origin by default
 # This presents minimal risk to visitors since the API merely retrieves non-sensitive data
