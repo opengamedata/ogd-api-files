@@ -123,7 +123,7 @@ class FileAPI:
         Outputs:
         - Not implemented
         """
-        def get(self):
+        def get(self, game_id):
             ret_val = APIResponse.Default(req_type=RESTType.GET)
 
             ret_val.ServerErrored("This endpoint is not yet implemented!")
@@ -189,7 +189,7 @@ class FileAPI:
         Outputs:
         - Not implemented
         """
-        def get(self):
+        def get(self, game_id, year):
             ret_val = APIResponse.Default(req_type=RESTType.GET)
 
             ret_val.ServerErrored("This endpoint is not yet implemented!")
@@ -207,7 +207,7 @@ class FileAPI:
         Outputs:
         - DatasetSchema of most recently-exported dataset for game in month
         """
-        def get(self, game_id, month, year):
+        def get(self, game_id, year, month):
             ret_val = APIResponse.Default(req_type=RESTType.GET)
 
             try:
@@ -294,7 +294,7 @@ class FileAPI:
         Outputs:
         - DatasetSchema of most recently-exported dataset for game in month
         """
-        def get(self, game_id, month, year, file_type):
+        def get(self, game_id, year, month, file_type):
             ret_val = APIResponse.Default(req_type=RESTType.GET)
 
             try:
