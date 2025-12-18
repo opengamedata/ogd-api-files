@@ -25,7 +25,7 @@ class test_GameList(TestCase):
         cls.result : Optional[requests.Response]
         cls.content : Optional[APIResponse]    = None
 
-        cls.url    = f"{_testing_cfg.ExternEndpoint}/games/list"
+        cls.url    = f"{_testing_cfg.ExternEndpoint}/games"
         Logger.Log(f"Sending request to {cls.url}", logging.INFO)
         cls.result = TestRequest(url=cls.url, request="GET", timeout=30, logger=Logger.std_logger)
         if cls.result is not None:
@@ -77,7 +77,7 @@ class test_GameDatasets(TestCase):
         cls.result : Optional[requests.Response]
         cls.content : Optional[APIResponse]    = None
 
-        cls.url    = f"{_testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/list"
+        cls.url    = f"{_testing_cfg.ExternEndpoint}/games/AQUALAB/datasets"
         Logger.Log(f"Sending request to {cls.url}", logging.INFO)
         cls.result = TestRequest(url=cls.url, request="GET", timeout=30, logger=Logger.std_logger)
         if cls.result is not None:
@@ -131,7 +131,7 @@ class test_GameDatasetInfo(TestCase):
         self.result : Optional[requests.Response]
         self.content : Optional[APIResponse]    = None
 
-        self.url    = f"{_testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/1/2024/files/"
+        self.url    = f"{_testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/2024/1"
         Logger.Log(f"Sending request to {self.url}", logging.INFO)
         self.result = TestRequest(url=self.url, request="GET", timeout=30, logger=Logger.std_logger)
         if self.result is not None:
@@ -192,7 +192,7 @@ class test_GameDatasetInfo_notfound(TestCase):
         self.result : Optional[requests.Response]
         self.content : Optional[APIResponse]    = None
 
-        self.url    = f"{_testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/1/2021/files/"
+        self.url    = f"{_testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/2021/1"
         Logger.Log(f"Sending request to {self.url}", logging.INFO)
         self.result = TestRequest(url=self.url, request="GET", timeout=30, logger=Logger.std_logger)
         if self.result is not None:

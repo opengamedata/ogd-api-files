@@ -4,9 +4,11 @@ from flask_restful import Api
 
 # import local files
 from apis.resources.GameList import GameList
+from apis.resources.GameSummary import GameSummary
 from apis.resources.DatasetList import DatasetList
 from apis.resources.DatasetInfo import DatasetInfo
 from apis.resources.DatasetFile import DatasetFile
+from apis.resources.DatasetsYear import DatasetsYear
 from apis.configs.FileAPIConfig import FileAPIConfig
 
 class FileAPI:
@@ -30,8 +32,11 @@ class FileAPI:
         """
         # Expected WSGIScriptAlias URL path is /data
         api = Api(app)
-        api.add_resource(GameList,    '/games/list')
-        api.add_resource(DatasetList, '/games/<string:game_id>/datasets/list')
-        api.add_resource(DatasetInfo, '/games/<string:game_id>/datasets/<int:month>/<int:year>/files/')
-        api.add_resource(DatasetFile, '/games/<string:game_id>/datasets/<int:month>/<int:year>/files/<string:file_type>')
+
+        api.add_resource(GameList,     '/games')
+        api.add_resource(GameSummary,  '/games/<string:game_id>')
+        api.add_resource(DatasetList,  '/games/<string:game_id>/datasets')
+        api.add_resource(DatasetsYear, '/games/<string:game_id>/datasets/<int:year>')
+        api.add_resource(DatasetInfo,  '/games/<string:game_id>/datasets/<int:year>/<int:month>')
+        api.add_resource(DatasetFile,  '/games/<string:game_id>/datasets/<int:year>/<int:month>/<string:file_type>')
         FileAPI.server_config = settings
