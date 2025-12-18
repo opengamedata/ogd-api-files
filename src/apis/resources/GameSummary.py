@@ -39,7 +39,7 @@ class GameSummary(Resource):
             ret_val.ServerErrored(msg=f"GameID '{game_id}' not found in list of games with datasets, or had no datasets listed")
             return ret_val.AsFlaskResponse
 
-        datadates = set(str(dataset.StartDate) for dataset in game_datasets.Datasets.values())
+        datadates = set(str(dataset.StartDate).replace("/", "-") for dataset in game_datasets.Datasets.values())
         responseData = {
             "game_id": game_id,
             "dataset_count": len(datadates),
