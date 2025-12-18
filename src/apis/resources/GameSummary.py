@@ -39,11 +39,11 @@ class GameSummary(Resource):
             ret_val.ServerErrored(msg=f"GameID '{game_id}' not found in list of games with datasets, or had no datasets listed")
             return ret_val.AsFlaskResponse
 
-        init_dataset = min(dataset.StartDate for dataset in game_datasets.Datasets.values())
+        datadates = set(str(dataset.StartDate) for dataset in game_datasets.Datasets.values())
         responseData = {
             "game_id": game_id,
-            "dataset_count": len(game_datasets.Datasets),
-            "initial_dataset": init_dataset if isinstance(init_dataset, str) else init_dataset.strftime("%m/%Y")
+            "dataset_count": len(datadates),
+            "initial_dataset": min(datadates)
         }
         ret_val.RequestSucceeded(msg="Retrieved monthly game usage", val=responseData)
 
