@@ -22,9 +22,26 @@ Broadly speaking, the file API has a 3-level hierarchy of data about game datase
 
   Retrieve a list of all games for which at least one dataset exists.
 
-* `/games/<game_id>/` (not implemented/upcoming)  
+* `/games/<game_id>/` (experimental/upcoming)  
 
   Retrieve a summary of the game and its datasets
+
+  Example:
+  ```bash
+  curl https://ogd-staging.fielddaylab.wisc.edu/path/to/app.wsgi/games/AQUALAB
+  ```
+
+  ```json
+  response = {
+    "type": "GET",
+    "val": {
+      "game_id": "AQUALAB",
+      "dataset_count": 57,
+      "initial_dataset": "2021-04-11 00:00:00"
+    },
+    "msg": "SUCCESS: Retrieved monthly game usage"
+  }
+  ```
 
 ### Dataset-Level Endpoints
 
@@ -56,7 +73,7 @@ Broadly speaking, the file API has a 3-level hierarchy of data about game datase
   }
   ```
 
-* `/games/<game_id>/datasets/<year>/` (not implemented/upcoming)
+* `/games/<game_id>/datasets/<year>/` (experimental/upcoming)
 
   Retrieve a list of datasets and associated session counts for a specific game within a specific month.
   Roughly equivalent to the `/games/<game_id>/datasets/` endpoint, but scoped to a single year.
