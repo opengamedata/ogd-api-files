@@ -14,22 +14,22 @@ inputs:
     required: true
     default: 'var/www/wsgi-bin/opengamedata/apis/files/'
   local_app_path:
-    description: "Local path to the the WSGI app to be deployed"
+    description: "Local path to the folder containing the WSGI app to be deployed"
     required: true
-    default: 'src/app.wsgi'
+    default: 'src/'
   config_path:
     description: "Local path to config folder"
     required: false
-    default: 'src/config'
+    default: 'config'
 runs:
   using: "composite"
   steps:
     - name: Set up src/config
-      run: cp ${{ inputs.config_path }}/config.py.template ${{ inputs.config_path }}/config.py 
+      run: cp ${{ inputs.config_path }}/config.py.template ${{ inputs.local_app_path }}/config.py 
       shell: bash
     - name: Set API Version
       run: sed -i 's@VERSION_PLACEHOLDER@${{inputs.api_version}}@g'  ${{ inputs.config_path }}/config.py
       shell: bash
     - name: Set API Base Path
-      run: sed -i 's@placeholder home@${{inputs.remote_app_path}}@g' ${{ inputs.local_app_path }}
+      run: sed -i 's@placeholder home@${{inputs.remote_app_path}}@g' ${{ inputs.local_app_path }}/app.wsgi
       shell: bash
