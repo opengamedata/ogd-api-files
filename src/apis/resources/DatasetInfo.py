@@ -12,7 +12,7 @@ from ogd.common.schemas.datasets.DatasetCollectionSchema import DatasetCollectio
 from ogd.common.schemas.datasets.DatasetSchema import DatasetSchema
 
 # import local files
-from apis.configs.FileAPIConfig import FileAPIConfig
+from configs.FileAPIConfig import FileAPIConfig
 from models.SanitizedParams import SanitizedParams
 from utils.utils import GetFileList, MatchDatasetRequest
 
