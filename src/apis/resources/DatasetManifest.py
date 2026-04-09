@@ -13,7 +13,7 @@ from ogd.common.schemas.datasets.DatasetCollectionSchema import DatasetCollectio
 from ogd.common.schemas.datasets.DatasetSchema import DatasetSchema
 
 # import local files
-from apis.configs.FileAPIConfig import FileAPIConfig
+from configs.FileAPIConfig import FileAPIConfig
 from models.SanitizedParams import SanitizedParams
 from utils.utils import GetFileList, MatchDatasetRequest
 
@@ -95,7 +95,14 @@ class DatasetManifest(Resource):
                     file_info["detectors_link"] = f"{GITHUB_BASE_URL}{_revision}/src/ogd/games/{sanitary_params.GameID.upper()}/detectors" if _revision else None
                     file_info["features_link"]  = f"{GITHUB_BASE_URL}{_revision}/src/ogd/games/{sanitary_params.GameID.upper()}/features"  if _revision else None
                     file_info["found_matching_range"] = True
-                    file_info["schema"] = urlrequest.urlopen(f"https://raw.githubusercontent.com/opengamedata/ogd-core/refs/heads/main/src/ogd/games/{sanitary_params.GameID.upper()}/schemas/{sanitary_params.GameID.upper()}.json.template").read()
+                    raw_url = f"https://raw.githubusercontent.com/opengamedata/ogd-core/refs/heads/main/src/ogd/games/{sanitary_params.GameID.upper()}/schemas/{sanitary_params.GameID.upper()}.json.template"
+                    with urlrequest.urlopen(raw_url) as _conn:
+                        try:
+                            _schema = _conn.read()
+                        except Exception:
+                            file_info["schema"] = "Could not retrieve schema"
+                        else:
+                            file_info["schema"] = _schema
 
                     ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=file_info)
                 else:
