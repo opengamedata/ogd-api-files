@@ -1,5 +1,5 @@
 # Specific files to ignore
-src/config/config.py
+src/**/config.py
 src/config/*.json
 tests/config/t_config.py
 tests/Makefile
