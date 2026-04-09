@@ -16,7 +16,7 @@ inputs:
   local_app_path:
     description: "Local path to the folder containing the WSGI app to be deployed"
     required: true
-    default: 'src/'
+    default: 'src'
   config_path:
     description: "Local path to config folder"
     required: false
