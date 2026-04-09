@@ -8,8 +8,9 @@ from apis.resources.GameSummary import GameSummary
 from apis.resources.DatasetList import DatasetList
 from apis.resources.DatasetInfo import DatasetInfo
 from apis.resources.DatasetFile import DatasetFile
+from apis.resources.DatasetManifest import DatasetManifest
 from apis.resources.DatasetsYear import DatasetsYear
-from apis.configs.FileAPIConfig import FileAPIConfig
+from configs.FileAPIConfig import FileAPIConfig
 
 class FileAPI:
     """Class to define an API matching the original website API.
@@ -38,5 +39,6 @@ class FileAPI:
         api.add_resource(DatasetList,  '/games/<string:game_id>/datasets')
         api.add_resource(DatasetsYear, '/games/<string:game_id>/datasets/<int:year>')
         api.add_resource(DatasetInfo,  '/games/<string:game_id>/datasets/<int:year>/<int:month>')
+        api.add_resource(DatasetManifest,  '/games/<string:game_id>/datasets/<int:year>/<int:month>/manifest')
         api.add_resource(DatasetFile,  '/games/<string:game_id>/datasets/<int:year>/<int:month>/<string:file_type>')
         FileAPI.server_config = settings
