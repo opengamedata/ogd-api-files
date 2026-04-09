@@ -10,7 +10,7 @@ from typing import Any, Dict, Final, Optional, Self
 # import 3rd-party libraries
 
 # import OGD libraries
-from ogd.configs.ServerConfig import ServerConfig
+from ogd.apis.configs.ServerConfig import ServerConfig
 from ogd.common.utils.typing import Map
 
 # import local files
