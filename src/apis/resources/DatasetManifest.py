@@ -1,4 +1,5 @@
 # import standard libraries
+from urllib import request as urlrequest
 from typing import Optional
 
 # import 3rd-party libraries
@@ -94,6 +95,7 @@ class DatasetManifest(Resource):
                     file_info["detectors_link"] = f"{GITHUB_BASE_URL}{_revision}/src/ogd/games/{sanitary_params.GameID.upper()}/detectors" if _revision else None
                     file_info["features_link"]  = f"{GITHUB_BASE_URL}{_revision}/src/ogd/games/{sanitary_params.GameID.upper()}/features"  if _revision else None
                     file_info["found_matching_range"] = True
+                    file_info["schema"] = urlrequest.urlopen(f"https://raw.githubusercontent.com/opengamedata/ogd-core/refs/heads/main/src/ogd/games/{sanitary_params.GameID.upper()}/schemas/{sanitary_params.GameID.upper()}.json.template").read()
 
                     ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=file_info)
                 else:
