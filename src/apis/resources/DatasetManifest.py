@@ -102,7 +102,7 @@ class DatasetManifest(Resource):
                         except Exception:
                             file_info["schema"] = "Could not retrieve schema"
                         else:
-                            file_info["schema"] = _schema
+                            file_info["schema"] = str(_schema)
 
                     ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=file_info)
                 else:
