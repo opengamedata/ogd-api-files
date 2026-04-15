@@ -1,4 +1,5 @@
 # import standard libraries
+import json
 from urllib import request as urlrequest
 from typing import Optional
 
@@ -98,11 +99,11 @@ class DatasetManifest(Resource):
                     raw_url = f"https://raw.githubusercontent.com/opengamedata/ogd-core/refs/heads/main/src/ogd/games/{sanitary_params.GameID.upper()}/schemas/{sanitary_params.GameID.upper()}.json.template"
                     with urlrequest.urlopen(raw_url) as _conn:
                         try:
-                            _schema = _conn.read()
+                            _schema = _conn.read().decode('utf-8')
                         except Exception:
                             file_info["schema"] = "Could not retrieve schema"
                         else:
-                            file_info["schema"] = str(_schema)
+                            file_info["schema"] = json.loads(_schema)
 
                     ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=file_info)
                 else:
