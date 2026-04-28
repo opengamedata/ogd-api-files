@@ -4,7 +4,6 @@ src/config/*.json
 tests/config/t_config.py
 tests/Makefile
 .vscode
-.pylintrc
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
