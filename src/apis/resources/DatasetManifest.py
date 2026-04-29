@@ -66,44 +66,46 @@ class DatasetManifest(Resource):
                     CODESPACES_BASE_URL : str = "https://codespaces.new/opengamedata/opengamedata-samples/tree/"
                     GITHUB_BASE_URL     : str = "https://github.com/opengamedata/opengamedata-core/tree/"
                     
-                    # Date information
-                    file_info["first_year"]  = _matched_dataset.Key.DateFrom.year
-                    file_info["first_month"] = _matched_dataset.Key.DateFrom.month
-                    file_info["last_year"]   = _matched_dataset.Key.DateTo.year
-                    file_info["last_month"]  = _matched_dataset.Key.DateTo.month
+                    # Game information
+                    file_info["game_id"]     = sanitary_params.GameID
+
+                    # Population information
+                    file_info["population"] = {}
+                    file_info["population"]["first_year"]  = _matched_dataset.Key.DateFrom.year
+                    file_info["population"]["first_month"] = _matched_dataset.Key.DateFrom.month
+                    file_info["population"]["last_year"]   = _matched_dataset.Key.DateTo.year
+                    file_info["population"]["last_month"]  = _matched_dataset.Key.DateTo.month
                     _branch_name     = sanitary_params.GameID.lower().replace('_', '-')
                     _revision        = _matched_dataset.OGDRevision or None
 
-                    # Files
-                    file_info["raw_file"]        = f"{file_list.RemoteURL}{_matched_dataset.GameEventsFile}" if _matched_dataset.GameEventsFile is not None else None
-                    file_info["events_file"]     = f"{file_list.RemoteURL}{_matched_dataset.AllEventsFile}"  if _matched_dataset.AllEventsFile  is not None else None
-                    file_info["sessions_file"]   = f"{file_list.RemoteURL}{_matched_dataset.SessionsFile}"   if _matched_dataset.SessionsFile   is not None else None
-                    file_info["players_file"]    = f"{file_list.RemoteURL}{_matched_dataset.PlayersFile}"    if _matched_dataset.PlayersFile    is not None else None
-                    file_info["population_file"] = f"{file_list.RemoteURL}{_matched_dataset.PopulationFile}" if _matched_dataset.PopulationFile is not None else None
+                    # File outputs
+                    file_info["output"] = {}
+                    file_info["output"]["raw_file"]        = f"{file_list.RemoteURL}{_matched_dataset.GameEventsFile}" if _matched_dataset.GameEventsFile is not None else None
+                    file_info["output"]["events_file"]     = f"{file_list.RemoteURL}{_matched_dataset.AllEventsFile}"  if _matched_dataset.AllEventsFile  is not None else None
+                    file_info["output"]["sessions_file"]   = f"{file_list.RemoteURL}{_matched_dataset.SessionsFile}"   if _matched_dataset.SessionsFile   is not None else None
+                    file_info["output"]["players_file"]    = f"{file_list.RemoteURL}{_matched_dataset.PlayersFile}"    if _matched_dataset.PlayersFile    is not None else None
+                    file_info["output"]["population_file"] = f"{file_list.RemoteURL}{_matched_dataset.PopulationFile}" if _matched_dataset.PopulationFile is not None else None
 
-                    # Templates
-                    file_info["events_template"]     = f"{file_list.TemplatesBase}{_matched_dataset.EventsTemplate}"     if _matched_dataset.EventsTemplate     is not None else None
-                    file_info["sessions_template"]   = f"{file_list.TemplatesBase}{_matched_dataset.SessionsTemplate}"   if _matched_dataset.SessionsTemplate   is not None else None
-                    file_info["players_template"]    = f"{file_list.TemplatesBase}{_matched_dataset.PlayersTemplate}"    if _matched_dataset.PlayersTemplate    is not None else None
-                    file_info["population_template"] = f"{file_list.TemplatesBase}{_matched_dataset.PopulationTemplate}" if _matched_dataset.PopulationTemplate is not None else None
-
-                    file_info["events_codespace"]   = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fevent-template%2Fdevcontainer.json"
-                    file_info["sessions_codespace"] = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fplayer-template%2Fdevcontainer.json"
-                    file_info["players_codespace"]  = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fsession-template%2Fdevcontainer.json"
-
+                    # Versioning/traceability
+                    file_info["versioning"] = {}
                     # Convention for branch naming is lower-case with dashes,
                     # while game IDs are usually upper-case with underscores, so make sure we do the conversion
-                    file_info["detectors_link"] = f"{GITHUB_BASE_URL}{_revision}/src/ogd/games/{sanitary_params.GameID.upper()}/detectors" if _revision else None
-                    file_info["features_link"]  = f"{GITHUB_BASE_URL}{_revision}/src/ogd/games/{sanitary_params.GameID.upper()}/features"  if _revision else None
-                    file_info["found_matching_range"] = True
+                    file_info["versioning"]["detectors_link"] = f"{GITHUB_BASE_URL}{_revision}/src/ogd/games/{sanitary_params.GameID.upper()}/detectors" if _revision else None
+                    file_info["versioning"]["features_link"]  = f"{GITHUB_BASE_URL}{_revision}/src/ogd/games/{sanitary_params.GameID.upper()}/features"  if _revision else None
+
                     raw_url = f"https://raw.githubusercontent.com/opengamedata/ogd-core/refs/heads/main/src/ogd/games/{sanitary_params.GameID.upper()}/schemas/{sanitary_params.GameID.upper()}.json.template"
                     with urlrequest.urlopen(raw_url) as _conn:
                         try:
-                            _schema = _conn.read().decode('utf-8')
+                            raw_schema = _conn.read().decode('utf-8')
                         except Exception:
-                            file_info["schema"] = "Could not retrieve schema"
+                            file_info["game_state"] = "Could not retrieve schema"
+                            file_info["events"] = "Could not retrieve schema"
+                            file_info["features"] = "Could not retrieve schema"
                         else:
-                            file_info["schema"] = json.loads(_schema)
+                            schema = json.loads(raw_schema)
+                            file_info["game_state"] = schema.get("game_state", "Could not find game state in schema")
+                            file_info["events"] = schema.get("events", "Could not find event listings in schema")
+                            file_info["features"] = schema.get("features", "Could not find feature configs in schema")
 
                     ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=file_info)
                 else:
