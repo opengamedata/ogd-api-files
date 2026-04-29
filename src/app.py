@@ -9,8 +9,8 @@ from flask_cors import CORS
 from ogd.common.utils.Logger import Logger
 
 # import local files
-from config.config import settings
-from apis.configs.FileAPIConfig import FileAPIConfig
+from config import settings
+from configs.FileAPIConfig import FileAPIConfig
 
 # By default we'll log to the WSGI errors stream which ends up in the Apache error log
 logHandlers = {
