@@ -1,11 +1,8 @@
 # import libraries
 import logging
 import unittest
-from json.decoder import JSONDecodeError
 from typing import Optional
 from unittest import TestCase
-# import 3rd-party libraries
-import requests
 # import ogd libraries
 from ogd.apis.models.APIRequest import APIRequest
 from ogd.apis.models.APIResponse import APIResponse, ResponseStatus
@@ -29,7 +26,7 @@ class test_Version(TestCase):
 
     def test_Succeeded(self):
         if self.content is not None:
-            self.assertTrue(self.content.Status == ResponseStatus.OK)
+            self.assertEqual(self.content.Status, ResponseStatus.OK)
         else:
             self.fail(f"No result from request to {self.url}")
 
