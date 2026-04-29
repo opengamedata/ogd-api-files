@@ -44,5 +44,5 @@ class GameSummary:
                     initial_dataset=response.Value.get("initial_dataset", "DATASET NOT FOUND")
                 )
             else:
-                raise ValueError()
+                raise ValueError(f"APIResponse for GameSummary had incorrect keys.")
         return ret_val
