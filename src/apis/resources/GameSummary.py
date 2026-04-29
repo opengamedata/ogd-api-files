@@ -42,6 +42,6 @@ class GameSummary(Resource):
 
         datadates = set(str(dataset.StartDate).replace("/", "-") for dataset in game_datasets.Datasets.values())
         model = GameSummaryModel(game_id=game_id, dataset_count=len(datadates), initial_dataset=min(datadates))
-        ret_val.RequestSucceeded(msg="Retrieved monthly game usage", val=model)
+        ret_val.RequestSucceeded(msg="Retrieved monthly game usage", val=model.AsDict)
 
         return ret_val.AsFlaskResponse
