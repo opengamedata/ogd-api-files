@@ -3,12 +3,13 @@ from flask import current_app
 from flask_restful import Resource
 
 # import ogd libraries
-from ogd.apis.utils.APIResponse import APIResponse, RESTType, ResponseStatus
+from ogd.apis.models.APIResponse import APIResponse, RESTType, ResponseStatus
 from ogd.common.configs.storage.DatasetRepositoryConfig import DatasetRepositoryConfig
 from ogd.common.schemas.datasets.DatasetCollectionSchema import DatasetCollectionSchema
 
 # import local files
 from apis.configs.FileAPIConfig import FileAPIConfig
+from ogd.apis.models.GameSummary import GameSummary as GameSummaryModel
 from models.SanitizedParams import SanitizedParams
 from utils.utils import GetFileList
 
@@ -40,11 +41,7 @@ class GameSummary(Resource):
             return ret_val.AsFlaskResponse
 
         datadates = set(str(dataset.StartDate).replace("/", "-") for dataset in game_datasets.Datasets.values())
-        responseData = {
-            "game_id": game_id,
-            "dataset_count": len(datadates),
-            "initial_dataset": min(datadates)
-        }
-        ret_val.RequestSucceeded(msg="Retrieved monthly game usage", val=responseData)
+        model = GameSummaryModel(game_id=game_id, dataset_count=len(datadates), initial_dataset=min(datadates))
+        ret_val.RequestSucceeded(msg="Retrieved monthly game usage", val=model)
 
         return ret_val.AsFlaskResponse

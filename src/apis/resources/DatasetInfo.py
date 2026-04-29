@@ -6,7 +6,7 @@ from flask import current_app
 from flask_restful import Resource
 
 # import ogd libraries
-from ogd.apis.utils.APIResponse import APIResponse, RESTType, ResponseStatus
+from ogd.apis.models.APIResponse import APIResponse, RESTType, ResponseStatus
 from ogd.common.configs.storage.DatasetRepositoryConfig import DatasetRepositoryConfig
 from ogd.common.schemas.datasets.DatasetCollectionSchema import DatasetCollectionSchema
 from ogd.common.schemas.datasets.DatasetSchema import DatasetSchema

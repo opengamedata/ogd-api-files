@@ -7,7 +7,7 @@ from unittest import TestCase
 # import 3rd-party libraries
 import requests
 # import ogd libraries
-from ogd.apis.utils.APIResponse import APIResponse, ResponseStatus
+from ogd.apis.models.APIResponse import APIResponse, ResponseStatus
 from ogd.apis.utils.TestRequest import TestRequest
 from ogd.common.utils.Logger import Logger
 # import locals

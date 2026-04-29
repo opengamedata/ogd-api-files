@@ -9,7 +9,7 @@ import requests
 from flask import Flask
 from werkzeug.test import TestResponse
 # import ogd libraries
-from ogd.apis.utils.APIResponse import APIResponse, ResponseStatus
+from ogd.apis.models.APIResponse import APIResponse, ResponseStatus
 from ogd.apis.utils.TestRequest import TestRequest
 from ogd.common.utils.Logger import Logger
 # import locals
