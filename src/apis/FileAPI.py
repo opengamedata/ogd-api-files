@@ -33,7 +33,7 @@ class FileAPI:
         # Expected WSGIScriptAlias URL path is /data
         api = Api(app)
 
-        api.add_resource(GameList,     '/games')
+        api.add_resource(GameList,     GameList.Path)
         api.add_resource(GameSummary,  '/games/<string:game_id>')
         api.add_resource(DatasetList,  '/games/<string:game_id>/datasets')
         api.add_resource(DatasetsYear, '/games/<string:game_id>/datasets/<int:year>')

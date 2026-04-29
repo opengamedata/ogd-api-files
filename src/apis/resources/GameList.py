@@ -41,3 +41,7 @@ class GameList(Resource):
             ret_val.ServerErrored(msg=msg)
 
         return ret_val.AsFlaskResponse
+
+    @property
+    def Path(self) -> str:
+        return GameListModel.PATH
