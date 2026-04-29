@@ -46,7 +46,7 @@ class DatasetManifest(Resource):
                     ret_val.RequestErrored(msg=f"Bad GameID '{sanitary_params.GameID}'")
                     return ret_val.AsFlaskResponse
                 elif (len(game_datasets.Datasets) == 0):
-                    ret_val.RequestErrored(msg=f"GameID '{sanitary_params.GameID}' has no available datasets", status=ResponseStatus.ERR_NOTFOUND)
+                    ret_val.RequestErrored(msg=f"GameID '{sanitary_params.GameID}' has no available datasets", status=ResponseStatus.NOT_FOUND)
                     return ret_val.AsFlaskResponse
             else:
                 raise ValueError("Could not process inputs!")
@@ -112,6 +112,6 @@ class DatasetManifest(Resource):
                     _msg = f"Dataset key {_matched_dataset.Key} was invalid." if _matched_dataset else "No datasets found!"
                     ret_val.RequestErrored(msg=_msg)
             else:
-                ret_val.RequestErrored(msg=f"Could not find a dataset for {sanitary_params.GameID} in {sanitary_params.Month:>02}/{sanitary_params.Year:>04}", status=ResponseStatus.ERR_NOTFOUND)
+                ret_val.RequestErrored(msg=f"Could not find a dataset for {sanitary_params.GameID} in {sanitary_params.Month:>02}/{sanitary_params.Year:>04}", status=ResponseStatus.NOT_FOUND)
 
         return ret_val.AsFlaskResponse

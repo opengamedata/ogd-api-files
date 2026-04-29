@@ -95,7 +95,7 @@ class DatasetFile(Resource):
                     else:
                         ret_val.RequestErrored(msg=f"Dataset key {_matched_dataset.Key} was invalid.")
                 else:
-                    ret_val.RequestErrored(msg=f"Could not find a dataset for {sanitary_params.GameID} in {sanitary_params.Month:>02}/{sanitary_params.Year:>04}", status=ResponseStatus.ERR_NOTFOUND)
+                    ret_val.RequestErrored(msg=f"Could not find a dataset for {sanitary_params.GameID} in {sanitary_params.Month:>02}/{sanitary_params.Year:>04}", status=ResponseStatus.NOT_FOUND)
             except url_error.HTTPError as err:
                 current_app.logger.error(f"HTTP error getting {file_type} file from {file_link}:\n{err}")
                 ret_val.ServerErrored(msg=f"Server experienced an error retrieving {file_type} file from {f'{sanitary_params.Month:>02}/{sanitary_params.Year:>04}'} for {sanitary_params.GameID}.")
