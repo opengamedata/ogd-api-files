@@ -1,0 +1,40 @@
+[build-system]
+requires = [
+    "build == 1.2.*",
+    "setuptools == 74.1.*",
+    "setuptools-git-versioning == 2.0.*",
+    "twine == 5.1.*",
+    "wheel == 0.44.*"
+]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools-git-versioning]
+enabled = true
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[tool.setuptools.packages.find]
+where = ["src/"]
+include = ["ogd.apis"]
+
+[project]
+name = "opengamedata-api-files"
+dynamic = ["version", "dependencies"]
+authors = [
+   { name="Luke Swanson", email="lwswanson2@wisc.edu" },
+   { name="David Gagnon", email="djgagnon@wisc.edu" },
+   { name="Ryan Wilkinson" }
+]
+description = "A small collection of classes for hydrating data from the OpenGameData File API."
+readme = "README.md"
+requires-python = ">=3.12"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/opengamedata/opengamedata-api-files"
+"Bug Tracker" = "https://github.com/opengamedata/opengamedata-api-files/issues"
