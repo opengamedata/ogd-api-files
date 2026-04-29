@@ -13,7 +13,7 @@ from ogd.apis.models.APIRequest import APIRequest
 from ogd.apis.models.APIResponse import APIResponse, ResponseStatus
 from ogd.common.utils.Logger import Logger
 # import locals
-from src.apis.configs.FileAPIConfig import FileAPIConfig
+from src.configs.FileAPIConfig import FileAPIConfig
 from src.apis.FileAPI import FileAPI
 from tests.FileAPITestConfig import FileAPITestConfig
 from tests.config.t_config import settings

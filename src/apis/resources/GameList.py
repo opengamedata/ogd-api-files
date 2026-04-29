@@ -8,7 +8,7 @@ from ogd.common.configs.storage.DatasetRepositoryConfig import DatasetRepository
 
 # import local files
 from ogd.apis.models.GameList import GameList as GameListModel
-from apis.configs.FileAPIConfig import FileAPIConfig
+from configs.FileAPIConfig import FileAPIConfig
 from utils.utils import GetFileList
 
 class GameList(Resource):
