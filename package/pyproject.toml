@@ -12,7 +12,7 @@ build-backend = "setuptools.build_meta"
 packages = ["ogd.apis.models.files"]
 
 [tool.setuptools.package-dir]
-"" = "package/src"
+"" = "src"
 
 [tool.setuptools-git-versioning]
 enabled = true
