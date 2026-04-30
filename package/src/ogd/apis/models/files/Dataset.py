@@ -3,7 +3,7 @@ from typing import Final, List
 from ogd.apis.models.APIResponse import APIResponse
 from ogd.common.utils.typing import Map
 
-class DatasetsYear:
+class Dataset:
     PATH : Final[str] = "/games/<string:game_id>/datasets/<int:year>"
 
     def __init__(self, year:int,    month:int,        total_sessions:int,
