@@ -8,14 +8,17 @@ requires = [
 ]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools]
+packages = ["ogd.apis.models.files"]
+
+[tool.setuptools.package-dir]
+"" = "package/src"
+
 [tool.setuptools-git-versioning]
 enabled = true
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
-
-[tool.setuptools.packages.find]
-where = ["package/src/"]
 
 [project]
 name = "opengamedata-api-files"
