@@ -7,6 +7,7 @@ from flask_restful import Resource
 
 # import ogd libraries
 from ogd.apis.models.APIResponse import APIResponse, RESTType, ResponseStatus
+from ogd.apis.models.files.DatasetInfo import DatasetInfo as DatasetInfoModel
 from ogd.common.configs.storage.DatasetRepositoryConfig import DatasetRepositoryConfig
 from ogd.common.schemas.datasets.DatasetCollectionSchema import DatasetCollectionSchema
 from ogd.common.schemas.datasets.DatasetSchema import DatasetSchema
@@ -57,15 +58,17 @@ class DatasetInfo(Resource):
 
             if _matched_dataset:
                 if _matched_dataset.Key.DateFrom and _matched_dataset.Key.DateTo:
-                    file_info = {}
 
                     # If this range contains the given year & month
                     # Base URLs
                     CODESPACES_BASE_URL : str = "https://codespaces.new/opengamedata/opengamedata-samples/tree/"
                     GITHUB_BASE_URL     : str = "https://github.com/opengamedata/opengamedata-core/tree/"
                     
-                    # Date information
-                    file_info["first_year"]  = _matched_dataset.Key.DateFrom.year
+                    file_info = DatasetInfoModel(
+                        # Date information
+                        first_year = _matched_dataset.Key.DateFrom.year
+                    )
+                    file_info["first_year"]  = 
                     file_info["first_month"] = _matched_dataset.Key.DateFrom.month
                     file_info["last_year"]   = _matched_dataset.Key.DateTo.year
                     file_info["last_month"]  = _matched_dataset.Key.DateTo.month
@@ -86,8 +89,9 @@ class DatasetInfo(Resource):
                     file_info["population_template"] = f"{file_list.TemplatesBase}{_matched_dataset.PopulationTemplate}" if _matched_dataset.PopulationTemplate is not None else None
 
                     file_info["events_codespace"]   = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fevent-template%2Fdevcontainer.json"
-                    file_info["sessions_codespace"] = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fplayer-template%2Fdevcontainer.json"
-                    file_info["players_codespace"]  = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fsession-template%2Fdevcontainer.json"
+                    file_info["sessions_codespace"] = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fsession-template%2Fdevcontainer.json"
+                    file_info["players_codespace"]  = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fplayer-template%2Fdevcontainer.json"
+                    file_info["players_codespace"]  = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fpopulation-template%2Fdevcontainer.json"
 
                     # Convention for branch naming is lower-case with dashes,
                     # while game IDs are usually upper-case with underscores, so make sure we do the conversion
