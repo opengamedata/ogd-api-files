@@ -1,9 +1,11 @@
-from typing import List
+from typing import Final, List
 
 from ogd.apis.models.APIResponse import APIResponse
 from ogd.common.utils.typing import Map
 
 class GameList:
+    PATH : Final[str] = "/games"
+
     def __init__(self, game_ids:List[str]):
         self._game_ids = game_ids
 
