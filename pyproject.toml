@@ -15,7 +15,7 @@ enabled = true
 dependencies = {file = ["requirements.txt"]}
 
 [tool.setuptools.packages.find]
-where = ["src/"]
+where = ["package/src/"]
 include = ["ogd.apis"]
 
 [project]
