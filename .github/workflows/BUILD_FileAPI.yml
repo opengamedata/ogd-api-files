@@ -41,7 +41,7 @@ jobs:
 
     # 2. Build 
     - name: Build Package
-      run: python -m build
+      run: python -m build package/
 
     # 3. Cache for use by others
     - name: Cache Build for Publishing
