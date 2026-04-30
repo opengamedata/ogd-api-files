@@ -46,7 +46,7 @@ class Dataset:
         }
     
     @staticmethod
-    def FromAPIResponse(response:APIResponse) -> "DatasetsYear":
+    def FromAPIResponse(response:APIResponse) -> "Dataset":
         """Parse a GameSummary from an APIResponse
 
         :param response: The APIResponse object containing the GameSummary data.
@@ -54,11 +54,11 @@ class Dataset:
         :return: A GameSummary object constructed from the data given in the APIResponse
         :rtype: GameSummary
         """
-        ret_val : DatasetsYear
+        ret_val : Dataset
 
         if isinstance(response.Value, dict):
             if all(key in response.Value.keys() for key in {"year", "month", "total_sessions", "sessions_file", "players_file", "population_file"}):
-                ret_val = DatasetsYear(
+                ret_val = Dataset(
                     year=response.Value.get("year", 0),
                     month=response.Value.get("month", 0),
                     total_sessions=response.Value.get("total_sessions", 0),
