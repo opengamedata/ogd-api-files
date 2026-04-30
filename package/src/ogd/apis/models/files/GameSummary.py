@@ -1,7 +1,10 @@
+from typing import Final
 from ogd.apis.models.APIResponse import APIResponse
 from ogd.common.utils.typing import Map
 
 class GameSummary:
+    PATH : Final[str] = "/games/<string:game_id>"
+
     def __init__(self, game_id:str, dataset_count:int, initial_dataset:str):
         self._game_id = game_id
         self._dataset_count = dataset_count
