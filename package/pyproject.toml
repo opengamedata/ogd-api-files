@@ -14,10 +14,6 @@ enabled = true
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
 
-[tool.setuptools.packages.find]
-where = ["package/src/"]
-include = ["ogd.apis"]
-
 [project]
 name = "opengamedata-api-files"
 dynamic = ["version", "dependencies"]
