@@ -9,8 +9,8 @@ import requests
 from flask import Flask
 from werkzeug.test import TestResponse
 # import ogd libraries
-from ogd.apis.utils.APIResponse import APIResponse, ResponseStatus
-from ogd.apis.utils.TestRequest import TestRequest
+from ogd.apis.models.APIRequest import APIRequest
+from ogd.apis.models.APIResponse import APIResponse, ResponseStatus
 from ogd.common.utils.Logger import Logger
 # import locals
 from src.configs.FileAPIConfig import FileAPIConfig
@@ -95,7 +95,6 @@ class test_GameDatasets_local(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.url    : str
-        cls.result : Optional[requests.Response]
         cls.content : Optional[APIResponse]    = None
 
         # 1. Get testing config
@@ -106,26 +105,14 @@ class test_GameDatasets_local(TestCase):
 
         cls.url    = f"{cls.testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/list"
         Logger.Log(f"Sending request to {cls.url}", logging.INFO)
-        cls.result = TestRequest(url=cls.url, request="GET", timeout=30, logger=Logger.std_logger)
-        if cls.result is not None:
-            try:
-                _raw = cls.result.json()
-            except JSONDecodeError as err:
-                print(f"Could not parse {cls.result.text} to JSON!\n{err}")
-            else:
-                cls.content = APIResponse.FromDict(all_elements=_raw)
-
-    @classmethod
-    def tearDownClass(cls):
-        if cls.result is not None:
-            cls.result.close()
+        cls.content = APIRequest(url=cls.url, request_type="GET", timeout=30).Execute(logger=Logger.std_logger)
 
     def test_Responded(self):
-        self.assertIsNotNone(self.result, f"No result from request to {self.url}")
+        self.assertIsNotNone(self.content, f"No result from request to {self.url}")
 
     def test_Succeeded(self):
-        if self.result is not None:
-            self.assertTrue(self.result.ok)
+        if self.content is not None:
+            self.assertEqual(self.content.Status, ResponseStatus.OK)
         else:
             self.fail(f"No result from request to {self.url}")
 
@@ -163,26 +150,18 @@ class test_GameDatasetInfo_local(TestCase):
 
     def setUp(self):
         self.url    : str
-        self.result : Optional[requests.Response]
         self.content : Optional[APIResponse]    = None
 
         self.url    = f"{self.testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/1/2024/files/"
         Logger.Log(f"Sending request to {self.url}", logging.INFO)
-        self.result = TestRequest(url=self.url, request="GET", timeout=30, logger=Logger.std_logger)
-        if self.result is not None:
-            try:
-                _raw = self.result.json()
-            except JSONDecodeError as err:
-                print(f"Could not parse {self.result.text} to JSON!\n{err}")
-            else:
-                self.content = APIResponse.FromDict(all_elements=_raw)
+        self.content = APIRequest(url=self.url, request_type="GET", timeout=30).Execute(logger=Logger.std_logger)
 
     def test_Responded(self):
-        self.assertIsNotNone(self.result, f"No result from request to {self.url}")
+        self.assertIsNotNone(self.content, f"No result from request to {self.url}")
 
     def test_Succeeded(self):
-        if self.result is not None:
-            self.assertTrue(self.result.ok)
+        if self.content is not None:
+            self.assertEqual(self.content.Status, ResponseStatus.OK)
         else:
             self.fail(f"No result from request to {self.url}")
 

@@ -12,7 +12,8 @@ from flask import current_app
 from flask_restful import Resource
 
 # import ogd libraries
-from ogd.apis.utils.APIResponse import APIResponse, RESTType, ResponseStatus
+from ogd.apis.models.APIResponse import APIResponse, RESTType, ResponseStatus
+from ogd.apis.models.files.DatasetFile import DatasetFile as DatasetFileModel
 from ogd.common.configs.storage.DatasetRepositoryConfig import DatasetRepositoryConfig
 from ogd.common.schemas.datasets.DatasetCollectionSchema import DatasetCollectionSchema
 from ogd.common.schemas.datasets.DatasetSchema import DatasetSchema
@@ -85,17 +86,17 @@ class DatasetFile(Resource):
                                     if f_name.endswith(".tsv"):
                                         data = pd.read_csv(zipped.open(f_name), sep="\t").replace({float('nan'):None})
                                         data = self._secondaryParse(data)
-                                        result = {
-                                            "columns": list(data.columns),
-                                            "rows": list(data.apply(lambda series : series.to_dict(), axis=1))
-                                        }
-                                        ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=result)
+                                        result = DatasetFileModel(
+                                            columns=list(data.columns),
+                                            rows=list(data.apply(lambda series : series.to_dict(), axis=1))
+                                        )
+                                        ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=result.AsDict)
                         else:
                             ret_val.RequestErrored(msg=missing_file_msg)
                     else:
                         ret_val.RequestErrored(msg=f"Dataset key {_matched_dataset.Key} was invalid.")
                 else:
-                    ret_val.RequestErrored(msg=f"Could not find a dataset for {sanitary_params.GameID} in {sanitary_params.Month:>02}/{sanitary_params.Year:>04}", status=ResponseStatus.ERR_NOTFOUND)
+                    ret_val.RequestErrored(msg=f"Could not find a dataset for {sanitary_params.GameID} in {sanitary_params.Month:>02}/{sanitary_params.Year:>04}", status=ResponseStatus.NOT_FOUND)
             except url_error.HTTPError as err:
                 current_app.logger.error(f"HTTP error getting {file_type} file from {file_link}:\n{err}")
                 ret_val.ServerErrored(msg=f"Server experienced an error retrieving {file_type} file from {f'{sanitary_params.Month:>02}/{sanitary_params.Year:>04}'} for {sanitary_params.GameID}.")

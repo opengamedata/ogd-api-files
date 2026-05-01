@@ -11,7 +11,7 @@ from flask_restful.inputs import datetime_from_iso8601
 from werkzeug.exceptions import BadRequest
 
 # import ogd libraries
-from ogd.apis.utils.APIResponse import APIResponse, RESTType
+from ogd.apis.models.APIResponse import APIResponse, RESTType
 
 # import ogd libraries
 from ogd.common.configs.storage.DatasetRepositoryConfig import DatasetRepositoryConfig

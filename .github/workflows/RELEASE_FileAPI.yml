@@ -15,8 +15,48 @@ env:
   DEPLOY_URL:  ${{ vars.OGD_SERVICES_HOST }}/${{ vars.API_BASE_URL }}/files/app.wsgi
 
 jobs:
+
+  build:
+    name: Build Python Package
+    uses: ./.github/workflows/BUILD_FileAPI.yml
+    with:
+      with_caching: true
+
+  pypi_release:
+    name: Publish Release to PyPI
+    needs: [build]
+    if: github.event.action == 'released'
+    runs-on: ubuntu-22.04
+    environment:
+      name: pypi_release
+      url: https://pypi.org/manage/project/opengamedata-api-files/
+    permissions:
+      id-token: write
+    steps:
+
+    # 1. Local checkout & config
+    - name: Restore Cached Build
+      id: cached-build
+      uses: actions/cache/restore@v4
+      with:
+        key: opengamedata-api-files-build-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ./dist/
+        fail-on-cache-miss: true
+    - name: Fail if Cache Restore Failed
+      if: steps.cached-build.outputs.cache-hit == 'false'
+      run: exit 1
+    # 2. Build 
+
+    # 3. Remote config & deploy
+    - name: Publish to PyPI
+      if: steps.cached-build.outputs.cache-hit == 'true'
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        print-hash: true
+
   production_deploy:
-    name: Release Deploy of Website API
+    name: Release Deploy of Files API
+    needs: [build, pypi_release]
     runs-on: ubuntu-22.04
     concurrency:
       group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}

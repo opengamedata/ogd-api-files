@@ -7,8 +7,8 @@ from unittest import TestCase
 # import 3rd-party libraries
 import requests
 # import ogd libraries
-from ogd.apis.utils.APIResponse import APIResponse, ResponseStatus
-from ogd.apis.utils.TestRequest import TestRequest
+from ogd.apis.models.APIRequest import APIRequest
+from ogd.apis.models.APIResponse import APIResponse, ResponseStatus
 from ogd.common.utils.Logger import Logger
 # import locals
 from tests.FileAPITestConfig import FileAPITestConfig
@@ -32,14 +32,7 @@ class test_GameUsageByMonth(TestCase):
             "month"   : 1
         }
         cls.url    = f"{_testing_cfg.ExternEndpoint}/getGameUsageByMonth"
-        cls.result = TestRequest(url=cls.url, request="GET", params=params, timeout=5, logger=Logger.std_logger)
-        if cls.result is not None:
-            try:
-                _raw = cls.result.json()
-            except JSONDecodeError as err:
-                print(f"Could not parse {cls.result.text} to JSON!\n{err}")
-            else:
-                cls.content = APIResponse.FromDict(all_elements=_raw)
+        cls.content = APIRequest(url=cls.url, request_type="GET", params=params, timeout=5).Execute(logger=Logger.std_logger)
 
     @classmethod
     def tearDownClass(cls):
@@ -80,7 +73,7 @@ class test_MonthlyGameUsage(TestCase):
         }
         cls.url    = f"{_testing_cfg.ExternEndpoint}/getMonthlyGameUsage"
         Logger.Log(f"Sending request to {cls.url}", logging.INFO)
-        cls.result = TestRequest(url=cls.url, request="GET", params=params, timeout=30, logger=Logger.std_logger)
+        cls.content = APIRequest(url=cls.url, request_type="GET", params=params, timeout=30).Execute(logger=Logger.std_logger)
         if cls.result is not None:
             try:
                 _raw = cls.result.json()
@@ -136,14 +129,7 @@ class test_GameFileInfoByMonth(TestCase):
         }
         self.url    = f"{_testing_cfg.ExternEndpoint}/getGameFileInfoByMonth"
         Logger.Log(f"Sending request to {self.url}", logging.INFO)
-        self.result = TestRequest(url=self.url, request="GET", params=params, timeout=30, logger=Logger.std_logger)
-        if self.result is not None:
-            try:
-                _raw = self.result.json()
-            except JSONDecodeError as err:
-                print(f"Could not parse {self.result.text} to JSON!\n{err}")
-            else:
-                self.content = APIResponse.FromDict(all_elements=_raw)
+        self.content = APIRequest(url=self.url, request_type="GET", params=params, timeout=30).Execute(logger=Logger.std_logger)
 
     def test_Responded(self):
         self.assertIsNotNone(self.result, f"No result from request to {self.url}")
@@ -188,6 +174,3 @@ class test_GameFileInfoByMonth(TestCase):
                 self.assertEqual(self.content.Value.get(key), val, msg=f"Mismatch for key {key}")
         else:
             self.fail(f"No JSON content from request to {self.url}")
-
-if __name__ == "__main__":
-    unittest.main()
