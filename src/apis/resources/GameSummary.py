@@ -1,3 +1,5 @@
+from typing import List
+
 # import 3rd-party libraries
 from flask import current_app
 from flask_restful import Resource
@@ -41,7 +43,43 @@ class GameSummary(Resource):
             return ret_val.AsFlaskResponse
 
         datadates = set(str(dataset.StartDate).replace("/", "-") for dataset in game_datasets.Datasets.values())
-        model = GameSummaryModel(game_id=game_id, dataset_count=len(datadates), initial_dataset=min(datadates))
+        session_avg = GameSummary._averageSessions(
+            monthly_session_counts=[game_datasets.Datasets[key].SessionCount for key in sorted(game_datasets.Datasets.keys(), reverse=True)]
+        )
+
+        model = GameSummaryModel(
+            game_id=game_id,
+            dataset_count=len(datadates),
+            session_avg=session_avg,
+            initial_dataset=min(datadates)
+        )
         ret_val.RequestSucceeded(msg="Retrieved monthly game usage", val=model.AsDict)
 
         return ret_val.AsFlaskResponse
+
+    @staticmethod
+    def _averageSessions(monthly_session_counts:List[int | None], month_range:int=12):
+        ret_val = 0
+
+        months_counted = 0
+        sum_sessions   = 0
+
+        for month in monthly_session_counts:
+            # If this month has sessions
+            if month is not None and month > 0:
+                # Add it to our sum
+                sum_sessions += month
+            # If we've found a month with sessions either this iteration or a previous iteration
+            if sum_sessions > 0:
+                # This month counts towards our 12 whether or not it had sessions
+                months_counted += 1
+            # Once we have 12 months of data we can quit
+            if months_counted == month_range:
+                break
+
+        # If we counted at least one month
+        if months_counted > 0:
+            # Return an integer average
+            ret_val = (int)(sum_sessions / months_counted)
+
+        return ret_val
