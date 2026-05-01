@@ -10,17 +10,13 @@ on:
     - 'src/**'
     - 'requirements.txt'
 
-env:
-  DEPLOY_HOST: ${{ vars.OGD_STAGING_HOST }}
-  DEPLOY_DIR:                              ${{ vars.API_BASE_PATH }}/${{ github.event.repository.name }}/${{ github.ref_name }}
-  DEPLOY_URL:  ${{ vars.OGD_STAGING_HOST }}/${{ vars.API_BASE_URL }}/${{ github.event.repository.name }}/${{ github.ref_name }}/app.wsgi
-
 jobs:
   ci_deploy:
     name: CI Deploy of Website API
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:
       deploy_host: ${{ vars.OGD_STAGING_HOST }}
+    secrets: inherit
 
   testbed_hello_remote:
     name: HelloAPI Remote Testbed
