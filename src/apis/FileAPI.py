@@ -4,6 +4,7 @@ from flask_restful import Api
 
 # import local files
 from apis.resources.GameList import GameList
+from apis.resources.GameListDetails import GameListDetails
 from apis.resources.GameSummary import GameSummary
 from apis.resources.DatasetList import DatasetList
 from apis.resources.DatasetInfo import DatasetInfo
@@ -35,6 +36,7 @@ class FileAPI:
         api = Api(app)
 
         api.add_resource(GameList,        '/games')
+        api.add_resource(GameListDetails, '/games/details')
         api.add_resource(GameSummary,     '/games/<string:game_id>')
         api.add_resource(DatasetList,     '/games/<string:game_id>/datasets')
         api.add_resource(DatasetsYear,    '/games/<string:game_id>/datasets/<int:year>')
