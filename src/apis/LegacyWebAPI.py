@@ -165,7 +165,7 @@ class LegacyWebAPI:
             total_sessions_by_yyyymm = {}
 
             # rangeKey format is GAMEID_YYYYMMDD_to_YYYYMMDD or GAME_ID_YYYYMMDD_to_YYYYYMMDD
-            for _datset_id,_dataset in game_datasets.Datasets.items():
+            for _dataset_id,_dataset in game_datasets.Datasets.items():
 
                 # If this rangeKey matches the expected format
                 if _dataset.Key.DateFrom: # len(rangeKeyParts) == 4:
