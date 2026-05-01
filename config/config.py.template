@@ -1,6 +1,7 @@
 settings = {
     "API_VERSION":"VERSION_PLACEHOLDER",
     "DEBUG_LEVEL":"INFO",
+    "LOCAL":True,
 	"BIGQUERY_GAME_MAPPING":
     {
         "AQUALAB":       {"PROJECT_ID":"aqualab-57f88",		"DATASET_ID":"analytics_271167280",	"TABLE_PREFIX":"events_*",   "CREDENTIALS_PATH":"./config/aqualab.json", 	"SCHEMA_TYPE": "EVENTS-FIREBASE"},
