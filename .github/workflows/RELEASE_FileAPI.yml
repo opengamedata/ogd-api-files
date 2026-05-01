@@ -57,6 +57,7 @@ jobs:
   production_deploy:
     name: Release Deploy of Files API
     needs: [build, pypi_release]
+    environment: release-wait-deploy # use environment to force waiting a few minutes after the PyPI release.
     runs-on: ubuntu-22.04
     concurrency:
       group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}
