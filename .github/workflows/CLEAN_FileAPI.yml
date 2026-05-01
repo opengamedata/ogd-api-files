@@ -1,11 +1,10 @@
 # Workflow to clean out the directory where a deleted "FileAPI" branch's files were deployed on the CI server
-name: OGD FileAPI - Dead Branch Cleanup Script
+name: Cleanup Dead Branch - FileAPI
 run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'delete' && github.event.ref || 'Manual Run') }}
 
-# Controls when the action will run. Triggers the workflow on deletion of branches. 
 on:
   delete: # Trigger automatically when we do a deletion of a branch
-  workflow_dispatch: # Allow manual trigger of this workflow from the Actions tab
+  workflow_dispatch:
 
 env:
   DEPLOY_HOST: ${{ vars.OGD_STAGING_HOST }}
@@ -14,7 +13,7 @@ env:
     
 jobs:
   branch_delete:
-    name: Branch Deletion Cleanup
+    name: Dead Branch Cleanup
     if: github.event.ref_type == 'branch'
     runs-on: ubuntu-22.04
     # concurrency:
@@ -28,10 +27,12 @@ jobs:
     # 2. Build 
 
     # 3. Remote config & clean
-    - name: Install OpenConnect
-      run: sudo apt-get -q update && sudo apt-get -q install openconnect
     - name: Connect to VPN
-      run: echo ${{ secrets.VPN_PASS }} | sudo openconnect --protocol=gp -u ${{ secrets.VPN_USER}} --passwd-on-stdin soe.vpn.wisc.edu &
+      uses: opengamedata/actions-openconnect-vpn@v1.1
+      with:
+        username: ${{ secrets.VPN_USER }}
+        password: ${{ secrets.VPN_PASS }}
+        endpoint: "soe.vpn.wisc.edu"
 
     - name: Setup Access Key
       run: |
@@ -46,7 +47,7 @@ jobs:
       run: echo "Removed branch deploy at ${{ env.DEPLOY_URL }}"
 
     - name: Upload logs as artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         path: ./*.log
     

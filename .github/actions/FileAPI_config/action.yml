@@ -1,0 +1,35 @@
+name: "Configure app.wsgi file for a deploy"
+author: Luke Swanson
+description: "Given a set of appropriate inputs, this action prepares the app.wsgi file for an API deploy."
+branding:
+  icon: 'clipboard'
+  color: 'blue'
+inputs:
+  api_version:
+    description: "The version of the API code."
+    required: false
+    default: 'Testing'
+  remote_app_path:
+    description: "Remote directory where WSGI app will be deployed, not including the file itself"
+    required: true
+    default: 'var/www/wsgi-bin/opengamedata/apis/files/'
+  local_app_path:
+    description: "Local path to the folder containing the WSGI app to be deployed"
+    required: true
+    default: 'src'
+  config_path:
+    description: "Local path to config folder"
+    required: false
+    default: 'config'
+runs:
+  using: "composite"
+  steps:
+    - name: Set up src/config
+      run: cp ${{ inputs.config_path }}/config.py.template ${{ inputs.local_app_path }}/config.py 
+      shell: bash
+    - name: Set API Version
+      run: sed -i 's@VERSION_PLACEHOLDER@${{inputs.api_version}}@g'  ${{ inputs.local_app_path }}/config.py
+      shell: bash
+    - name: Set API Base Path
+      run: sed -i 's@placeholder home@${{inputs.remote_app_path}}@g' ${{ inputs.local_app_path }}/app.wsgi
+      shell: bash

@@ -1,10 +1,9 @@
 # Specific files to ignore
-src/config/config.py
-src/config/*.json
+**/config.py
+**/config/*.json
 tests/config/t_config.py
 tests/Makefile
 .vscode
-.pylintrc
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -111,7 +110,7 @@ celerybeat.pid
 
 # Environments
 .env
-.venv
+.venv*
 env/
 venv/
 ENV/
