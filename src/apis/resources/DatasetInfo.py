@@ -98,7 +98,7 @@ class DatasetInfo(Resource):
                         found_matching_range = True
                     )
 
-                    ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=file_info)
+                    ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=file_info.AsDict)
                 else:
                     _msg = f"Dataset key {_matched_dataset.Key} was invalid." if _matched_dataset else "No datasets found!"
                     ret_val.RequestErrored(msg=_msg)
