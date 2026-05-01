@@ -28,7 +28,7 @@ authors = [
    { name="David Gagnon", email="djgagnon@wisc.edu" },
    { name="Ryan Wilkinson" }
 ]
-description = "A small collection of classes for hydrating data from the OpenGameData File API."
+description = "A small collection of classes for deserializing data from the OpenGameData File API."
 readme = "README.md"
 requires-python = ">=3.12"
 classifiers = [
