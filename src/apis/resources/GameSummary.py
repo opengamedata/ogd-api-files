@@ -6,12 +6,12 @@ from flask_restful import Resource
 
 # import ogd libraries
 from ogd.apis.models.APIResponse import APIResponse, RESTType, ResponseStatus
+from ogd.apis.models.files.GameSummary import GameSummary as GameSummaryModel
 from ogd.common.configs.storage.DatasetRepositoryConfig import DatasetRepositoryConfig
 from ogd.common.schemas.datasets.DatasetCollectionSchema import DatasetCollectionSchema
 
 # import local files
 from configs.FileAPIConfig import FileAPIConfig
-from ogd.apis.models.files.GameSummary import GameSummary as GameSummaryModel
 from models.SanitizedParams import SanitizedParams
 from utils.utils import GetFileList
 
