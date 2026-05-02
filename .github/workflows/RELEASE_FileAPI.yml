@@ -51,10 +51,19 @@ jobs:
       with:
         print-hash: true
 
-  release_deploy:
-    name: CI Deploy of Website API
+  wait_for_pypi:
+    name: Wait for PyPI to Update
     needs: [build, pypi_release]
     environment: release-wait-deploy # use environment to force waiting a few minutes after the PyPI release.
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Done Waiting
+      run: echo "Done waiting."
+      shell: bash
+
+  release_deploy:
+    name: CI Deploy of Website API
+    needs: [build, pypi_release, wait_for_pypi]
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:
       deploy_host: ${{ vars.OGD_SERVICES_HOST }}
