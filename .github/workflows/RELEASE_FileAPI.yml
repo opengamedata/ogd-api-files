@@ -25,7 +25,6 @@ jobs:
   pypi_release:
     name: Publish Release to PyPI
     needs: [build]
-    if: github.event.action == 'released'
     runs-on: ubuntu-22.04
     environment:
       name: pypi_release
