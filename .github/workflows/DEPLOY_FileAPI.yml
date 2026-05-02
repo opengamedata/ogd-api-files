@@ -1,0 +1,72 @@
+# Workflow to physically deploy Files API to the CI server
+name: Deploy Script - FileAPI
+run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' && github.event.head_commit.message || 'Manual Run') }}
+on:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      deploy_host:
+        type: string
+        description: "The host on which to deploy."
+        required: true
+        default: ${{ vars.OGD_STAGING_HOST }}
+
+env:
+  DEPLOY_HOST: ${{ inputs.deploy_host }}
+  DEPLOY_DIR:                              ${{ vars.API_BASE_PATH }}/${{ github.event.repository.name }}/${{ github.ref_name }}
+  DEPLOY_URL:  ${{ inputs.deploy_host }}/${{ vars.API_BASE_URL }}/${{ github.event.repository.name }}/${{ github.ref_name }}/app.wsgi
+
+jobs:
+  ci_deploy:
+    name: CI Deploy of Website API
+    runs-on: ubuntu-22.04
+    concurrency:
+      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-deploy
+      cancel-in-progress: true
+
+    steps:
+
+    # 1. Local checkout & config
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Get current version tag
+      id: version-tag
+      run: |
+        echo "VERSION_TAG=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
+    - name: Set up Config File
+      uses: ./.github/actions/FileAPI_config
+      with:
+          remote_app_path: ${{ env.DEPLOY_DIR }}
+          api_version:     ${{ steps.version-tag.outputs.VERSION_TAG }}-${{ github.ref_name }}-${{ github.sha }}
+
+    # 2. Build 
+
+    # 3. Remote config & deploy
+    - name: Connect to VPN
+      uses: opengamedata/actions-openconnect-vpn@v1.1
+      with:
+        username: ${{ secrets.VPN_USER }}
+        password: ${{ secrets.VPN_PASS }}
+        endpoint: "soe.vpn.wisc.edu"
+
+    - name: Deploy to Server
+      uses: opengamedata/actions-deploy-project@v1.1
+      with:
+        local_path: ./src
+        remote_path: ${{ env.DEPLOY_DIR }}
+        remote_host: ${{ env.DEPLOY_HOST }}
+        remote_user: ${{ secrets.DEPLOY_USER }}
+        remote_key:  ${{ secrets.DEPLOY_KEY }}
+
+    - name: Upload requirements.txt
+      run: scp -o StrictHostKeyChecking=no -T -i ./key.txt ./requirements.txt ${{ secrets.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:${{ env.DEPLOY_DIR }}
+    - name: Set up venv for the deploy
+      run: ssh -o StrictHostKeyChecking=no -T -i ./key.txt ${{ secrets.DEPLOY_USER }}@${{ env.DEPLOY_HOST }} "cd ${{ env.DEPLOY_DIR }}; python -m venv --system-site-packages ./.venv; source .venv/bin/activate; python -m pip install -r requirements.txt"
+
+    # 4. Cleanup & complete
+    - name: Restart httpd via ssh
+      run: ssh -o StrictHostKeyChecking=no -T -i ./key.txt ${{ secrets.DEPLOY_USER }}@${{ env.DEPLOY_HOST }} "sudo systemctl restart apache2"
+    - name: Announce deploy
+      run: echo "Deployed to ${{ env.DEPLOY_URL }}"

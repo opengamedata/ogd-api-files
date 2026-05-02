@@ -27,6 +27,9 @@ runs:
     - name: Set up src/config
       run: cp ${{ inputs.config_path }}/config.py.template ${{ inputs.local_app_path }}/config.py 
       shell: bash
+    - name: Set to Non-Local Deploy
+      run: sed -i 's@"LOCAL"\s*=\s*True@"LOCAL" = False@g' ${{ inputs.local_app_path }}/config.py
+      shell: bash
     - name: Set API Version
       run: sed -i 's@VERSION_PLACEHOLDER@${{inputs.api_version}}@g'  ${{ inputs.local_app_path }}/config.py
       shell: bash
