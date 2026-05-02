@@ -42,7 +42,7 @@ jobs:
 
     # 2. Build 
     - name: Build Package
-      run: python -m build package/
+      run: python -m build package/ --outdir="./"
 
     # 3. Cache for use by others
     - name: Cache Build for Publishing
@@ -51,7 +51,7 @@ jobs:
       uses: actions/cache/save@v4
       with:
         key: opengamedata-api-files-build-${{ github.run_id }}-${{ github.run_attempt }}
-        path: ./package/dist/
+        path: dist/
     - name: Non-Cached Build
       if: inputs.with_caching != true
       run: echo "No build cached"
