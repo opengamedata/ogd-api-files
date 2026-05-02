@@ -39,7 +39,7 @@ jobs:
       uses: actions/cache/restore@v4
       with:
         key: opengamedata-api-files-build-${{ github.run_id }}-${{ github.run_attempt }}
-        path: ./dist/
+        path: ./package/dist/
         fail-on-cache-miss: true
     - name: Fail if Cache Restore Failed
       if: steps.cached-build.outputs.cache-hit == 'false'
