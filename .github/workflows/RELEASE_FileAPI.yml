@@ -20,7 +20,6 @@ jobs:
   pypi_release:
     name: Publish Release to PyPI
     needs: [build]
-    if: github.event.action == 'released'
     runs-on: ubuntu-22.04
     environment:
       name: pypi_release
@@ -35,11 +34,14 @@ jobs:
       uses: actions/cache/restore@v4
       with:
         key: opengamedata-api-files-build-${{ github.run_id }}-${{ github.run_attempt }}
-        path: ./dist/
+        path: package/dist/
         fail-on-cache-miss: true
     - name: Fail if Cache Restore Failed
       if: steps.cached-build.outputs.cache-hit == 'false'
       run: exit 1
+    - name: Pull dist to ./
+      run: mv ./package/dist ./dist
+      shell: bash
     # 2. Build 
 
     # 3. Remote config & deploy
@@ -52,6 +54,7 @@ jobs:
   release_deploy:
     name: CI Deploy of Website API
     needs: [build, pypi_release]
+    environment: release-wait-deploy # use environment to force waiting a few minutes after the PyPI release.
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:
       deploy_host: ${{ vars.OGD_SERVICES_HOST }}
