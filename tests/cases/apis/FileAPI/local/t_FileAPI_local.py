@@ -46,7 +46,7 @@ class test_GameList_local(TestCase):
 
         cls.server = cls.application.test_client()
 
-        cls.url    = f"{cls.testing_cfg.ExternEndpoint}/games"
+        cls.url    = f"/games"
         Logger.Log(f"Sending request to {cls.url}", logging.INFO)
         cls.result = cls.server.get(cls.url)
         if cls.result is not None:
@@ -95,6 +95,7 @@ class test_GameDatasets_local(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.url    : str
+        cls.result : Optional[TestResponse]
         cls.content : Optional[APIResponse]    = None
 
         # 1. Get testing config
@@ -103,9 +104,31 @@ class test_GameDatasets_local(TestCase):
         _str_level =       "DEBUG" if cls.testing_cfg.Verbose else "INFO"
         Logger.std_logger.setLevel(_level)
 
-        cls.url    = f"{cls.testing_cfg.ExternEndpoint}/games/AQUALAB/datasets"
+        # 2. Set up local Flask app to run tests
+        cls.application = Flask(__name__)
+        cls.application.logger.setLevel(_level)
+
+        _server_cfg_elems = {
+            "API_VERSION"   : "0.0.0-Testing",
+            "DEBUG_LEVEL"   : _str_level,
+            "FILE_LIST_URL" : 'https://opengamedata.fielddaylab.wisc.edu/data/file_list.json',
+            "BIGQUERY_GAME_MAPPING" : {}
+        }
+        _server_cfg = FileAPIConfig.FromDict(name="HelloAPITestServer", unparsed_elements=_server_cfg_elems)
+        FileAPI.register(app=cls.application, settings=_server_cfg)
+
+        cls.server = cls.application.test_client()
+
+        cls.url    = f"/games/AQUALAB/datasets"
         Logger.Log(f"Sending request to {cls.url}", logging.INFO)
-        cls.content = APIRequest(url=cls.url, request_type="GET", timeout=30).Execute(logger=Logger.std_logger)
+        cls.result = cls.server.get(cls.url)
+        if cls.result is not None:
+            try:
+                _raw = cls.result.json
+            except JSONDecodeError as err:
+                print(f"Could not parse {cls.result.text} to JSON!\n{err}")
+            else:
+                cls.content = APIResponse.FromDict(all_elements=_raw or {})
 
     def test_Responded(self):
         self.assertIsNotNone(self.content, f"No result from request to {self.url}")
@@ -142,19 +165,41 @@ class test_GameDatasets_local(TestCase):
 class test_GameDatasetInfo_local(TestCase):
     @classmethod
     def setUpClass(cls):
+        cls.url    : str
+        cls.result : Optional[TestResponse]
+        cls.content : Optional[APIResponse]    = None
+
         # 1. Get testing config
         cls.testing_cfg = FileAPITestConfig.FromDict(name="FileAPITestConfig", unparsed_elements=settings)
         _level     = logging.DEBUG if cls.testing_cfg.Verbose else logging.INFO
         _str_level =       "DEBUG" if cls.testing_cfg.Verbose else "INFO"
         Logger.std_logger.setLevel(_level)
 
-    def setUp(self):
-        self.url    : str
-        self.content : Optional[APIResponse]    = None
+        # 2. Set up local Flask app to run tests
+        cls.application = Flask(__name__)
+        cls.application.logger.setLevel(_level)
 
-        self.url    = f"{self.testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/1/2024"
-        Logger.Log(f"Sending request to {self.url}", logging.INFO)
-        self.content = APIRequest(url=self.url, request_type="GET", timeout=30).Execute(logger=Logger.std_logger)
+        _server_cfg_elems = {
+            "API_VERSION"   : "0.0.0-Testing",
+            "DEBUG_LEVEL"   : _str_level,
+            "FILE_LIST_URL" : 'https://opengamedata.fielddaylab.wisc.edu/data/file_list.json',
+            "BIGQUERY_GAME_MAPPING" : {}
+        }
+        _server_cfg = FileAPIConfig.FromDict(name="HelloAPITestServer", unparsed_elements=_server_cfg_elems)
+        FileAPI.register(app=cls.application, settings=_server_cfg)
+
+        cls.server = cls.application.test_client()
+
+        cls.url    = f"/games/AQUALAB/datasets/1/2024"
+        Logger.Log(f"Sending request to {cls.url}", logging.INFO)
+        cls.result = cls.server.get(cls.url)
+        if cls.result is not None:
+            try:
+                _raw = cls.result.json
+            except JSONDecodeError as err:
+                print(f"Could not parse {cls.result.text} to JSON!\n{err}")
+            else:
+                cls.content = APIResponse.FromDict(all_elements=_raw or {})
 
     def test_Responded(self):
         self.assertIsNotNone(self.content, f"No result from request to {self.url}")
@@ -200,6 +245,3 @@ class test_GameDatasetInfo_local(TestCase):
                 self.assertEqual(self.content.Value.get(key), val, msg=f"Mismatch for key {key}")
         else:
             self.fail(f"No JSON content from request to {self.url}")
-
-if __name__ == "__main__":
-    unittest.main()
