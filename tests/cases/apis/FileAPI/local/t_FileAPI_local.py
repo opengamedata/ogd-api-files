@@ -46,7 +46,7 @@ class test_GameList_local(TestCase):
 
         cls.server = cls.application.test_client()
 
-        cls.url    = f"{cls.testing_cfg.ExternEndpoint}/games/list"
+        cls.url    = f"{cls.testing_cfg.ExternEndpoint}/games"
         Logger.Log(f"Sending request to {cls.url}", logging.INFO)
         cls.result = cls.server.get(cls.url)
         if cls.result is not None:
@@ -103,7 +103,7 @@ class test_GameDatasets_local(TestCase):
         _str_level =       "DEBUG" if cls.testing_cfg.Verbose else "INFO"
         Logger.std_logger.setLevel(_level)
 
-        cls.url    = f"{cls.testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/list"
+        cls.url    = f"{cls.testing_cfg.ExternEndpoint}/games/AQUALAB/datasets"
         Logger.Log(f"Sending request to {cls.url}", logging.INFO)
         cls.content = APIRequest(url=cls.url, request_type="GET", timeout=30).Execute(logger=Logger.std_logger)
 
@@ -152,7 +152,7 @@ class test_GameDatasetInfo_local(TestCase):
         self.url    : str
         self.content : Optional[APIResponse]    = None
 
-        self.url    = f"{self.testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/1/2024/files/"
+        self.url    = f"{self.testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/1/2024"
         Logger.Log(f"Sending request to {self.url}", logging.INFO)
         self.content = APIRequest(url=self.url, request_type="GET", timeout=30).Execute(logger=Logger.std_logger)
 
