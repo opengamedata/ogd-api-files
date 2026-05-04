@@ -55,7 +55,7 @@ class test_GameList_local(TestCase):
             except JSONDecodeError as err:
                 print(f"Could not parse {cls.result.text} to JSON!\n{err}")
             else:
-                cls.content = APIResponse.FromDict(all_elements=_raw or {})
+                cls.content = APIResponse.FromDict(all_elements=_raw or {}, status=ResponseStatus(cls.result.status_code))
 
     @classmethod
     def tearDownClass(cls):
@@ -128,7 +128,7 @@ class test_GameDatasets_local(TestCase):
             except JSONDecodeError as err:
                 print(f"Could not parse {cls.result.text} to JSON!\n{err}")
             else:
-                cls.content = APIResponse.FromDict(all_elements=_raw or {})
+                cls.content = APIResponse.FromDict(all_elements=_raw or {}, status=ResponseStatus(cls.result.status_code))
 
     def test_Responded(self):
         self.assertIsNotNone(self.content, f"No result from request to {self.url}")
@@ -190,7 +190,7 @@ class test_GameDatasetInfo_local(TestCase):
 
         cls.server = cls.application.test_client()
 
-        cls.url    = f"/games/AQUALAB/datasets/1/2024"
+        cls.url    = f"/games/AQUALAB/datasets/2024/1"
         Logger.Log(f"Sending request to {cls.url}", logging.INFO)
         cls.result = cls.server.get(cls.url)
         if cls.result is not None:
@@ -199,7 +199,7 @@ class test_GameDatasetInfo_local(TestCase):
             except JSONDecodeError as err:
                 print(f"Could not parse {cls.result.text} to JSON!\n{err}")
             else:
-                cls.content = APIResponse.FromDict(all_elements=_raw or {})
+                cls.content = APIResponse.FromDict(all_elements=_raw or {}, status=ResponseStatus(cls.result.status_code))
 
     def test_Responded(self):
         self.assertIsNotNone(self.content, f"No result from request to {self.url}")
@@ -210,7 +210,7 @@ class test_GameDatasetInfo_local(TestCase):
         else:
             self.fail(f"No result from request to {self.url}")
 
-    @unittest.skip(reason="Temporarily turning this off until we solve bug that is returning the wrong info for certain months, so that we can test for other regressions in the meantime.")
+    @unittest.skip(reason="Temporarily turning this off until we solve issue with changing hashs for detectors/features links.")
     def test_Correct(self):
         expected_data = {
             "detectors_link":"https://github.com/opengamedata/opengamedata-core/tree/42597ba/src/ogd/games/AQUALAB/detectors",
@@ -228,6 +228,7 @@ class test_GameDatasetInfo_local(TestCase):
             "players_template":"https://github.com/opengamedata/opengamedata-templates/tree/aqualab",
             "population_file":"https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_population-features.zip",
             "population_template":"https://github.com/opengamedata/opengamedata-templates/tree/aqualab",
+            "population_codespace":"https://codespaces.new/opengamedata/opengamedata-samples/tree/aqualab?quickstart=1&devcontainer_path=.devcontainer%2Fpopulation-template%2Fdevcontainer.json",
             "raw_file":"https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_events.zip",
             "sessions_codespace":"https://codespaces.new/opengamedata/opengamedata-samples/tree/aqualab?quickstart=1&devcontainer_path=.devcontainer%2Fplayer-template%2Fdevcontainer.json",
             "sessions_file":"https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_session-features.zip",
@@ -240,7 +241,7 @@ class test_GameDatasetInfo_local(TestCase):
         expected_data['events_file'] = None
 
         if self.content is not None and self.content.Value is not None:
-            self.assertEqual(self.content.Value.keys(), expected_data.keys(), msg="Mismatching keys between response and expected")
+            self.assertEqual(set(self.content.Value.keys()), set(expected_data.keys()), msg="Mismatching keys between response and expected")
             for key, val in expected_data.items():
                 self.assertEqual(self.content.Value.get(key), val, msg=f"Mismatch for key {key}")
         else:
