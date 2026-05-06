@@ -7,7 +7,7 @@ on:
   #    - '*'
   workflow_dispatch:
   release:
-    types: released
+    types: [released, prereleased]
 
 jobs:
 
@@ -63,6 +63,7 @@ jobs:
 
   release_deploy:
     name: Release Deploy of Website API
+    if: github.event.action == 'released'
     needs: [build, pypi_release, wait_for_pypi]
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:
