@@ -25,7 +25,7 @@ on:
 env:
   DEPLOY_HOST: ${{ inputs.deploy_host }}
   DEPLOY_DIR:                            ${{ vars.API_BASE_PATH }}/files/${{ github.ref_name }}
-  DEPLOY_URL:  ${{ inputs.deploy_host }}/${{ vars.API_BASE_URL }}/files/${{ github.ref_name }}/app.wsgi
+  DEPLOY_URL:  ${{ inputs.deploy_host }}/${{ vars.API_BASE_URL  }}/files/${{ github.ref_name }}/app.wsgi
   DEPLOY_DIR_LATEST:                     ${{ vars.API_BASE_PATH }}/files/latest
 
 jobs:
