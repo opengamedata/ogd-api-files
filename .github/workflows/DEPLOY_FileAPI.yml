@@ -10,11 +10,17 @@ on:
         description: "The host on which to deploy."
         required: true
         default: ${{ vars.OGD_STAGING_HOST }}
+      as_latest:
+        type: boolean
+        description: "Whether to also deploy as the 'latest' version of API"
+        required: false
+        default: false
 
 env:
   DEPLOY_HOST: ${{ inputs.deploy_host }}
   DEPLOY_DIR:                            ${{ vars.API_BASE_PATH }}/files/${{ github.ref_name }}
   DEPLOY_URL:  ${{ inputs.deploy_host }}/${{ vars.API_BASE_URL }}/files/${{ github.ref_name }}/app.wsgi
+  DEPLOY_DIR_LATEST:                     ${{ vars.API_BASE_PATH }}/files/latest
 
 jobs:
   ci_deploy:
@@ -56,6 +62,16 @@ jobs:
       with:
         local_path: ./src
         remote_path: ${{ env.DEPLOY_DIR }}
+        remote_host: ${{ env.DEPLOY_HOST }}
+        remote_user: ${{ secrets.DEPLOY_USER }}
+        remote_key:  ${{ secrets.DEPLOY_KEY }}
+
+    - name: Deploy as Latest
+      if: ${{ inputs.as_latest }}
+      uses: opengamedata/actions-deploy-project@v1.1
+      with:
+        local_path: ./src
+        remote_path: ${{ env.DEPLOY_DIR_LATEST }}
         remote_host: ${{ env.DEPLOY_HOST }}
         remote_user: ${{ secrets.DEPLOY_USER }}
         remote_key:  ${{ secrets.DEPLOY_KEY }}
