@@ -3,6 +3,12 @@ name: Deploy Script - FileAPI
 run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' && github.event.head_commit.message || 'Manual Run') }}
 on:
   workflow_dispatch:
+    inputs:
+      as_latest:
+        type: boolean
+        description: "Whether to also deploy as the 'latest' version of API"
+        required: false
+        default: false
   workflow_call:
     inputs:
       deploy_host:
