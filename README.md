@@ -156,11 +156,23 @@ Broadly speaking, the file API has a 3-level hierarchy for retrieving informatio
   curl https://ogd-staging.fielddaylab.wisc.edu/apis/files/main/games/AQUALAB/datasets/2023/01
   ```
 
+* `/games/<game_id>/datasets/<year>/<month>/manifest` (experimental)
+
+  Get a full "dataset manifest" for the given dataset. This includes details about events and features included in the dataset.
+
+  Example:
+  ```bash
+  curl https://ogd-staging.fielddaylab.wisc.edu/apis/files/main/games/AQUALAB/datasets/2023/01/manifest
+  ```
+
 ### File-Level Endpoints
 
 * `/games/<game_id>/datasets/<month>/<year>/<file_type>`
 
   Retrieve the contents of a specific dataset file. Valid `file_type`s are `population`, `player`, and `session`.
+
+  This is only recommended for applications that need direct access to dataset file contents.
+  Local downloads should be obtained through the URLs provided in the other dataset endpoints.
 
   Future releases may add support for requesting event file contents.
 
