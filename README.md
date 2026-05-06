@@ -7,9 +7,8 @@ Its primary use is for getting information about what data is available from the
 ## API endpoints
 
 The latest release of the API supports the endpoints listed below.
-Experimental endpoints that have not yet been included in a release but are intended for inclusion in future versions are labeled as such.
 
-Broadly speaking, the file API has a 3-level hierarchy of data about game datasets.
+Broadly speaking, the file API has a 3-level hierarchy for retrieving information about games and their datasets.
 
 1. Games: The top-level entity is a game. Each game has an ID and is associated with one or more datasets.
 2. Datasets: The term "dataset" refers to all data for a specific month of play from a specific game.
@@ -18,17 +17,33 @@ Broadly speaking, the file API has a 3-level hierarchy of data about game datase
 
 ### Game-Level Endpoints
 
-* `/games` (experimental/upcoming)  
+* `/games`
 
   Retrieve a list of all games for which at least one dataset exists.
 
-* `/games/<game_id>` (experimental/upcoming)  
+  Example:
+
+  ```bash
+  curl https://ogd-staging.fielddaylab.wisc.edu/apis/files/main/games
+  ```
+
+  ```json
+  {
+    "type": "GET",
+    "val": {
+      "game_ids": ["AQUALAB", "BACTERIA", "BALLOON", ...]
+    },
+    "msg": "SUCCESS: Retrieved list of games with available datasets"
+    }
+  ```
+
+* `/games/<game_id>`
 
   Retrieve a summary of the game and its datasets
 
   Example:
   ```bash
-  curl https://ogd-staging.fielddaylab.wisc.edu/path/to/app.wsgi/games/AQUALAB
+  curl https://ogd-staging.fielddaylab.wisc.edu/apis/files/main/games/AQUALAB
   ```
 
   ```json
@@ -37,15 +52,48 @@ Broadly speaking, the file API has a 3-level hierarchy of data about game datase
     "val": {
       "game_id": "AQUALAB",
       "dataset_count": 57,
+      "session_average": 1234,
       "initial_dataset": "2021-04-11 00:00:00"
     },
     "msg": "SUCCESS: Retrieved monthly game usage"
   }
   ```
 
+* `/games/details`
+
+  Retrieve summaries of all games for which at least one dataset exists.
+
+  Example:
+
+  ```bash
+  curl https://ogd-staging.fielddaylab.wisc.edu/apis/files/main/games/details
+  ```
+
+  ```json
+  response = {
+    "type": "GET",
+    "val": {
+      "AQUALAB": {
+        "game_id": "AQUALAB",
+        "dataset_count": 57,
+        "session_average": 1234,
+        "initial_dataset": "2021-04-11 00:00:00"
+      },
+      "AQUALAB": {
+        "game_id": "BACTERIA",
+        "dataset_count": 42,
+        "session_average": 543,
+        "initial_dataset": "2021-01-10 00:00:00"
+      },
+    },
+    "msg": "SUCCESS: Retrieved list of games with available datasets"
+  }
+  ```
+
+
 ### Dataset-Level Endpoints
 
-* `/games/<game_id>/datasets` (experimental/upcoming)  
+* `/games/<game_id>/datasets`
 
   Retrieve a list of datasets and associated session counts for a specific game.
 
@@ -54,7 +102,7 @@ Broadly speaking, the file API has a 3-level hierarchy of data about game datase
 
   Example:
   ```bash
-  curl https://ogd-staging.fielddaylab.wisc.edu/path/to/app.wsgi/games/AQUALAB/datasets
+  curl https://ogd-staging.fielddaylab.wisc.edu/apis/files/main/games/AQUALAB/datasets
   ```
 
   ```json
@@ -64,23 +112,23 @@ Broadly speaking, the file API has a 3-level hierarchy of data about game datase
       "game_id": "AQUALAB",
       "datasets": [
         ...
-        {"year": 2025, "month": 9, "total_sessions": 4908},
-        {"year": 2025, "month": 10, "total_sessions": 4763},
-        {"year": 2025, "month": 11, "total_sessions": 5339}
+        {"year": 2025, "month": 9, "total_sessions": 4908, "sessions_file": ..., "players_file": ..., "population_file": ...},
+        {"year": 2025, "month": 10, "total_sessions": 4763, ...},
+        {"year": 2025, "month": 11, "total_sessions": 5339, ...}
       ]
     },
     "msg": "SUCCESS: Retrieved monthly game usage"
   }
   ```
 
-* `/games/<game_id>/datasets/<year>` (experimental/upcoming)
+* `/games/<game_id>/datasets/<year>`
 
   Retrieve a list of datasets and associated session counts for a specific game within a specific month.
   Roughly equivalent to the `/games/<game_id>/datasets/` endpoint, but scoped to a single year.
 
   Example:
   ```bash
-  curl https://ogd-staging.fielddaylab.wisc.edu/path/to/app.wsgi/games/AQUALAB/datasets/2023
+  curl https://ogd-staging.fielddaylab.wisc.edu/apis/files/main/games/AQUALAB/datasets/2023
   ```
 
   ```json
@@ -89,9 +137,9 @@ Broadly speaking, the file API has a 3-level hierarchy of data about game datase
     "val": {
       "game_id": "AQUALAB",
       "datasets": [
-        {"year": 2023, "month": 1, "total_sessions": 2013},
-        {"year": 2023, "month": 2, "total_sessions": 17},
-        {"year": 2023, "month": 3, "total_sessions": 8605}
+        {"year": 2023, "month": 1, "total_sessions": 2013, "sessions_file": ..., "players_file": ..., "population_file": ...},
+        {"year": 2023, "month": 2, "total_sessions": 17, ...},
+        {"year": 2023, "month": 3, "total_sessions": 8605, ...}
         ...
       ]
     },
@@ -99,15 +147,27 @@ Broadly speaking, the file API has a 3-level hierarchy of data about game datase
   }
   ```
 
-* `/games/<game_id>/datasets/<year>/<month>` (experimental/upcoming)
+* `/games/<game_id>/datasets/<year>/<month>`
 
   Get detailed info on the files and other resources that are available for a specific dataset. This is roughly equivalent to the `/getGameFileInfoByMonth` legacy endpoint.
 
+  Example:
+  ```bash
+  curl https://ogd-staging.fielddaylab.wisc.edu/apis/files/main/games/AQUALAB/datasets/2023/01
+  ```
+
 ### File-Level Endpoints
 
-* `/games/<game_id>/datasets/<month>/<year>/<file_type>` (experimental/upcoming)
+* `/games/<game_id>/datasets/<month>/<year>/<file_type>`
 
   Retrieve the contents of a specific dataset file. Valid `file_type`s are `population`, `player`, and `session`.
+
+  Future releases may add support for requesting event file contents.
+
+  Example:
+  ```bash
+  curl https://ogd-staging.fielddaylab.wisc.edu/apis/files/main/games/AQUALAB/datasets/2023/01/player
+  ```
 
 ### Legacy Endpoints
 
