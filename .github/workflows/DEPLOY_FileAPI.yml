@@ -39,6 +39,9 @@ jobs:
     steps:
 
     # 1. Local checkout & config
+    - name: Announce deploy
+      run: echo "Deploying to ${{ env.DEPLOY_URL }}"
+
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
@@ -90,5 +93,3 @@ jobs:
     # 4. Cleanup & complete
     - name: Restart httpd via ssh
       run: ssh -o StrictHostKeyChecking=no -T -i ./key.txt ${{ secrets.DEPLOY_USER }}@${{ env.DEPLOY_HOST }} "sudo systemctl restart apache2"
-    - name: Announce deploy
-      run: echo "Deployed to ${{ env.DEPLOY_URL }}"
