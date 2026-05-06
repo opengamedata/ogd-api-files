@@ -8,7 +8,7 @@ from ogd.apis.models.APIRequest import APIRequest
 from ogd.apis.models.APIResponse import APIResponse, ResponseStatus
 from ogd.common.utils.Logger import Logger
 # import locals
-from src.tests.config import t_config
+from tests.config import t_config
 from tests.FileAPITestConfig import FileAPITestConfig
 
 _testing_cfg = FileAPITestConfig.FromDict(name="FileAPITestConfig", unparsed_elements=t_config.settings)

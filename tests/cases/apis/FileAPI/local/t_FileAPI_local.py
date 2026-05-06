@@ -46,7 +46,7 @@ class test_GameList_local(TestCase):
 
         cls.server = cls.application.test_client()
 
-        cls.url    = f"{cls.testing_cfg.ExternEndpoint}/games/list"
+        cls.url    = f"/games"
         Logger.Log(f"Sending request to {cls.url}", logging.INFO)
         cls.result = cls.server.get(cls.url)
         if cls.result is not None:
@@ -55,7 +55,7 @@ class test_GameList_local(TestCase):
             except JSONDecodeError as err:
                 print(f"Could not parse {cls.result.text} to JSON!\n{err}")
             else:
-                cls.content = APIResponse.FromDict(all_elements=_raw or {})
+                cls.content = APIResponse.FromDict(all_elements=_raw or {}, status=ResponseStatus(cls.result.status_code))
 
     @classmethod
     def tearDownClass(cls):
@@ -95,6 +95,7 @@ class test_GameDatasets_local(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.url    : str
+        cls.result : Optional[TestResponse]
         cls.content : Optional[APIResponse]    = None
 
         # 1. Get testing config
@@ -103,9 +104,31 @@ class test_GameDatasets_local(TestCase):
         _str_level =       "DEBUG" if cls.testing_cfg.Verbose else "INFO"
         Logger.std_logger.setLevel(_level)
 
-        cls.url    = f"{cls.testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/list"
+        # 2. Set up local Flask app to run tests
+        cls.application = Flask(__name__)
+        cls.application.logger.setLevel(_level)
+
+        _server_cfg_elems = {
+            "API_VERSION"   : "0.0.0-Testing",
+            "DEBUG_LEVEL"   : _str_level,
+            "FILE_LIST_URL" : 'https://opengamedata.fielddaylab.wisc.edu/data/file_list.json',
+            "BIGQUERY_GAME_MAPPING" : {}
+        }
+        _server_cfg = FileAPIConfig.FromDict(name="HelloAPITestServer", unparsed_elements=_server_cfg_elems)
+        FileAPI.register(app=cls.application, settings=_server_cfg)
+
+        cls.server = cls.application.test_client()
+
+        cls.url    = f"/games/AQUALAB/datasets"
         Logger.Log(f"Sending request to {cls.url}", logging.INFO)
-        cls.content = APIRequest(url=cls.url, request_type="GET", timeout=30).Execute(logger=Logger.std_logger)
+        cls.result = cls.server.get(cls.url)
+        if cls.result is not None:
+            try:
+                _raw = cls.result.json
+            except JSONDecodeError as err:
+                print(f"Could not parse {cls.result.text} to JSON!\n{err}")
+            else:
+                cls.content = APIResponse.FromDict(all_elements=_raw or {}, status=ResponseStatus(cls.result.status_code))
 
     def test_Responded(self):
         self.assertIsNotNone(self.content, f"No result from request to {self.url}")
@@ -142,19 +165,41 @@ class test_GameDatasets_local(TestCase):
 class test_GameDatasetInfo_local(TestCase):
     @classmethod
     def setUpClass(cls):
+        cls.url    : str
+        cls.result : Optional[TestResponse]
+        cls.content : Optional[APIResponse]    = None
+
         # 1. Get testing config
         cls.testing_cfg = FileAPITestConfig.FromDict(name="FileAPITestConfig", unparsed_elements=settings)
         _level     = logging.DEBUG if cls.testing_cfg.Verbose else logging.INFO
         _str_level =       "DEBUG" if cls.testing_cfg.Verbose else "INFO"
         Logger.std_logger.setLevel(_level)
 
-    def setUp(self):
-        self.url    : str
-        self.content : Optional[APIResponse]    = None
+        # 2. Set up local Flask app to run tests
+        cls.application = Flask(__name__)
+        cls.application.logger.setLevel(_level)
 
-        self.url    = f"{self.testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/1/2024/files/"
-        Logger.Log(f"Sending request to {self.url}", logging.INFO)
-        self.content = APIRequest(url=self.url, request_type="GET", timeout=30).Execute(logger=Logger.std_logger)
+        _server_cfg_elems = {
+            "API_VERSION"   : "0.0.0-Testing",
+            "DEBUG_LEVEL"   : _str_level,
+            "FILE_LIST_URL" : 'https://opengamedata.fielddaylab.wisc.edu/data/file_list.json',
+            "BIGQUERY_GAME_MAPPING" : {}
+        }
+        _server_cfg = FileAPIConfig.FromDict(name="HelloAPITestServer", unparsed_elements=_server_cfg_elems)
+        FileAPI.register(app=cls.application, settings=_server_cfg)
+
+        cls.server = cls.application.test_client()
+
+        cls.url    = f"/games/AQUALAB/datasets/2024/1"
+        Logger.Log(f"Sending request to {cls.url}", logging.INFO)
+        cls.result = cls.server.get(cls.url)
+        if cls.result is not None:
+            try:
+                _raw = cls.result.json
+            except JSONDecodeError as err:
+                print(f"Could not parse {cls.result.text} to JSON!\n{err}")
+            else:
+                cls.content = APIResponse.FromDict(all_elements=_raw or {}, status=ResponseStatus(cls.result.status_code))
 
     def test_Responded(self):
         self.assertIsNotNone(self.content, f"No result from request to {self.url}")
@@ -165,7 +210,7 @@ class test_GameDatasetInfo_local(TestCase):
         else:
             self.fail(f"No result from request to {self.url}")
 
-    @unittest.skip(reason="Temporarily turning this off until we solve bug that is returning the wrong info for certain months, so that we can test for other regressions in the meantime.")
+    @unittest.skip(reason="Temporarily turning this off until we solve issue with changing hashs for detectors/features links.")
     def test_Correct(self):
         expected_data = {
             "detectors_link":"https://github.com/opengamedata/opengamedata-core/tree/42597ba/src/ogd/games/AQUALAB/detectors",
@@ -183,6 +228,7 @@ class test_GameDatasetInfo_local(TestCase):
             "players_template":"https://github.com/opengamedata/opengamedata-templates/tree/aqualab",
             "population_file":"https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_population-features.zip",
             "population_template":"https://github.com/opengamedata/opengamedata-templates/tree/aqualab",
+            "population_codespace":"https://codespaces.new/opengamedata/opengamedata-samples/tree/aqualab?quickstart=1&devcontainer_path=.devcontainer%2Fpopulation-template%2Fdevcontainer.json",
             "raw_file":"https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_events.zip",
             "sessions_codespace":"https://codespaces.new/opengamedata/opengamedata-samples/tree/aqualab?quickstart=1&devcontainer_path=.devcontainer%2Fplayer-template%2Fdevcontainer.json",
             "sessions_file":"https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_session-features.zip",
@@ -195,11 +241,8 @@ class test_GameDatasetInfo_local(TestCase):
         expected_data['events_file'] = None
 
         if self.content is not None and self.content.Value is not None:
-            self.assertEqual(self.content.Value.keys(), expected_data.keys(), msg="Mismatching keys between response and expected")
+            self.assertEqual(set(self.content.Value.keys()), set(expected_data.keys()), msg="Mismatching keys between response and expected")
             for key, val in expected_data.items():
                 self.assertEqual(self.content.Value.get(key), val, msg=f"Mismatch for key {key}")
         else:
             self.fail(f"No JSON content from request to {self.url}")
-
-if __name__ == "__main__":
-    unittest.main()
