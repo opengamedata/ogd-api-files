@@ -8,7 +8,7 @@ inputs:
   endpoint:
     description: "The external endpoint where the app is deployed"
     required: true
-    default: 'https://ogd-staging.fielddaylab.wisc.edu/wsgi-bin/opengamedata/apis/opengamedata-api-files/main/app.wsgi'
+    default: 'https://ogd-staging.fielddaylab.wisc.edu/apis/files/main/app.wsgi'
   api_version:
     description: "The version of the API code."
     required: false
