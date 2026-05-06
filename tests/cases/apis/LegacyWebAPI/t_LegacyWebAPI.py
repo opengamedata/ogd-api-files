@@ -23,7 +23,6 @@ class test_GameUsageByMonth(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.url    : str
-        cls.result : Optional[requests.Response]
         cls.content : Optional[APIResponse]    = None
 
         params = {
@@ -34,24 +33,12 @@ class test_GameUsageByMonth(TestCase):
         cls.url    = f"{_testing_cfg.ExternEndpoint}/getGameUsageByMonth"
         cls.content = APIRequest(url=cls.url, request_type="GET", params=params, timeout=5).Execute(logger=Logger.std_logger)
 
-    @classmethod
-    def tearDownClass(cls):
-        if cls.result is not None:
-            cls.result.close()
-
-    @staticmethod
-    def RunAll():
-        pass
-
     def test_Responded(self):
-        if self.result is not None:
-            self.assertTrue(self.result.ok)
-        else:
-            self.fail(f"No result from request to {self.url}")
+        self.assertIsNotNone(self.content)
 
     def test_Succeeded(self):
         if self.content is not None:
-            self.assertEqual(self.content.Status, ResponseStatus.SUCCESS)
+            self.assertEqual(self.content.Status, ResponseStatus.OK)
         else:
             self.fail(f"No JSON content from request to {self.url}")
 
@@ -65,7 +52,6 @@ class test_MonthlyGameUsage(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.url    : str
-        cls.result : Optional[requests.Response]
         cls.content : Optional[APIResponse]    = None
 
         params = {
@@ -74,25 +60,13 @@ class test_MonthlyGameUsage(TestCase):
         cls.url    = f"{_testing_cfg.ExternEndpoint}/getMonthlyGameUsage"
         Logger.Log(f"Sending request to {cls.url}", logging.INFO)
         cls.content = APIRequest(url=cls.url, request_type="GET", params=params, timeout=30).Execute(logger=Logger.std_logger)
-        if cls.result is not None:
-            try:
-                _raw = cls.result.json()
-            except JSONDecodeError as err:
-                print(f"Could not parse {cls.result.text} to JSON!\n{err}")
-            else:
-                cls.content = APIResponse.FromDict(all_elements=_raw)
-
-    @classmethod
-    def tearDownClass(cls):
-        if cls.result is not None:
-            cls.result.close()
 
     def test_Responded(self):
-        self.assertIsNotNone(self.result, f"No result from request to {self.url}")
+        self.assertIsNotNone(self.content, f"No result from request to {self.url}")
 
     def test_Succeeded(self):
-        if self.result is not None:
-            self.assertTrue(self.result.ok)
+        if self.content is not None:
+            self.assertTrue(self.content.Status == ResponseStatus.OK)
         else:
             self.fail(f"No result from request to {self.url}")
 
@@ -119,7 +93,6 @@ class test_MonthlyGameUsage(TestCase):
 class test_GameFileInfoByMonth(TestCase):
     def setUp(self):
         self.url    : str
-        self.result : Optional[requests.Response]
         self.content : Optional[APIResponse]    = None
 
         params = {
@@ -132,11 +105,11 @@ class test_GameFileInfoByMonth(TestCase):
         self.content = APIRequest(url=self.url, request_type="GET", params=params, timeout=30).Execute(logger=Logger.std_logger)
 
     def test_Responded(self):
-        self.assertIsNotNone(self.result, f"No result from request to {self.url}")
+        self.assertIsNotNone(self.content, f"No result from request to {self.url}")
 
     def test_Succeeded(self):
-        if self.result is not None:
-            self.assertTrue(self.result.ok)
+        if self.content is not None:
+            self.assertTrue(self.content.Status == ResponseStatus.OK)
         else:
             self.fail(f"No result from request to {self.url}")
 

@@ -61,24 +61,18 @@ class test_GameDatasets(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.url    : str
-        cls.result : Optional[requests.Response]
         cls.content : Optional[APIResponse]    = None
 
         cls.url    = f"{_testing_cfg.ExternEndpoint}/games/AQUALAB/datasets"
         Logger.Log(f"Sending request to {cls.url}", logging.INFO)
         cls.content = APIRequest(url=cls.url, request_type="GET", timeout=30).Execute(logger=Logger.std_logger)
 
-    @classmethod
-    def tearDownClass(cls):
-        if cls.result is not None:
-            cls.result.close()
-
     def test_Responded(self):
-        self.assertIsNotNone(self.result, f"No result from request to {self.url}")
+        self.assertIsNotNone(self.content, f"No result from request to {self.url}")
 
     def test_Succeeded(self):
-        if self.result is not None:
-            self.assertTrue(self.result.ok)
+        if self.content is not None:
+            self.assertTrue(self.content.Status == ResponseStatus.OK)
         else:
             self.fail(f"No result from request to {self.url}")
 
@@ -108,7 +102,6 @@ class test_GameDatasets(TestCase):
 class test_GameDatasetInfo(TestCase):
     def setUp(self):
         self.url    : str
-        self.result : Optional[requests.Response]
         self.content : Optional[APIResponse]    = None
 
         self.url    = f"{_testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/2024/1"
@@ -116,11 +109,11 @@ class test_GameDatasetInfo(TestCase):
         self.content = APIRequest(url=self.url, request_type="GET", timeout=30).Execute(logger=Logger.std_logger)
 
     def test_Responded(self):
-        self.assertIsNotNone(self.result, f"No result from request to {self.url}")
+        self.assertIsNotNone(self.content, f"No result from request to {self.url}")
 
     def test_Succeeded(self):
-        if self.result is not None:
-            self.assertTrue(self.result.ok)
+        if self.content is not None:
+            self.assertTrue(self.content.Status == ResponseStatus.OK)
         else:
             self.fail(f"No result from request to {self.url}")
 
@@ -136,13 +129,14 @@ class test_GameDatasetInfo(TestCase):
             "found_matching_range":True,
             "last_month":1,
             "last_year":2024,
-            "players_codespace":"https://codespaces.new/opengamedata/opengamedata-samples/tree/aqualab?quickstart=1&devcontainer_path=.devcontainer%2Fsession-template%2Fdevcontainer.json",
+            "players_codespace":"https://codespaces.new/opengamedata/opengamedata-samples/tree/aqualab?quickstart=1&devcontainer_path=.devcontainer%2Fplayer-template%2Fdevcontainer.json",
             "players_file":"https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_player-features.zip",
             "players_template":"https://github.com/opengamedata/opengamedata-templates/tree/aqualab",
+            "population_codespace":"https://codespaces.new/opengamedata/opengamedata-samples/tree/aqualab?quickstart=1&devcontainer_path=.devcontainer%2Fpopulation-template%2Fdevcontainer.json",
             "population_file":"https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_population-features.zip",
             "population_template":"https://github.com/opengamedata/opengamedata-templates/tree/aqualab",
             "raw_file":"https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_events.zip",
-            "sessions_codespace":"https://codespaces.new/opengamedata/opengamedata-samples/tree/aqualab?quickstart=1&devcontainer_path=.devcontainer%2Fplayer-template%2Fdevcontainer.json",
+            "sessions_codespace":"https://codespaces.new/opengamedata/opengamedata-samples/tree/aqualab?quickstart=1&devcontainer_path=.devcontainer%2Fsession-template%2Fdevcontainer.json",
             "sessions_file":"https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_session-features.zip",
             "sessions_template":"https://github.com/opengamedata/opengamedata-templates/tree/aqualab",
         }
@@ -153,7 +147,7 @@ class test_GameDatasetInfo(TestCase):
         expected_data['events_file'] = None
 
         if self.content is not None and self.content.Value is not None:
-            self.assertEqual(self.content.Value.keys(), expected_data.keys(), msg="Mismatching keys between response and expected")
+            self.assertEqual(set(self.content.Value.keys()), set(expected_data.keys()), msg="Mismatching keys between response and expected")
             for key, val in expected_data.items():
                 self.assertEqual(self.content.Value.get(key), val, msg=f"Mismatch for key {key}")
         else:

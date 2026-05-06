@@ -26,7 +26,7 @@ class test_Hello(TestCase):
         cls.content : Optional[APIResponse]    = APIRequest(url=cls.base_url, request_type="GET", params={}, timeout=30).Execute(logger=Logger.std_logger)
 
     def test_Responded(self):
-        self.assertIsNotNone(self.content, f"No result from request to {self.base_url}")
+        self.assertIsNotNone(self.content, f"No response from request to {self.base_url}")
 
     def test_Succeeded(self):
         if self.content is not None:
