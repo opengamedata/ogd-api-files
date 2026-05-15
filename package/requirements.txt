@@ -1,2 +1,2 @@
-opengamedata-common==2.0.*
-opengamedata-api-utils==1.5.*
+opengamedata-common>=2.0.0b1
+opengamedata-api-utils==2.0.*
