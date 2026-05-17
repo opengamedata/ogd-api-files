@@ -53,6 +53,15 @@ class FileAPIConfig(ServerConfig):
         ret_val = f"{self.Name}"
         return ret_val
 
+    @property
+    def AsDict(self) -> Map:
+        return {
+            "API_VERSION":self.Version,
+            "DEBUG_LEVEL":self.DebugLevel,
+            "BIGQUERY_GAME_MAPPING":self.GameMapping,
+            "FILE_LIST_URL":self.FileListURL
+        }
+
     @classmethod
     def _fromDict(cls, name:str, unparsed_elements:Map, key_overrides:Optional[Dict[str, str]]=None, default_override:Optional[Self]=None) -> "FileAPIConfig":
         return FileAPIConfig(name=name, all_elements=unparsed_elements)
