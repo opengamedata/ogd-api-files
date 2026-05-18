@@ -1,6 +1,5 @@
 # import standard libraries
-import json
-from urllib import request as urlrequest
+from pathlib import Path
 from typing import Optional
 
 # import 3rd-party libraries
@@ -59,6 +58,7 @@ class DatasetManifest(Resource):
 
             if _matched_dataset:
                 if _matched_dataset.Key.DateFrom and _matched_dataset.Key.DateTo:
+                    _matched_dataset._base_files_location = Path("./")
                     file_info = _matched_dataset.AsDict
 
                     # If this range contains the given year & month
