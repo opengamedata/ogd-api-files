@@ -30,8 +30,7 @@ class FileAPITestConfig(TestConfig):
 
     def __init__(self, name:str,
                  extern_endpoint:Optional[str]=None, api_version:Optional[str]=None,
-                 verbose:Optional[bool]=None, enabled_tests:Optional[Dict[str, bool]]=None,
-                 other_elements:Optional[Map]=None):
+                 verbose:Optional[bool]=None,        other_elements:Optional[Map]=None):
 
         unparsed_elements : Map = other_elements or {}
 
@@ -45,7 +44,6 @@ class FileAPITestConfig(TestConfig):
             super().__init__(
                 name=name,
                 verbose=verbose,
-                enabled_tests=enabled_tests,
                 other_elements=unparsed_elements
             )
             self._initialized = True
@@ -74,7 +72,6 @@ class FileAPITestConfig(TestConfig):
             extern_endpoint=FileAPITestConfig._DEFAULT_ENDPOINT,
             api_version=FileAPITestConfig._DEFAULT_API_VERSION,
             verbose=FileAPITestConfig._DEFAULT_VERBOSE,
-            enabled_tests=FileAPITestConfig._DEFAULT_ENABLED_TESTS,
             other_elements={}
         )
 
@@ -83,7 +80,7 @@ class FileAPITestConfig(TestConfig):
                   key_overrides:Optional[Dict[str, str]]=None,
                   default_override:Optional[Self]=None):
         return FileAPITestConfig(name=name, extern_endpoint=None, api_version=None,
-                                 verbose=None, enabled_tests=None, other_elements=unparsed_elements)
+                                 verbose=None, other_elements=unparsed_elements)
 
     @staticmethod
     def _parseExternEndpoint(unparsed_elements:Map, schema_name:Optional[str]=None) -> str:
