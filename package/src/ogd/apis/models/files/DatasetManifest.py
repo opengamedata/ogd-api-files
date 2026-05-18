@@ -8,11 +8,9 @@ from typing import Any, Dict, Final, List, Optional, Self
 from ogd.common.filters.Filter import Filter
 from ogd.common.models.DatasetKey import DatasetKey
 from ogd.common.schemas.locations.LocationSchema import LocationSchema
-from ogd.common.schemas.locations.FileLocationSchema import FileLocationSchema
 from ogd.common.schemas.events.EventSchema import EventSchema
 from ogd.common.schemas.events.GameStateSchema import GameStateSchema
 from ogd.common.schemas.features.FeatureSchema import FeatureSchema
-from ogd.common.schemas.Schema import Schema
 from ogd.common.utils.Logger import Logger
 from ogd.common.utils.typing import Map
 from ogd.common.models.SemanticVersion import SemanticVersion
