@@ -9,7 +9,6 @@ from flask_restful import Resource
 
 # import ogd libraries
 from ogd.apis.models.APIResponse import APIResponse, RESTType, ResponseStatus
-from ogd.apis.models.files.DatasetManifest import DatasetManifest as DataManifestModel
 from ogd.common.configs.storage.DatasetRepositoryConfig import DatasetRepositoryConfig
 from ogd.common.schemas.datasets.DatasetCollectionSchema import DatasetCollectionSchema
 from ogd.common.schemas.datasets.DatasetSchema import DatasetSchema
@@ -60,24 +59,12 @@ class DatasetManifest(Resource):
 
             if _matched_dataset:
                 if _matched_dataset.Key.DateFrom and _matched_dataset.Key.DateTo:
-                    file_info = {}
+                    file_info = _matched_dataset.AsDict
 
                     # If this range contains the given year & month
                     # Base URLs
-                    CODESPACES_BASE_URL : str = "https://codespaces.new/opengamedata/opengamedata-samples/tree/"
                     GITHUB_BASE_URL     : str = "https://github.com/opengamedata/opengamedata-core/tree/"
                     
-                    # Game information
-                    file_info["game_id"]     = sanitary_params.GameID
-
-                    # Population information
-                    file_info["population"] = {}
-                    file_info["population"]["first_year"]  = _matched_dataset.Key.DateFrom.year
-                    file_info["population"]["first_month"] = _matched_dataset.Key.DateFrom.month
-                    file_info["population"]["last_year"]   = _matched_dataset.Key.DateTo.year
-                    file_info["population"]["last_month"]  = _matched_dataset.Key.DateTo.month
-                    _branch_name     = sanitary_params.GameID.lower().replace('_', '-')
-                    _revision        = _matched_dataset.OGDRevision or None
 
                     # File outputs
                     file_info["output"] = {}
@@ -91,8 +78,8 @@ class DatasetManifest(Resource):
                     file_info["versioning"] = {}
                     # Convention for branch naming is lower-case with dashes,
                     # while game IDs are usually upper-case with underscores, so make sure we do the conversion
-                    file_info["versioning"]["detectors_link"] = f"{GITHUB_BASE_URL}{_revision}/src/ogd/games/{sanitary_params.GameID.upper()}/detectors" if _revision else None
-                    file_info["versioning"]["features_link"]  = f"{GITHUB_BASE_URL}{_revision}/src/ogd/games/{sanitary_params.GameID.upper()}/features"  if _revision else None
+                    file_info["versioning"]["detectors_link"] = f"{GITHUB_BASE_URL}{_matched_dataset.OGDRevision}/src/ogd/games/{sanitary_params.GameID.upper()}/detectors" if _matched_dataset.OGDRevision else None
+                    file_info["versioning"]["features_link"]  = f"{GITHUB_BASE_URL}{_matched_dataset.OGDRevision}/src/ogd/games/{sanitary_params.GameID.upper()}/features"  if _matched_dataset.OGDRevision else None
 
                     raw_url = f"https://raw.githubusercontent.com/opengamedata/ogd-core/refs/heads/main/src/ogd/games/{sanitary_params.GameID.upper()}/schemas/{sanitary_params.GameID.upper()}.json.template"
                     with urlrequest.urlopen(raw_url) as _conn:
