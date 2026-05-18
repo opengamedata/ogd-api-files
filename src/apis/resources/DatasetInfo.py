@@ -1,4 +1,5 @@
 # import standard libraries
+from pathlib import Path
 from typing import Optional
 
 # import 3rd-party libraries
@@ -7,7 +8,6 @@ from flask_restful import Resource
 
 # import ogd libraries
 from ogd.apis.models.APIResponse import APIResponse, RESTType, ResponseStatus
-from ogd.apis.models.files.DatasetInfo import DatasetInfo as DatasetInfoModel
 from ogd.common.configs.storage.DatasetRepositoryConfig import DatasetRepositoryConfig
 from ogd.common.schemas.datasets.DatasetCollectionSchema import DatasetCollectionSchema
 from ogd.common.schemas.datasets.DatasetSchema import DatasetSchema
@@ -58,45 +58,17 @@ class DatasetInfo(Resource):
 
             if _matched_dataset:
                 if _matched_dataset.Key.DateFrom and _matched_dataset.Key.DateTo:
+                    _matched_dataset._base_files_location = Path("./")
+                    file_info = _matched_dataset.AsDict
 
                     # If this range contains the given year & month
                     # Base URLs
-                    CODESPACES_BASE_URL : str = "https://codespaces.new/opengamedata/opengamedata-samples/tree/"
                     GITHUB_BASE_URL     : str = "https://github.com/opengamedata/opengamedata-core/tree/"
-                    _branch_name     = sanitary_params.GameID.lower().replace('_', '-')
-                    _revision        = _matched_dataset.OGDRevision or None
                     
-                    file_info = DatasetInfoModel(
-                        # Date information
-                        first_year = _matched_dataset.Key.DateFrom.year,
-                        first_month= _matched_dataset.Key.DateFrom.month,
-                        last_year  = _matched_dataset.Key.DateTo.year,
-                        last_month = _matched_dataset.Key.DateTo.month,
-                        raw_file        = f"{file_list.RemoteURL}{_matched_dataset.GameEventsFile}" if _matched_dataset.GameEventsFile is not None else None,
-                        events_file     = f"{file_list.RemoteURL}{_matched_dataset.AllEventsFile}"  if _matched_dataset.AllEventsFile  is not None else None,
-                        sessions_file   = f"{file_list.RemoteURL}{_matched_dataset.SessionsFile}"   if _matched_dataset.SessionsFile   is not None else None,
-                        players_file    = f"{file_list.RemoteURL}{_matched_dataset.PlayersFile}"    if _matched_dataset.PlayersFile    is not None else None,
-                        population_file = f"{file_list.RemoteURL}{_matched_dataset.PopulationFile}" if _matched_dataset.PopulationFile is not None else None,
-
-                        # Templates
-                        events_template     = f"{file_list.TemplatesBase}{_matched_dataset.EventsTemplate}"     if _matched_dataset.EventsTemplate     is not None else None,
-                        sessions_template   = f"{file_list.TemplatesBase}{_matched_dataset.SessionsTemplate}"   if _matched_dataset.SessionsTemplate   is not None else None,
-                        players_template    = f"{file_list.TemplatesBase}{_matched_dataset.PlayersTemplate}"    if _matched_dataset.PlayersTemplate    is not None else None,
-                        population_template = f"{file_list.TemplatesBase}{_matched_dataset.PopulationTemplate}" if _matched_dataset.PopulationTemplate is not None else None,
-
-                        events_codespace   = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fevent-template%2Fdevcontainer.json",
-                        sessions_codespace = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fsession-template%2Fdevcontainer.json",
-                        players_codespace  = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fplayer-template%2Fdevcontainer.json",
-                        population_codespace = f"{CODESPACES_BASE_URL}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fpopulation-template%2Fdevcontainer.json",
-
-                        # Files
-
-                        # Convention for branch naming is lower-case with dashes,
-                        # while game IDs are usually upper-case with underscores, so make sure we do the conversion
-                        detectors_link = f"{GITHUB_BASE_URL}{_revision}/src/ogd/games/{sanitary_params.GameID.upper()}/detectors" if _revision else None,
-                        features_link  = f"{GITHUB_BASE_URL}{_revision}/src/ogd/games/{sanitary_params.GameID.upper()}/features"  if _revision else None,
-                        found_matching_range = True
-                    )
+                    # Convention for branch naming is lower-case with dashes,
+                    # while game IDs are usually upper-case with underscores, so make sure we do the conversion
+                    file_info["detectors_link"] = f"{GITHUB_BASE_URL}{_matched_dataset.OGDRevision}/src/ogd/games/{sanitary_params.GameID.upper()}/detectors" if _matched_dataset.OGDRevision else None
+                    file_info["features_link"]  = f"{GITHUB_BASE_URL}{_matched_dataset.OGDRevision}/src/ogd/games/{sanitary_params.GameID.upper()}/features"  if _matched_dataset.OGDRevision else None
 
                     ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=file_info.AsDict)
                 else:

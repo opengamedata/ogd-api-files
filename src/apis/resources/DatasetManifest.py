@@ -61,15 +61,6 @@ class DatasetManifest(Resource):
                     _matched_dataset._base_files_location = Path("./")
                     file_info = _matched_dataset.AsDict
 
-                    # If this range contains the given year & month
-                    # Base URLs
-                    GITHUB_BASE_URL     : str = "https://github.com/opengamedata/opengamedata-core/tree/"
-                    
-                    # Convention for branch naming is lower-case with dashes,
-                    # while game IDs are usually upper-case with underscores, so make sure we do the conversion
-                    file_info["detectors_link"] = f"{GITHUB_BASE_URL}{_matched_dataset.OGDRevision}/src/ogd/games/{sanitary_params.GameID.upper()}/detectors" if _matched_dataset.OGDRevision else None
-                    file_info["features_link"]  = f"{GITHUB_BASE_URL}{_matched_dataset.OGDRevision}/src/ogd/games/{sanitary_params.GameID.upper()}/features"  if _matched_dataset.OGDRevision else None
-
                     ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=file_info)
                 else:
                     _msg = f"Dataset key {_matched_dataset.Key} was invalid." if _matched_dataset else "No datasets found!"
