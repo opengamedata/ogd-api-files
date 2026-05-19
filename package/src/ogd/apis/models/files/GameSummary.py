@@ -54,7 +54,7 @@ class GameSummaryResponse(APIResponse):
         return GameSummaryResponse(req_type=response.Type, val=response.Value, msg=response.Message, status=response.Status)
 
     @staticmethod
-    def FromDatasetCollection(game_id:str, dataset_collection:DatasetCollectionSchema):
+    def FromDatasetCollection(game_id:str, dataset_collection:DatasetCollectionSchema, req_type:RESTType=RESTType.GET):
         """Create a response from a `DatasetCollectionSchema`.
 
         This will implicitly treat the response as representing a success, given the DatasetCollectionSchema is valid.
@@ -67,7 +67,7 @@ class GameSummaryResponse(APIResponse):
         :return: _description_
         :rtype: _type_
         """
-        ret_val = GameSummaryResponse.Default()
+        ret_val = GameSummaryResponse.Default(req_type=req_type)
 
         datadates = set(str(dataset.StartDate).replace("/", "-") for dataset in dataset_collection.Datasets.values())
         session_counts=[dataset_collection.Datasets[key].SessionCount for key in sorted(dataset_collection.Datasets.keys(), reverse=True)]
