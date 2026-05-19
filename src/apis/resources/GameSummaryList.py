@@ -14,7 +14,7 @@ from apis.resources.GameSummary import GameSummary
 from configs.FileAPIConfig import FileAPIConfig
 from utils.utils import GetFileList
 
-class GameListDetails(Resource):
+class GameSummaryList(Resource):
     """
     Get the per-month number of sessions for a given game
 
