@@ -19,45 +19,26 @@ class GameSummaryRequest(APIRequest):
 
 class GameSummaryResponse(APIResponse):
     def __init__(self, req_type:Optional[RESTType | str], val:Optional[Map], msg:str, status:ResponseStatus):
-        self._game_id         : str
-        self._dataset_count   : int
-        self._avg_sessions    : Optional[int]
-        self._initial_dataset : str
-
-        if isinstance(val, dict):
-            if all(key in val.keys() for key in {"game_id", "dataset_count", "session_average", "initial_dataset"}):
-                self._game_id         = val.get("game_id", "GAME NOT FOUND")
-                self._dataset_count   = val.get("dataset_count", 0)
-                self._avg_sessions    = val.get("session_average", None)
-                self._initial_dataset = val.get("initial_dataset", "DATASET NOT FOUND")
-            else:
-                raise ValueError(f"value map given to GameSummaryResponse had incorrect keys.")
+        if isinstance(val, dict) and not all(key in val.keys() for key in {"game_id", "dataset_count", "session_average", "initial_dataset"}):
+            raise ValueError(f"Value map given to GameSummaryResponse had incorrect keys.")
         super().__init__(req_type=req_type, val=val, msg=msg, status=status)
 
     @property
     def GameID(self) -> str:
-        return self._game_id
+        return self.Value.get("game_id", "GAME NOT FOUND") if self.Value else "NO RESPONSE"
     @property
     def DatasetCount(self) -> int:
-        return self._dataset_count
+        return self.Value.get("dataset_count", 0) if self.Value else 0
     @property
     def AverageSessionCount(self) -> Optional[int]:
-        return self._avg_sessions
+        return self.Value.get("session_average", None) if self.Value else None
     @property
     def InitialDataset(self) -> str:
-        return self._initial_dataset
+        return self.Value.get("initial_dataset", "DATASET NOT FOUND") if self.Value else "NO RESPONSE"
 
     @staticmethod
-    def FromDatasetCollection(game_id:str, dataset_collection:DatasetCollectionSchema):
-        datadates = set(str(dataset.StartDate).replace("/", "-") for dataset in dataset_collection.Datasets.values())
-        session_counts=[dataset_collection.Datasets[key].SessionCount for key in sorted(dataset_collection.Datasets.keys(), reverse=True)]
-        _val = {
-            "game_id"          : game_id,
-            "dataset_count"    : len(datadates),
-            "average_sessions" : GameSummaryResponse._averageSessions(monthly_session_counts=session_counts),
-            "initial_dataset"  : min(datadates)
-        }
-        return GameSummaryResponse(req_type=RESTType.GET, msg="SUCCESS: Retrieved monthly game usage", val=_val, status=ResponseStatus.OK)
+    def Default(req_type:RESTType=RESTType.GET):
+        return GameSummaryResponse.FromAPIResponse(APIResponse.Default(req_type=req_type))
     
     @staticmethod
     def FromAPIResponse(response:APIResponse) -> "GameSummaryResponse":
@@ -71,6 +52,34 @@ class GameSummaryResponse(APIResponse):
         :rtype: GameSummary
         """
         return GameSummaryResponse(req_type=response.Type, val=response.Value, msg=response.Message, status=response.Status)
+
+    @staticmethod
+    def FromDatasetCollection(game_id:str, dataset_collection:DatasetCollectionSchema):
+        """Create a response from a `DatasetCollectionSchema`.
+
+        This will implicitly treat the response as representing a success, given the DatasetCollectionSchema is valid.
+        As such, intended for use only by APIs that serve game summaries.
+
+        :param game_id: _description_
+        :type game_id: str
+        :param dataset_collection: _description_
+        :type dataset_collection: DatasetCollectionSchema
+        :return: _description_
+        :rtype: _type_
+        """
+        ret_val = GameSummaryResponse.Default()
+
+        datadates = set(str(dataset.StartDate).replace("/", "-") for dataset in dataset_collection.Datasets.values())
+        session_counts=[dataset_collection.Datasets[key].SessionCount for key in sorted(dataset_collection.Datasets.keys(), reverse=True)]
+        _val = {
+            "game_id"          : game_id,
+            "dataset_count"    : len(datadates),
+            "average_sessions" : GameSummaryResponse._averageSessions(monthly_session_counts=session_counts),
+            "initial_dataset"  : min(datadates)
+        }
+        ret_val.RequestSucceeded(msg="Retrieved monthly game usage", val=_val)
+
+        return ret_val
 
     @staticmethod
     def _averageSessions(monthly_session_counts:List[int | None], month_range:int=12):
