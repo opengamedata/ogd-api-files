@@ -1,16 +1,38 @@
-from typing import Final, List, Optional
+import logging
+from typing import List, Optional
+
+from ogd.apis.models.APIRequest import APIRequest
 from ogd.apis.models.APIResponse import APIResponse
+from ogd.apis.models.enums.RESTType import RESTType
+from ogd.apis.models.enums.ResponseStatus import ResponseStatus
 from ogd.common.schemas.datasets.DatasetCollectionSchema import DatasetCollectionSchema
 from ogd.common.utils.typing import Map
 
-class GameSummary:
-    PATH : Final[str] = "/games/<string:game_id>"
+class GameSummaryRequest(APIRequest):
+    def __init__(self, api_base_url:str, game_id:str, timeout:int=1):
+        _url = f"{api_base_url}/games/{game_id}"
+        super().__init__(url=_url, request_type=RESTType.GET, params=None, body=None, timeout=timeout)
 
-    def __init__(self, game_id:str, dataset_count:int, average_sessions:Optional[int], initial_dataset:str):
-        self._game_id = game_id
-        self._dataset_count = dataset_count
-        self._avg_sessions   = average_sessions
-        self._initial_dataset = initial_dataset
+    def Execute(self, logger:Optional[logging.Logger]=None, retry:int=0) -> "GameSummaryResponse":
+        api_response = super().Execute(logger=logger, retry=retry)
+        return GameSummaryResponse.FromAPIResponse(response=api_response)
+
+class GameSummaryResponse(APIResponse):
+    def __init__(self, req_type:Optional[RESTType | str], val:Optional[Map], msg:str, status:ResponseStatus):
+        self._game_id         : str
+        self._dataset_count   : int
+        self._avg_sessions    : Optional[int]
+        self._initial_dataset : str
+
+        if isinstance(val, dict):
+            if all(key in val.keys() for key in {"game_id", "dataset_count", "session_average", "initial_dataset"}):
+                self._game_id         = val.get("game_id", "GAME NOT FOUND")
+                self._dataset_count   = val.get("dataset_count", 0)
+                self._avg_sessions    = val.get("session_average", None)
+                self._initial_dataset = val.get("initial_dataset", "DATASET NOT FOUND")
+            else:
+                raise ValueError(f"value map given to GameSummaryResponse had incorrect keys.")
+        super().__init__(req_type=req_type, val=val, msg=msg, status=status)
 
     @property
     def GameID(self) -> str:
@@ -25,47 +47,30 @@ class GameSummary:
     def InitialDataset(self) -> str:
         return self._initial_dataset
 
-    @property
-    def AsDict(self) -> Map:
-        return {
-            "game_id": self.GameID,
-            "dataset_count": self.DatasetCount,
-            "session_average": self.AverageSessionCount,
-            "initial_dataset": self.InitialDataset
-        }
-
     @staticmethod
     def FromDatasetCollection(game_id:str, dataset_collection:DatasetCollectionSchema):
         datadates = set(str(dataset.StartDate).replace("/", "-") for dataset in dataset_collection.Datasets.values())
-        return GameSummary(
-            game_id          = game_id,
-            dataset_count    = len(datadates),
-            average_sessions  = GameSummary._averageSessions(monthly_session_counts=session_counts),
-            initial_dataset  = min(datadates)
-        )
+        session_counts=[dataset_collection.Datasets[key].SessionCount for key in sorted(dataset_collection.Datasets.keys(), reverse=True)]
+        _val = {
+            "game_id"          : game_id,
+            "dataset_count"    : len(datadates),
+            "average_sessions" : GameSummaryResponse._averageSessions(monthly_session_counts=session_counts),
+            "initial_dataset"  : min(datadates)
+        }
+        return GameSummaryResponse(req_type=RESTType.GET, msg="SUCCESS: Retrieved monthly game usage", val=_val, status=ResponseStatus.OK)
     
     @staticmethod
-    def FromAPIResponse(response:APIResponse) -> "GameSummary":
-        """Parse a GameSummary from an APIResponse
+    def FromAPIResponse(response:APIResponse) -> "GameSummaryResponse":
+        """Set up a GameSummaryResponse from an APIResponse
+
+        This is effectively a copy constructor.
 
         :param response: The APIResponse object containing the GameSummary data.
         :type response: APIResponse
         :return: A GameSummary object constructed from the data given in the APIResponse
         :rtype: GameSummary
         """
-        ret_val : GameSummary
-
-        if isinstance(response.Value, dict):
-            if all(key in response.Value.keys() for key in {"game_id", "dataset_count", "session_average", "initial_dataset"}):
-                ret_val = GameSummary(
-                    game_id=response.Value.get("game_id", "GAME NOT FOUND"),
-                    dataset_count=response.Value.get("dataset_count", 0),
-                    average_sessions=response.Value.get("session_average", None),
-                    initial_dataset=response.Value.get("initial_dataset", "DATASET NOT FOUND")
-                )
-            else:
-                raise ValueError(f"APIResponse for GameSummary had incorrect keys.")
-        return ret_val
+        return GameSummaryResponse(req_type=response.Type, val=response.Value, msg=response.Message, status=response.Status)
 
     @staticmethod
     def _averageSessions(monthly_session_counts:List[int | None], month_range:int=12):
