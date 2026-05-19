@@ -4,7 +4,7 @@ from flask_restful import Api
 
 # import local files
 from apis.resources.GameList import GameList
-from apis.resources.GameListDetails import GameSummaryList
+from apis.resources.GameSummaryList import GameSummaryList
 from apis.resources.GameSummary import GameSummary
 from apis.resources.DatasetList import DatasetList
 from apis.resources.DatasetInfo import DatasetInfo
