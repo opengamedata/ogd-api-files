@@ -36,7 +36,7 @@ class FileAPI:
         api = Api(app)
 
         api.add_resource(GameList,        '/games')
-        api.add_resource(GameSummaries, '/games/details')
+        api.add_resource(GameSummaries,   '/games/details')
         api.add_resource(GameSummary,     '/games/<string:game_id>')
         api.add_resource(DatasetList,     '/games/<string:game_id>/datasets')
         api.add_resource(DatasetsYear,    '/games/<string:game_id>/datasets/<int:year>')

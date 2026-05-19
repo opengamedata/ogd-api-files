@@ -6,6 +6,7 @@ from flask_restful import Resource
 
 # import ogd libraries
 from ogd.apis.models.APIResponse import APIResponse, RESTType, ResponseStatus
+from ogd.apis.models.files.GameSummary import GameSummary as GameSummaryModel
 from ogd.apis.models.files.GameSummaries import GameSummaries as GameSummariesModel
 from ogd.common.configs.storage.DatasetRepositoryConfig import DatasetRepositoryConfig
 
@@ -28,7 +29,7 @@ class GameSummaries(Resource):
     def get(self):
         ret_val = APIResponse.Default(req_type=RESTType.GET)
 
-        summaries : Dict[str, GameSummaryModel] = {}
+        summaries : Dict[str, GameSummary] {}
 
         try:
             cfg       : FileAPIConfig           = FileAPIConfig("FileAPIConfig", {})

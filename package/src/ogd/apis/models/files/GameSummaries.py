@@ -1,4 +1,4 @@
-from typing import Dict, Final, List
+from typing import Dict, Final
 
 from ogd.apis.models.APIResponse import APIResponse
 from ogd.apis.models.files.GameSummary import GameSummary
@@ -29,13 +29,13 @@ class GameSummaries:
         :return: A GameSummary object constructed from the data given in the APIResponse
         :rtype: GameSummary
         """
-        ret_val : GameList
+        ret_val : GameSummaries
 
         if isinstance(response.Value, dict):
-            if all(key in response.Value.keys() for key in {"game_ids"}):
-                ret_val = GameList(
-                    game_ids=response.Value.get("game_ids", "GAMES NOT FOUND"),
-                )
-            else:
-                raise ValueError(f"APIResponse for GamesList had incorrect keys.")
+            ret_val = GameSummaries(game_summaries=response.Value)
+        else:
+            ret_val = GameSummaries({})
         return ret_val
+
+    def insert(self, summary:GameSummary):
+        self._summaries[summary.GameID] = summary
