@@ -6,7 +6,7 @@ from flask_restful import Resource
 
 # import ogd libraries
 from ogd.apis.models.APIResponse import APIResponse, RESTType, ResponseStatus
-from ogd.apis.models.files.GameSummary import GameSummary as GameSummaryModel
+from ogd.apis.models.files.GameSummary import GameSummaryResponse
 from ogd.common.configs.storage.DatasetRepositoryConfig import DatasetRepositoryConfig
 from ogd.common.schemas.datasets.DatasetCollectionSchema import DatasetCollectionSchema
 
@@ -38,8 +38,7 @@ class GameSummary(Resource):
         game_datasets : Optional[DatasetCollectionSchema] = file_list.Games.get(game_id, None)
 
         if game_datasets and len(game_datasets.Datasets) > 0:
-            model = GameSummaryModel.FromDatasetCollection(game_id=game_id, dataset_collection=game_datasets)
-            ret_val.RequestSucceeded(msg="Retrieved monthly game usage", val=model.AsDict)
+            ret_val = GameSummaryResponse.FromDatasetCollection(game_id=game_id, dataset_collection=game_datasets)
         else:
             # If the given game isn't in our dictionary, or our dictionary doesn't have any date ranges for this game
             ret_val.ServerErrored(msg=f"GameID '{game_id}' not found in list of games with datasets, or had no datasets listed")
