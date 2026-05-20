@@ -29,28 +29,18 @@ class GameSummaries(Resource):
     def get(self):
         ret_val = APIResponse.Default(req_type=RESTType.GET)
 
-        summaries : Dict[str, GameSummary] {}
-
         try:
             cfg       : FileAPIConfig           = FileAPIConfig("FileAPIConfig", {})
             file_list : DatasetRepositoryConfig = GetFileList(cfg.FileListURL)
-            for game_id,datasets in file_list.Games.items():
-                datadates = set(str(dataset.StartDate).replace("/", "-") for dataset in datasets.Datasets.values())
-                session_avg = GameSummary._averageSessions(
-                    monthly_session_counts=[datasets.Datasets[key].SessionCount for key in sorted(datasets.Datasets.keys(), reverse=True)]
-                )
 
-                summaries[game_id] = GameSummaryModel(
-                    game_id=game_id,
-                    dataset_count=len(datadates),
-                    session_avg=session_avg,
-                    initial_dataset=min(datadates)
-                )
-
-            # If the given game isn't in our dictionary, or our dictionary doesn't have any date ranges for this game
-            if file_list.Games is None or len(file_list.Games) < 1:
+            # If the file_list didn't actually have games
+            if file_list.Games is None or len(file_list.Games) == 0:
                 ret_val.RequestErrored(msg="Could not find any games!", status=ResponseStatus.NOT_FOUND)
             else:
+                summaries = GameSummariesModel({
+                    game_id:GameSummaryModel.FromDatasetCollection(game_id=game_id, dataset_collection=datasets)
+                    for game_id,datasets in file_list.Games.items()
+                })
                 ret_val.RequestSucceeded(
                     msg="Retrieved list of games with available datasets",
                     val={ key : val.AsDict for key,val in summaries.items() }
