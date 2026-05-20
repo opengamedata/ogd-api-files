@@ -10,7 +10,6 @@ from apis.resources.DatasetList import DatasetList
 from apis.resources.DatasetInfo import DatasetInfo
 from apis.resources.DatasetFile import DatasetFile
 from apis.resources.DatasetManifest import DatasetManifest
-from apis.resources.DatasetsYear import DatasetsYear
 from configs.FileAPIConfig import FileAPIConfig
 
 class FileAPI:
