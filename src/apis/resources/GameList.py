@@ -1,3 +1,5 @@
+import dataclasses
+
 # import 3rd-party libraries
 from flask import current_app
 from flask_restful import Resource
@@ -33,8 +35,8 @@ class GameList(Resource):
             if file_list.Games is None or len(file_list.Games) < 1:
                 ret_val.RequestErrored(msg="Could not find any games!", status=ResponseStatus.NOT_FOUND)
             else:
-                responseData = GameListModel(game_ids=list(file_list.Games.keys()))
-                ret_val.RequestSucceeded(msg="Retrieved list of games with available datasets", val=responseData.AsDict)
+                games = GameListModel(game_ids=list(file_list.Games.keys()))
+                ret_val.RequestSucceeded(msg="Retrieved list of games with available datasets", val=dataclasses.asdict(games))
         except Exception as err:
             msg = "Unexpected error while retrieving list of games with available datasets!"
             current_app.logger.error(f"{msg}\n{type(err)}:\n{err}")
