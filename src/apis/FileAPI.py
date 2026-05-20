@@ -38,8 +38,8 @@ class FileAPI:
         api.add_resource(GameList,        '/games')
         api.add_resource(GameSummaries,   '/games/details')
         api.add_resource(GameSummary,     '/games/<string:game_id>')
-        api.add_resource(DatasetList,     '/games/<string:game_id>/datasets')
-        api.add_resource(DatasetsYear,    '/games/<string:game_id>/datasets/<int:year>')
+        api.add_resource(DatasetList,     '/games/<string:game_id>/datasets',
+                                          '/games/<string:game_id>/datasets/<int:year>')
         api.add_resource(DatasetInfo,     '/games/<string:game_id>/datasets/<int:year>/<int:month>')
         api.add_resource(DatasetManifest, '/games/<string:game_id>/datasets/<int:year>/<int:month>/manifest')
         api.add_resource(DatasetFile,     '/games/<string:game_id>/datasets/<int:year>/<int:month>/<string:file_type>')
