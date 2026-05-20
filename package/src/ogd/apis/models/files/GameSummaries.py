@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 from ogd.apis.models.APIRequest import APIRequest
 from ogd.apis.models.APIResponse import APIResponse
@@ -28,6 +28,24 @@ class GameSummariesRequest(APIRequest):
 @dataclass
 class GameSummaries:
     summaries : Dict[str, GameSummary]
+
+    def __getitem__(self, key):
+        return self.Summaries[key]
+
+    def __setitem__(self, key, value):
+        self.Summaries[key] = value
+
+    def get(self, key:str, default:Any=None):
+        return self.Summaries.get(key, default)
+
+    def items(self):
+        return self.Summaries.items()
+
+    def keys(self):
+        return self.Summaries.keys()
+
+    def values(self):
+        return self.Summaries.values()
 
     @property
     def Summaries(self) -> Dict[str, GameSummary]:
