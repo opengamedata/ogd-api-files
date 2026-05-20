@@ -1,10 +1,10 @@
 import logging
+from dataclasses import dataclass
 from typing import List, Optional
 
 from ogd.apis.models.APIRequest import APIRequest
 from ogd.apis.models.APIResponse import APIResponse
 from ogd.apis.models.enums.RESTType import RESTType
-from ogd.apis.models.enums.ResponseStatus import ResponseStatus
 from ogd.common.schemas.datasets.DatasetCollectionSchema import DatasetCollectionSchema
 from ogd.common.utils.typing import Map
 
@@ -13,35 +13,32 @@ class GameSummaryRequest(APIRequest):
         _url = f"{api_base_url}/games/{game_id}"
         super().__init__(url=_url, request_type=RESTType.GET, params=None, body=None, timeout=timeout)
 
-    def Execute(self, logger:Optional[logging.Logger]=None, retry:int=0) -> "GameSummaryResponse":
+    def Execute(self, logger:Optional[logging.Logger]=None, retry:int=0) -> "GameSummary":
         api_response = super().Execute(logger=logger, retry=retry)
-        return GameSummaryResponse.FromAPIResponse(response=api_response)
+        return GameSummary.FromAPIResponse(response=api_response)
 
-class GameSummaryResponse(APIResponse):
-    def __init__(self, req_type:Optional[RESTType | str], val:Optional[Map], msg:str, status:ResponseStatus):
-        if isinstance(val, dict) and not all(key in val.keys() for key in {"game_id", "dataset_count", "session_average", "initial_dataset"}):
-            raise ValueError(f"Value map given to GameSummaryResponse had incorrect keys.")
-        super().__init__(req_type=req_type, val=val, msg=msg, status=status)
+@dataclass
+class GameSummary:
+    game_id : str
+    dataset_count : int
+    average_sessions : Optional[int]
+    initial_dataset : str
 
     @property
     def GameID(self) -> str:
-        return self.Value.get("game_id", "GAME NOT FOUND") if self.Value else "NO RESPONSE"
+        return self.game_id
     @property
     def DatasetCount(self) -> int:
-        return self.Value.get("dataset_count", 0) if self.Value else 0
+        return self.dataset_count
     @property
     def AverageSessionCount(self) -> Optional[int]:
-        return self.Value.get("session_average", None) if self.Value else None
+        return self.average_sessions
     @property
     def InitialDataset(self) -> str:
-        return self.Value.get("initial_dataset", "DATASET NOT FOUND") if self.Value else "NO RESPONSE"
-
-    @staticmethod
-    def Default(req_type:RESTType=RESTType.GET):
-        return GameSummaryResponse.FromAPIResponse(APIResponse.Default(req_type=req_type))
+        return self.initial_dataset
     
     @staticmethod
-    def FromAPIResponse(response:APIResponse) -> "GameSummaryResponse":
+    def FromDict(raw_dict:Map) -> "GameSummary":
         """Set up a GameSummaryResponse from an APIResponse
 
         This is effectively a copy constructor.
@@ -51,10 +48,45 @@ class GameSummaryResponse(APIResponse):
         :return: A GameSummary object constructed from the data given in the APIResponse
         :rtype: GameSummary
         """
-        return GameSummaryResponse(req_type=response.Type, val=response.Value, msg=response.Message, status=response.Status)
+        ret_val : GameSummary
+
+        expected_keys = {"game_id", "dataset_count", "average_sessions", "initial_dataset"}
+        missing_keys = expected_keys - raw_dict.keys()
+
+        if len(missing_keys) == 0:
+            ret_val = GameSummary(
+                game_id = raw_dict["game_id"],
+                dataset_count = raw_dict["dataset_count"],
+                average_sessions = raw_dict["average_sessions"],
+                initial_dataset = raw_dict["initial_dataset"],
+            )
+        else:
+            raise KeyError(f"GameSummary source dict had incorrect set of keys, missing {missing_keys}")
+
+        return ret_val
+    
+    @staticmethod
+    def FromAPIResponse(response:APIResponse) -> "GameSummary":
+        """Set up a GameSummaryResponse from an APIResponse
+
+        This is effectively a copy constructor.
+
+        :param response: The APIResponse object containing the GameSummary data.
+        :type response: APIResponse
+        :return: A GameSummary object constructed from the data given in the APIResponse
+        :rtype: GameSummary
+        """
+        ret_val : GameSummary
+
+        if response.Value is not None:
+            ret_val = GameSummary.FromDict(raw_dict=response.Value)
+        else:
+            raise ValueError(f"Response for GameSummary returned no values!")
+
+        return ret_val
 
     @staticmethod
-    def FromDatasetCollection(game_id:str, dataset_collection:DatasetCollectionSchema, req_type:RESTType=RESTType.GET):
+    def FromDatasetCollection(game_id:str, dataset_collection:DatasetCollectionSchema) -> "GameSummary":
         """Create a response from a `DatasetCollectionSchema`.
 
         This will implicitly treat the response as representing a success, given the DatasetCollectionSchema is valid.
@@ -67,17 +99,17 @@ class GameSummaryResponse(APIResponse):
         :return: _description_
         :rtype: _type_
         """
-        ret_val = GameSummaryResponse.Default(req_type=req_type)
+        ret_val : GameSummary
 
-        datadates = set(str(dataset.StartDate).replace("/", "-") for dataset in dataset_collection.Datasets.values())
+        dataset_dates = set(str(dataset.StartDate).replace("/", "-") for dataset in dataset_collection.Datasets.values())
         session_counts=[dataset_collection.Datasets[key].SessionCount for key in sorted(dataset_collection.Datasets.keys(), reverse=True)]
-        _val = {
-            "game_id"          : game_id,
-            "dataset_count"    : len(datadates),
-            "average_sessions" : GameSummaryResponse._averageSessions(monthly_session_counts=session_counts),
-            "initial_dataset"  : min(datadates)
-        }
-        ret_val.RequestSucceeded(msg="Retrieved monthly game usage", val=_val)
+
+        ret_val = GameSummary(
+            game_id = game_id,
+            dataset_count = len(dataset_dates),
+            average_sessions = GameSummary._averageSessions(monthly_session_counts=session_counts),
+            initial_dataset = min(dataset_dates)
+        )
 
         return ret_val
 
