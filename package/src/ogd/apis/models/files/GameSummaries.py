@@ -1,24 +1,37 @@
-from typing import Dict, Final
+import logging
+from dataclasses import dataclass
+from typing import Dict, Optional
 
+from ogd.apis.models.APIRequest import APIRequest
 from ogd.apis.models.APIResponse import APIResponse
+from ogd.apis.models.enums.RESTType import RESTType
 from ogd.apis.models.files.GameSummary import GameSummary
+from ogd.common.schemas.datasets.DatasetCollectionSchema import DatasetCollectionSchema
 from ogd.common.utils.typing import Map
 
-class GameSummaries:
-    PATH : Final[str] = "/games/<str:game_id>"
+class GameSummariesRequest(APIRequest):
+    def __init__(self, api_base_url:str, timeout:int=1):
+        _url = f"{api_base_url}/games/details"
+        super().__init__(url=_url, request_type=RESTType.GET, params=None, body=None, timeout=timeout)
 
-    def __init__(self, game_summaries:Dict[str, GameSummary]):
-        self._summaries = game_summaries
+    def Execute(self, logger:Optional[logging.Logger]=None, retry:int=0) -> "GameSummaries | APIResponse":
+        ret_val : GameSummaries | APIResponse
+
+        api_response = super().Execute(logger=logger, retry=retry)
+        try:
+            ret_val = GameSummaries.FromAPIResponse(response=api_response)
+        except (ValueError, KeyError):
+            ret_val = api_response
+
+        return ret_val
+
+@dataclass
+class GameSummaries:
+    summaries : Dict[str, GameSummary]
 
     @property
     def Summaries(self) -> Dict[str, GameSummary]:
-        return self._summaries
-
-    @property
-    def AsDict(self) -> Map:
-        return {
-            key: val.AsDict for key,val in self.Summaries.items()
-        }
+        return self.summaries
     
     @staticmethod
     def FromAPIResponse(response:APIResponse) -> "GameSummaries":
@@ -31,11 +44,12 @@ class GameSummaries:
         """
         ret_val : GameSummaries
 
-        if isinstance(response.Value, dict):
-            ret_val = GameSummaries(game_summaries=response.Value)
+        if response.Value is not None:
+            ret_val = GameSummaries(summaries=response.Value)
         else:
             ret_val = GameSummaries({})
         return ret_val
 
+
     def insert(self, summary:GameSummary):
-        self._summaries[summary.GameID] = summary
+        self.summaries[summary.GameID] = summary

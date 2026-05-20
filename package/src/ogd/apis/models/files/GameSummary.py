@@ -46,15 +46,6 @@ class GameSummary:
     
     @staticmethod
     def FromDict(raw_dict:Map) -> "GameSummary":
-        """Set up a GameSummaryResponse from an APIResponse
-
-        This is effectively a copy constructor.
-
-        :param response: The APIResponse object containing the GameSummary data.
-        :type response: APIResponse
-        :return: A GameSummary object constructed from the data given in the APIResponse
-        :rtype: GameSummary
-        """
         ret_val : GameSummary
 
         expected_keys = {"game_id", "dataset_count", "average_sessions", "initial_dataset"}
@@ -74,9 +65,7 @@ class GameSummary:
     
     @staticmethod
     def FromAPIResponse(response:APIResponse) -> "GameSummary":
-        """Set up a GameSummaryResponse from an APIResponse
-
-        This is effectively a copy constructor.
+        """Set up a GameSummary from an APIResponse
 
         :param response: The APIResponse object containing the GameSummary data.
         :type response: APIResponse
