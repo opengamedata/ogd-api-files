@@ -1,4 +1,4 @@
-from typing import Dict
+import dataclasses
 
 # import 3rd-party libraries
 from flask import current_app
@@ -43,7 +43,7 @@ class GameSummaries(Resource):
                 })
                 ret_val.RequestSucceeded(
                     msg="Retrieved list of games with available datasets",
-                    val={ key : val.AsDict for key,val in summaries.items() }
+                    val={ key : dataclasses.asdict(val) for key,val in summaries.items() }
                 )
         except Exception as err:
             msg = "Unexpected error while retrieving list of games with available datasets!"
