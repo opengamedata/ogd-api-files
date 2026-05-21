@@ -34,17 +34,14 @@ class GameSummaries(Resource):
             file_list : DatasetRepositoryConfig = GetFileList(cfg.FileListURL)
 
             # If the file_list didn't actually have games
-            if file_list.Games is None or len(file_list.Games) == 0:
-                ret_val.RequestErrored(msg="Could not find any games!", status=ResponseStatus.NOT_FOUND)
-            else:
+            if file_list.Games is not None and len(file_list.Games) > 0:
                 summaries = GameSummariesModel({
                     game_id:GameSummaryModel.FromDatasetCollection(game_id=game_id, dataset_collection=datasets)
                     for game_id,datasets in file_list.Games.items()
                 })
-                ret_val.RequestSucceeded(
-                    msg="Retrieved list of games with available datasets",
-                    val={ key : dataclasses.asdict(val) for key,val in summaries.items() }
-                )
+                ret_val.RequestSucceeded(msg="Retrieved list of games with available datasets", val=summaries.AsDict)
+            else:
+                ret_val.RequestErrored(msg="Could not find any games!", status=ResponseStatus.NOT_FOUND)
         except Exception as err:
             msg = "Unexpected error while retrieving list of games with available datasets!"
             current_app.logger.error(f"{msg}\n{type(err)}:\n{err}")
