@@ -8,7 +8,7 @@ from ogd.apis.models.enums.RESTType import RESTType
 from ogd.common.schemas.datasets.DatasetSchema import DatasetSchema
 from ogd.common.utils.typing import Map
 
-class DatasetInfoRequest(APIRequest):
+class DatasetSummaryRequest(APIRequest):
     def __init__(self, api_base_url:str, game_id:str, timeout:int=1):
         _url = f"{api_base_url}/games/{game_id}"
         super().__init__(url=_url, request_type=RESTType.GET, params=None, body=None, timeout=timeout)
@@ -24,7 +24,7 @@ class DatasetInfoRequest(APIRequest):
 
         return ret_val
 
-class DatasetInfo:
+class DatasetSummary:
     PATH : Final[str] = "/games/<string:game_id>/datasets/<int:year>"
 
     def __init__(self, first_year:int, first_month:int, last_year:int,     last_month:int,
@@ -139,7 +139,7 @@ class DatasetInfo:
             
     
     @staticmethod
-    def FromAPIResponse(response:APIResponse) -> "DatasetInfo":
+    def FromAPIResponse(response:APIResponse) -> "DatasetSummary":
         """Parse a GameSummary from an APIResponse
 
         :param response: The APIResponse object containing the GameSummary data.
@@ -147,7 +147,7 @@ class DatasetInfo:
         :return: A GameSummary object constructed from the data given in the APIResponse
         :rtype: GameSummary
         """
-        ret_val : DatasetInfo
+        ret_val : DatasetSummary
 
         if isinstance(response.Value, dict):
             expected_keys = {
@@ -158,7 +158,7 @@ class DatasetInfo:
                 "detectors_link", "features_link", "found_matching_range"
             }
             if all(key in response.Value.keys() for key in expected_keys):
-                ret_val = DatasetInfo(
+                ret_val = DatasetSummary(
                     first_year=response.Value.get("first_year", 0),
                     first_month=response.Value.get("first_month", 0),
                     last_year=response.Value.get("last_year", 0),

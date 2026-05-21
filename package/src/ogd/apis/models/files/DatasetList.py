@@ -52,7 +52,7 @@ class Dataset:
                 population_file = raw_dict.get("population_file", "POPULATION FILE NOT FOUND"),
             )
         else:
-            raise KeyError(f"Dataset summary source dict had incorrect set of keys, missing {missing_keys}")
+            raise KeyError(f"Dataset info source dict had incorrect set of keys, missing {missing_keys}")
         return ret_val
 
 class DatasetListRequest(APIRequest):
