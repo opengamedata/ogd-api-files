@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import Final, List, Optional
+from typing import List, Optional
 
 from ogd.apis.models.APIRequest import APIRequest
 from ogd.apis.models.APIResponse import APIResponse

@@ -1,7 +1,7 @@
 import logging
 from datetime import date
 from pathlib import Path
-from typing import Final, Optional
+from typing import Optional
 
 from ogd.apis.models.APIRequest import APIRequest
 from ogd.apis.models.APIResponse import APIResponse

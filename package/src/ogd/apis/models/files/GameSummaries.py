@@ -6,8 +6,6 @@ from ogd.apis.models.APIRequest import APIRequest
 from ogd.apis.models.APIResponse import APIResponse
 from ogd.apis.models.enums.RESTType import RESTType
 from ogd.apis.models.files.GameSummary import GameSummary
-from ogd.common.schemas.datasets.DatasetCollectionSchema import DatasetCollectionSchema
-from ogd.common.utils.typing import Map
 
 class GameSummariesRequest(APIRequest):
     def __init__(self, api_base_url:str, timeout:int=1):
