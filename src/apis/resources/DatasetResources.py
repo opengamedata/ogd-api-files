@@ -17,7 +17,7 @@ from configs.FileAPIConfig import FileAPIConfig
 from models.SanitizedParams import SanitizedParams
 from utils.utils import GetFileList, MatchDatasetRequest
 
-class DatasetInfo(Resource):
+class DatasetResources(Resource):
     """
     Get info on the files that are available for the given game in the given month & year
 
