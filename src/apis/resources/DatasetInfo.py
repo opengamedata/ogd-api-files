@@ -63,6 +63,7 @@ class DatasetInfo(Resource):
 
                     # If this range contains the given year & month
                     # Base URLs
+                    CODESPACES_BASE_URL : str = f"https://codespaces.new/opengamedata/opengamedata-samples/tree/"
                     GITHUB_BASE_URL     : str = "https://github.com/opengamedata/opengamedata-core/tree/"
                     
                     # Convention for branch naming is lower-case with dashes,
