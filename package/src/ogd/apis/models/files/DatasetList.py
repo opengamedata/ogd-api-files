@@ -14,9 +14,9 @@ class Dataset:
     year            : int
     month           : int
     total_sessions  : Optional[int]
-    sessions_file   : str
-    players_file    : str
-    population_file : str
+    sessions_file   : Optional[str]
+    players_file    : Optional[str]
+    population_file : Optional[str]
 
     @property
     def Year(self) -> int:
@@ -28,13 +28,13 @@ class Dataset:
     def TotalSessions(self) -> Optional[int]:
         return self.total_sessions
     @property
-    def SessionsFile(self) -> str:
+    def SessionsFile(self) -> Optional[str]:
         return self.sessions_file
     @property
-    def PlayersFile(self) -> str:
+    def PlayersFile(self) -> Optional[str]:
         return self.players_file
     @property
-    def PopulationFile(self) -> str:
+    def PopulationFile(self) -> Optional[str]:
         return self.population_file
     
     @staticmethod
@@ -63,9 +63,9 @@ class Dataset:
             year=schema.StartDate.year if isinstance(schema.StartDate, date) else int(schema.StartDate.split('-')[0]),
             month=schema.StartDate.month if isinstance(schema.StartDate, date) else int(schema.StartDate.split('-')[1]),
             total_sessions=schema.SessionCount,
-            sessions_file=schema.SessionsFile,
-            players_file=schema.PlayersFile,
-            population_file=schema.PopulationFile
+            sessions_file=str(schema.SessionsFile) if schema.SessionsFile else None,
+            players_file=str(schema.PlayersFile) if schema.PlayersFile else None,
+            population_file=str(schema.PopulationFile) if schema.PopulationFile else None
         )
 
 class DatasetListRequest(APIRequest):
