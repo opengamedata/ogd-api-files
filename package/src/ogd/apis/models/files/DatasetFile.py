@@ -79,5 +79,5 @@ class DatasetFile:
         if isinstance(response.Value, dict):
             ret_val = DatasetFile.FromDict(raw_dict=response.Value)
         else:
-            raise ValueError(f"Response for DatasetFile returned no values!")
+            raise ValueError(f"Response for DatasetFile contained no values!")
         return ret_val

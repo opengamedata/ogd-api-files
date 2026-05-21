@@ -207,6 +207,6 @@ class DatasetResources:
         if response.Value is not None:
             ret_val = DatasetResources.FromDict(raw_dict=response.Value)
         else:
-            raise ValueError(f"Response for DataSummary returned no values!")
+            raise ValueError(f"Response for DataSummary contained no values!")
 
         return ret_val

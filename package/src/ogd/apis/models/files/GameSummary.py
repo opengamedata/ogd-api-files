@@ -77,7 +77,7 @@ class GameSummary:
         if response.Value is not None:
             ret_val = GameSummary.FromDict(raw_dict=response.Value)
         else:
-            raise ValueError(f"Response for GameSummary returned no values!")
+            raise ValueError(f"Response for GameSummary contained no values!")
 
         return ret_val
 
