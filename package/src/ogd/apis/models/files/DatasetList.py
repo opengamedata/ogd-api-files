@@ -1,17 +1,19 @@
 import logging
 from dataclasses import dataclass
+from datetime import date
 from typing import List, Optional
 
 from ogd.apis.models.APIRequest import APIRequest
 from ogd.apis.models.APIResponse import APIResponse
 from ogd.apis.models.enums.RESTType import RESTType
+from ogd.common.schemas.datasets.DatasetSchema import DatasetSchema
 from ogd.common.utils.typing import Map
 
 @dataclass
 class Dataset:
     year            : int
     month           : int
-    total_sessions  : int
+    total_sessions  : Optional[int]
     sessions_file   : str
     players_file    : str
     population_file : str
@@ -23,7 +25,7 @@ class Dataset:
     def Month(self) -> int:
         return self.month
     @property
-    def TotalSessions(self) -> int:
+    def TotalSessions(self) -> Optional[int]:
         return self.total_sessions
     @property
     def SessionsFile(self) -> str:
@@ -46,7 +48,7 @@ class Dataset:
             ret_val = Dataset(
                 year            = raw_dict.get("year", 0),
                 month           = raw_dict.get("month", 0),
-                total_sessions  = raw_dict.get("total_sessions", 0),
+                total_sessions  = raw_dict.get("total_sessions", None),
                 sessions_file   = raw_dict.get("sessions_file", "SESSIONS FILE NOT FOUND"),
                 players_file    = raw_dict.get("players_file", "PLAYERS FILE NOT FOUND"),
                 population_file = raw_dict.get("population_file", "POPULATION FILE NOT FOUND"),
@@ -54,6 +56,17 @@ class Dataset:
         else:
             raise KeyError(f"Dataset info source dict had incorrect set of keys, missing {missing_keys}")
         return ret_val
+
+    @staticmethod
+    def FromDatasetSchema(schema:DatasetSchema) -> "Dataset":
+        return Dataset(
+            year=schema.StartDate.year if isinstance(schema.StartDate, date) else int(schema.StartDate.split('-')[0]),
+            month=schema.StartDate.month if isinstance(schema.StartDate, date) else int(schema.StartDate.split('-')[1]),
+            total_sessions=schema.SessionCount,
+            sessions_file=schema.SessionsFile,
+            players_file=schema.PlayersFile,
+            population_file=schema.PopulationFile
+        )
 
 class DatasetListRequest(APIRequest):
     def __init__(self, api_base_url:str, game_id:str, year:Optional[int]=None, timeout:int=1):

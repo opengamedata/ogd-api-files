@@ -5,8 +5,9 @@ from flask import current_app
 from flask_restful import Resource
 
 # import ogd libraries
-from ogd.apis.models.APIResponse import APIResponse, RESTType, ResponseStatus
-from ogd.apis.models.files.Dataset import Dataset as DatasetModel
+from ogd.apis.models.APIResponse import APIResponse, RESTType
+from ogd.apis.models.files.DatasetList import DatasetList as DatasetListModel
+from ogd.apis.models.files.DatasetList import Dataset
 from ogd.common.configs.storage.DatasetRepositoryConfig import DatasetRepositoryConfig
 from ogd.common.schemas.datasets.DatasetCollectionSchema import DatasetCollectionSchema
 
@@ -42,6 +43,11 @@ class DatasetList(Resource):
         if not parsed_game_id in file_list.Games or len(file_list.Games[parsed_game_id].Datasets) == 0:
             ret_val.ServerErrored(msg=f"GameID '{parsed_game_id}' not found in list of games with datasets, or had no datasets listed")
             return ret_val.AsFlaskResponse
+
+        dataset_list = DatasetListModel(datasets={
+            Dataset.FromDatasetSchema(dataset)
+            for dataset in game_datasets.Datasets.values()
+        })
 
         sessions = []
 
