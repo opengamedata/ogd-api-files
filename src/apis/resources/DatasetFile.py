@@ -1,4 +1,5 @@
 # import standard libraries
+import dataclasses
 import json
 import zipfile
 from io import BytesIO
@@ -84,13 +85,13 @@ class DatasetFile(Resource):
                             with zipfile.ZipFile(BytesIO(datafile_response.read())) as zipped:
                                 for f_name in zipped.namelist():
                                     if f_name.endswith(".tsv"):
-                                        data = pd.read_csv(zipped.open(f_name), sep="\t").replace({float('nan'):None})
-                                        data = self._secondaryParse(data)
-                                        result = DatasetFileModel(
-                                            columns=list(data.columns),
-                                            rows=list(data.apply(lambda series : series.to_dict(), axis=1))
+                                        raw_data = pd.read_csv(zipped.open(f_name), sep="\t").replace({float('nan'):None})
+                                        raw_data = self._secondaryParse(raw_data)
+                                        dataset = DatasetFileModel(
+                                            columns=list(raw_data.columns),
+                                            rows=list(raw_data.apply(lambda series : series.to_dict(), axis=1))
                                         )
-                                        ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=result.AsDict)
+                                        ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=dataclasses.asdict(dataset))
                         else:
                             ret_val.RequestErrored(msg=missing_file_msg)
                     else:
