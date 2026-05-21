@@ -3,7 +3,7 @@ from typing import Final, List
 from ogd.apis.models.APIResponse import APIResponse
 from ogd.common.utils.typing import Map
 
-class Dataset:
+class DatasetSummary:
     PATH : Final[str] = "/games/<string:game_id>/datasets/<int:year>"
 
     def __init__(self, year:int,    month:int,        total_sessions:int,
@@ -46,7 +46,7 @@ class Dataset:
         }
     
     @staticmethod
-    def FromAPIResponse(response:APIResponse) -> "Dataset":
+    def FromAPIResponse(response:APIResponse) -> "DatasetSummary":
         """Parse a GameSummary from an APIResponse
 
         :param response: The APIResponse object containing the GameSummary data.
@@ -54,11 +54,11 @@ class Dataset:
         :return: A GameSummary object constructed from the data given in the APIResponse
         :rtype: GameSummary
         """
-        ret_val : Dataset
+        ret_val : DatasetSummary
 
         if isinstance(response.Value, dict):
             if all(key in response.Value.keys() for key in {"year", "month", "total_sessions", "sessions_file", "players_file", "population_file"}):
-                ret_val = Dataset(
+                ret_val = DatasetSummary(
                     year=response.Value.get("year", 0),
                     month=response.Value.get("month", 0),
                     total_sessions=response.Value.get("total_sessions", 0),
