@@ -99,7 +99,7 @@ class DatasetResources:
 
     @property
     def AsDict(self) -> Map:
-        return self._dataset_schema.AsDict | {
+        return {
             "start_date" : str(self.StartDate),
             "end_date" : str(self.EndDate),
             "game_events_file" : str(self.GameEventsFile) if self.GameEventsFile else None,
