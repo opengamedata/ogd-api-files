@@ -59,7 +59,6 @@ class DatasetResources(Resource):
 
             if _matched_dataset and _matched_dataset.Key.DateFrom and _matched_dataset.Key.DateTo:
                 _matched_dataset._base_files_location = Path("./")
-                file_info = _matched_dataset.AsDict
                 # Base URLs
                 CODESPACES_BASE_URL : str = f"https://codespaces.new/opengamedata/opengamedata-samples/tree/"
                 GITHUB_BASE_URL     : str = "https://github.com/opengamedata/opengamedata-core/tree/"
