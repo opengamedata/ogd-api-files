@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from enum import IntEnum
+from enum import Enum
 from typing import Any, List, Optional
 
 from ogd.apis.models.APIRequest import APIRequest
@@ -8,7 +8,7 @@ from ogd.apis.models.APIResponse import APIResponse
 from ogd.apis.models.enums.RESTType import RESTType
 from ogd.common.utils.typing import Map
 
-class FileTypes(IntEnum):
+class FileTypes(Enum):
     """Enum type representing the file types currently supported by the DatasetFile endpoint.
 
     In particular, this endpoint can be used to retrieve any of the three granular feature file types:
@@ -20,8 +20,11 @@ class FileTypes(IntEnum):
     PLAYER = 2
     POPULATION = 3
 
+    def __str__(self):
+        return self.name
+
 class DatasetFileRequest(APIRequest):
-    def __init__(self, api_base_url:str, game_id:str, year:int, month:int, file_type:str, timeout:int=1):
+    def __init__(self, api_base_url:str, game_id:str, year:int, month:int, file_type:FileTypes | str, timeout:int=1):
         _url = f"{api_base_url}/games/{game_id}/datasets/{year}/{month}/{file_type}"
         super().__init__(url=_url, request_type=RESTType.GET, params=None, body=None, timeout=timeout)
 
