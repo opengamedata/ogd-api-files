@@ -8,6 +8,7 @@ from flask_restful import Resource
 
 # import ogd libraries
 from ogd.apis.models.APIResponse import APIResponse, RESTType, ResponseStatus
+from ogd.apis.models.files.DatasetResources import DatasetResources as DatasetResourcesModel
 from ogd.common.configs.storage.DatasetRepositoryConfig import DatasetRepositoryConfig
 from ogd.common.schemas.datasets.DatasetCollectionSchema import DatasetCollectionSchema
 from ogd.common.schemas.datasets.DatasetSchema import DatasetSchema
@@ -56,25 +57,22 @@ class DatasetResources(Resource):
         # 2. Search for the most recently modified dataset that contains the requested month and year
             _matched_dataset : Optional[DatasetSchema] = MatchDatasetRequest(sanitary_request=sanitary_params, available_datasets=game_datasets)
 
-            if _matched_dataset:
-                if _matched_dataset.Key.DateFrom and _matched_dataset.Key.DateTo:
-                    _matched_dataset._base_files_location = Path("./")
-                    file_info = _matched_dataset.AsDict
+            if _matched_dataset and _matched_dataset.Key.DateFrom and _matched_dataset.Key.DateTo:
+                _matched_dataset._base_files_location = Path("./")
+                file_info = _matched_dataset.AsDict
+                # Base URLs
+                CODESPACES_BASE_URL : str = f"https://codespaces.new/opengamedata/opengamedata-samples/tree/"
+                GITHUB_BASE_URL     : str = "https://github.com/opengamedata/opengamedata-core/tree/"
+                
+                dataset_resources = DatasetResourcesModel.FromBaseURLs(
+                    game_id=sanitary_params.GameID,
+                    dataset_schema=_matched_dataset,
+                    template_url_base=file_list.TemplatesBase.Location,
+                    codespace_tree_url=CODESPACES_BASE_URL,
+                    github_tree_url=GITHUB_BASE_URL
+                )
 
-                    # If this range contains the given year & month
-                    # Base URLs
-                    CODESPACES_BASE_URL : str = f"https://codespaces.new/opengamedata/opengamedata-samples/tree/"
-                    GITHUB_BASE_URL     : str = "https://github.com/opengamedata/opengamedata-core/tree/"
-                    
-                    # Convention for branch naming is lower-case with dashes,
-                    # while game IDs are usually upper-case with underscores, so make sure we do the conversion
-                    file_info["detectors_link"] = f"{GITHUB_BASE_URL}{_matched_dataset.OGDRevision}/src/ogd/games/{sanitary_params.GameID.upper()}/detectors" if _matched_dataset.OGDRevision else None
-                    file_info["features_link"]  = f"{GITHUB_BASE_URL}{_matched_dataset.OGDRevision}/src/ogd/games/{sanitary_params.GameID.upper()}/features"  if _matched_dataset.OGDRevision else None
-
-                    ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=file_info.AsDict)
-                else:
-                    _msg = f"Dataset key {_matched_dataset.Key} was invalid." if _matched_dataset else "No datasets found!"
-                    ret_val.RequestErrored(msg=_msg)
+                ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=dataset_resources.AsDict)
             else:
                 ret_val.RequestErrored(msg=f"Could not find a dataset for {sanitary_params.GameID} in {sanitary_params.Month:>02}/{sanitary_params.Year:>04}", status=ResponseStatus.NOT_FOUND)
 
