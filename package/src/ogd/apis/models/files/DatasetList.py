@@ -5,8 +5,55 @@ from typing import Final, List, Optional
 from ogd.apis.models.APIRequest import APIRequest
 from ogd.apis.models.APIResponse import APIResponse
 from ogd.apis.models.enums.RESTType import RESTType
-from ogd.apis.models.files.Dataset import Dataset
 from ogd.common.utils.typing import Map
+
+@dataclass
+class Dataset:
+    year            : int
+    month           : int
+    total_sessions  : int
+    sessions_file   : str
+    players_file    : str
+    population_file : str
+
+    @property
+    def Year(self) -> int:
+        return self.year
+    @property
+    def Month(self) -> int:
+        return self.month
+    @property
+    def TotalSessions(self) -> int:
+        return self.total_sessions
+    @property
+    def SessionsFile(self) -> str:
+        return self.sessions_file
+    @property
+    def PlayersFile(self) -> str:
+        return self.players_file
+    @property
+    def PopulationFile(self) -> str:
+        return self.population_file
+    
+    @staticmethod
+    def FromDict(raw_dict:Map) -> "Dataset":
+        ret_val : Dataset
+
+        expected_keys = {"year", "month", "total_sessions", "sessions_file", "players_file", "population_file"}
+        missing_keys = expected_keys - raw_dict.keys()
+
+        if len(missing_keys) == 0:
+            ret_val = Dataset(
+                year            = raw_dict.get("year", 0),
+                month           = raw_dict.get("month", 0),
+                total_sessions  = raw_dict.get("total_sessions", 0),
+                sessions_file   = raw_dict.get("sessions_file", "SESSIONS FILE NOT FOUND"),
+                players_file    = raw_dict.get("players_file", "PLAYERS FILE NOT FOUND"),
+                population_file = raw_dict.get("population_file", "POPULATION FILE NOT FOUND"),
+            )
+        else:
+            raise KeyError(f"Dataset summary source dict had incorrect set of keys, missing {missing_keys}")
+        return ret_val
 
 class DatasetListRequest(APIRequest):
     def __init__(self, api_base_url:str, game_id:str, year:Optional[int]=None, timeout:int=1):
