@@ -1,11 +1,12 @@
+import dataclasses
 import logging
-from dataclasses import dataclass
 from typing import Any, Dict, Optional
 
 from ogd.apis.models.APIRequest import APIRequest
 from ogd.apis.models.APIResponse import APIResponse
 from ogd.apis.models.enums.RESTType import RESTType
 from ogd.apis.models.files.GameSummary import GameSummary
+from ogd.common.utils.typing import Map
 
 class GameSummariesRequest(APIRequest):
     def __init__(self, api_base_url:str, timeout:int=1):
@@ -23,9 +24,9 @@ class GameSummariesRequest(APIRequest):
 
         return ret_val
 
-@dataclass
 class GameSummaries:
-    summaries : Dict[str, GameSummary]
+    def __init__(self, summaries:Dict[str, GameSummary]) -> None:
+        self._summaries = summaries
 
     def __getitem__(self, key):
         return self.Summaries[key]
@@ -47,7 +48,11 @@ class GameSummaries:
 
     @property
     def Summaries(self) -> Dict[str, GameSummary]:
-        return self.summaries
+        return self._summaries
+
+    @property
+    def AsDict(self) -> Map:
+        return {key : dataclasses.asdict(val) for key,val in self.items()}
     
     @staticmethod
     def FromAPIResponse(response:APIResponse) -> "GameSummaries":
@@ -68,4 +73,4 @@ class GameSummaries:
 
 
     def insert(self, summary:GameSummary):
-        self.summaries[summary.GameID] = summary
+        self._summaries[summary.GameID] = summary
