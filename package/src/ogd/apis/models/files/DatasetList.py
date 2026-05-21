@@ -87,6 +87,7 @@ class DatasetListRequest(APIRequest):
 
 @dataclass
 class DatasetList:
+    game_id  : str
     datasets : List[Dataset]
 
     def __getitem__(self, index:int):
@@ -96,6 +97,9 @@ class DatasetList:
         self.Datasets[index] = value
 
     @property
+    def GameID(self) -> str:
+        return self.game_id
+    @property
     def Datasets(self) -> List[Dataset]:
         return self.datasets
     
@@ -103,8 +107,13 @@ class DatasetList:
     def FromDict(raw_dict:Map) -> "DatasetList":
         ret_val : DatasetList
 
-        if "datasets" in raw_dict.keys():
-            ret_val = DatasetList(datasets=[Dataset.FromDict(dataset) for dataset in raw_dict["datasets"]])
+        expected_keys = {"game_id", "datasets"}
+        missing_keys = expected_keys - raw_dict.keys()
+
+        if len(missing_keys) == 0:
+            ret_val = DatasetList(
+                game_id=raw_dict["game_id"],
+                datasets=[Dataset.FromDict(dataset) for dataset in raw_dict["datasets"]])
         else:
             raise KeyError(f"DatasetList source dict did not have datasets element!")
 
@@ -124,5 +133,5 @@ class DatasetList:
         if isinstance(response.Value, dict):
             ret_val = DatasetList.FromDict(response.Value)
         else:
-            ret_val = DatasetList([])
+            ret_val = DatasetList(game_id="GAME NOT FOUND", datasets=[])
         return ret_val
