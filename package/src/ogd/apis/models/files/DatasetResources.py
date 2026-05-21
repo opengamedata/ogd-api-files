@@ -9,23 +9,23 @@ from ogd.apis.models.enums.RESTType import RESTType
 from ogd.common.schemas.datasets.DatasetSchema import DatasetSchema
 from ogd.common.utils.typing import Map
 
-class DatasetSummaryRequest(APIRequest):
+class DatasetResourcesRequest(APIRequest):
     def __init__(self, api_base_url:str, game_id:str, year:int, month:int, timeout:int=1):
         _url = f"{api_base_url}/games/{game_id}/datasets/{year}/{month}"
         super().__init__(url=_url, request_type=RESTType.GET, params=None, body=None, timeout=timeout)
 
-    def Execute(self, logger:Optional[logging.Logger]=None, retry:int=0) -> "DatasetSummary | APIResponse":
-        ret_val : DatasetSummary | APIResponse
+    def Execute(self, logger:Optional[logging.Logger]=None, retry:int=0) -> "DatasetResources | APIResponse":
+        ret_val : DatasetResources | APIResponse
 
         api_response = super().Execute(logger=logger, retry=retry)
         try:
-            ret_val = DatasetSummary.FromAPIResponse(response=api_response)
+            ret_val = DatasetResources.FromAPIResponse(response=api_response)
         except (ValueError, KeyError):
             ret_val = api_response
 
         return ret_val
 
-class DatasetSummary:
+class DatasetResources:
     def __init__(self, dataset_schema:DatasetSchema,
                  events_template:Optional[str],  sessions_template:Optional[str],  players_template:Optional[str],  population_template:Optional[str],
                  events_codespace:Optional[str], sessions_codespace:Optional[str], players_codespace:Optional[str], population_codespace:Optional[str],
@@ -125,7 +125,7 @@ class DatasetSummary:
                      game_id:str,
                      template_url_base:str,
                      codespace_tree_url:str,
-                     github_tree_url:str) -> "DatasetSummary":
+                     github_tree_url:str) -> "DatasetResources":
         """Generate a DatasetSummary by providing base URLs for the templates,
         codespaces, and github, rather than full URLs for every datset-related link.
 
@@ -145,7 +145,7 @@ class DatasetSummary:
         codespace_tree_url = f"{codespace_tree_url}/" if not codespace_tree_url.endswith("/") else codespace_tree_url
         github_tree_url    = f"{github_tree_url}/" if not github_tree_url.endswith("/") else github_tree_url
         _branch_name       = game_id.lower().replace('_', '-')
-        return DatasetSummary(
+        return DatasetResources(
             dataset_schema=dataset_schema,
             events_template=f"{template_url_base}/tree/{_branch_name}",
             sessions_template=f"{template_url_base}/tree/{_branch_name}",
@@ -160,8 +160,8 @@ class DatasetSummary:
         )
 
     @staticmethod
-    def FromDict(raw_dict:Map) -> "DatasetSummary":
-        ret_val : DatasetSummary
+    def FromDict(raw_dict:Map) -> "DatasetResources":
+        ret_val : DatasetResources
 
         expected_keys = {
             "first_year", "first_month", "last_year", "last_month",
@@ -174,7 +174,7 @@ class DatasetSummary:
         missing_keys = expected_keys - raw_dict.keys()
         if len(missing_keys) == 0:
             schema = DatasetSchema.FromDict(name="DatasetSchema", unparsed_elements=raw_dict)
-            ret_val = DatasetSummary(
+            ret_val = DatasetResources(
                 dataset_schema=schema,
                 events_template      = raw_dict.get("events_template"),
                 sessions_template    = raw_dict.get("sessions_template"),
@@ -194,7 +194,7 @@ class DatasetSummary:
 
     
     @staticmethod
-    def FromAPIResponse(response:APIResponse) -> "DatasetSummary":
+    def FromAPIResponse(response:APIResponse) -> "DatasetResources":
         """Parse a GameSummary from an APIResponse
 
         :param response: The APIResponse object containing the GameSummary data.
@@ -202,10 +202,10 @@ class DatasetSummary:
         :return: A GameSummary object constructed from the data given in the APIResponse
         :rtype: GameSummary
         """
-        ret_val : DatasetSummary
+        ret_val : DatasetResources
 
         if response.Value is not None:
-            ret_val = DatasetSummary.FromDict(raw_dict=response.Value)
+            ret_val = DatasetResources.FromDict(raw_dict=response.Value)
         else:
             raise ValueError(f"Response for DataSummary returned no values!")
 
