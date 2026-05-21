@@ -1,3 +1,4 @@
+import dataclasses
 from typing import Optional
 
 # import 3rd-party libraries
@@ -39,37 +40,19 @@ class DatasetList(Resource):
         file_list     : DatasetRepositoryConfig = GetFileList(cfg.FileListURL)
         game_datasets : DatasetCollectionSchema = file_list.Games.get(parsed_game_id, DatasetCollectionSchema.Default())
 
+        if parsed_game_id in file_list.Games and len(file_list.Games[parsed_game_id].Datasets) > 0:
+            # TODO : inject file_list.RemoteURL into the file locations for the datasets. In particular, probably need to set each dataset's base file location to the RemoteURL base.
+            as_list = [
+                    Dataset.FromDatasetSchema(dataset)
+                    for dataset in game_datasets.Datasets.values()
+                    if dataset.Key.DateFrom and dataset.Key.DateTo and year in {dataset.Key.DateFrom.year, dataset.Key.DateTo.year, None}
+            ]
+            dataset_list_model = DatasetListModel(game_id=parsed_game_id, datasets=as_list)
+
+            value = { "game_id": parsed_game_id, "datasets": dataclasses.asdict(dataset_list_model) }
+            ret_val.RequestSucceeded(msg="Retrieved monthly game usage", val=value)
         # If the given game isn't in our dictionary, or our dictionary doesn't have any date ranges for this game
-        if not parsed_game_id in file_list.Games or len(file_list.Games[parsed_game_id].Datasets) == 0:
+        else:
             ret_val.ServerErrored(msg=f"GameID '{parsed_game_id}' not found in list of games with datasets, or had no datasets listed")
-            return ret_val.AsFlaskResponse
-
-        dataset_list = DatasetListModel(datasets={
-            Dataset.FromDatasetSchema(dataset)
-            for dataset in game_datasets.Datasets.values()
-        })
-
-        sessions = []
-
-        # rangeKey format is GAMEID_YYYYMMDD_to_YYYYMMDD or GAME_ID_YYYYMMDD_to_YYYYYMMDD
-        for _dataset in game_datasets.Datasets.values():
-
-            # If this rangeKey matches the expected format
-            if _dataset.Key.DateFrom and _dataset.Key.DateTo and year in {_dataset.Key.DateFrom.year, _dataset.Key.DateTo.year, None}: # len(rangeKeyParts) == 4:
-                # Capture the number of sessions for this YYYYMM
-                sessions.append(
-                    DatasetModel(
-                        year            = _dataset.Key.DateFrom.year,
-                        month           = _dataset.Key.DateFrom.month,
-                        total_sessions  = _dataset.SessionCount or 0,
-                        sessions_file   = f"{file_list.RemoteURL}{_dataset.SessionsFile}"   if _dataset.SessionsFile   is not None else "SESSIONS FILE NOT FOUND",
-                        players_file    = f"{file_list.RemoteURL}{_dataset.PlayersFile}"    if _dataset.PlayersFile    is not None else "PLAYERS FILE NOT FOUND",
-                        population_file = f"{file_list.RemoteURL}{_dataset.PopulationFile}" if _dataset.PopulationFile is not None else "POPULATION FILE NOT FOUND"
-                    ).AsDict
-                )
-
-
-        responseData = { "game_id": parsed_game_id, "datasets": sessions }
-        ret_val.RequestSucceeded(msg="Retrieved monthly game usage", val=responseData)
 
         return ret_val.AsFlaskResponse
