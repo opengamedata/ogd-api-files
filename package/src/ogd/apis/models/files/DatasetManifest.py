@@ -63,12 +63,12 @@ class DatasetManifest(DatasetSchema):
     def AsDict(self) -> JSONMap:
         overrides : JSONMap = {
             "output": {
-                "all_events_file"    : self.AllEventsFile,
-                "game_events_file"   : self.GameEventsFile,
-                "all_features_file"  : self.CombinedFeaturesFile,
-                "sessions_file"      : self.SessionsFile,
-                "players_file"       : self.PlayersFile,
-                "population_file"    : self.PopulationFile
+                "all_events_file"    : self.AllEventsFile        or (self._all_events_file.Location if self._all_events_file else None),
+                "game_events_file"   : self.GameEventsFile       or (self._game_events_file.Location if self._game_events_file else None),
+                "all_features_file"  : self.CombinedFeaturesFile or (self._all_features_file.Location if self._all_features_file else None),
+                "sessions_file"      : self.SessionsFile         or (self._sessions_file.Location if self._sessions_file else None),
+                "players_file"       : self.PlayersFile          or (self._players_file.Location if self._players_file else None),
+                "population_file"    : self.PopulationFile       or (self._population_file.Location if self._population_file else None)
             }
         }
         return super().AsDict | overrides
