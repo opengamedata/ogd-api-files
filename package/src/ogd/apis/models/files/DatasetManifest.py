@@ -1,13 +1,11 @@
 import logging
-from datetime import date
-from pathlib import Path
 from typing import Optional
 
 from ogd.apis.models.APIRequest import APIRequest
 from ogd.apis.models.APIResponse import APIResponse
 from ogd.apis.models.enums.RESTType import RESTType
 from ogd.common.schemas.datasets.DatasetSchema import DatasetSchema
-from ogd.common.utils.typing import Map
+from ogd.common.utils.typing import JSONMap, Map
 
 class DatasetManifestRequest(APIRequest):
     def __init__(self, api_base_url:str, game_id:str, year:int, month:int, timeout:int=1):
@@ -61,6 +59,19 @@ class DatasetManifest(DatasetSchema):
 
         return ret_val
 
+    @property
+    def AsDict(self) -> JSONMap:
+        overrides : JSONMap = {
+            "output": {
+                "all_events_file"    : self.AllEventsFile,
+                "game_events_file"   : self.GameEventsFile,
+                "all_features_file"  : self.CombinedFeaturesFile,
+                "sessions_file"      : self.SessionsFile,
+                "players_file"       : self.PlayersFile,
+                "population_file"    : self.PopulationFile
+            }
+        }
+        return super().AsDict | overrides
     
     @staticmethod
     def FromAPIResponse(response:APIResponse) -> "DatasetManifest":
