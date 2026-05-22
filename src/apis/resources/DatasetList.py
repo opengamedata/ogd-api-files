@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Optional
+from typing import List, Optional
 
 # import 3rd-party libraries
 from flask import current_app
@@ -41,7 +41,10 @@ class DatasetList(Resource):
         game_datasets : DatasetCollectionSchema = file_list.Games.get(parsed_game_id, DatasetCollectionSchema.Default())
 
         if parsed_game_id in file_list.Games and len(file_list.Games[parsed_game_id].Datasets) > 0:
-            # TODO : inject file_list.RemoteURL into the file locations for the datasets. In particular, probably need to set each dataset's base file location to the RemoteURL base.
+            # inject file_list.RemoteURL into the file locations for the datasets. In particular, probably need to set each dataset's base file location to the RemoteURL base.
+            if file_list.RemoteURL is not None:
+                for dataset in game_datasets.Datasets.values():
+                    dataset._base_files_location = file_list.RemoteURL
             as_list = [
                     Dataset.FromDatasetSchema(dataset)
                     for dataset in game_datasets.Datasets.values()
