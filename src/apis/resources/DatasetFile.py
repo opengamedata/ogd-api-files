@@ -67,15 +67,18 @@ class DatasetFile(Resource):
 
                 if _matched_dataset:
                     if _matched_dataset.Key.DateFrom and _matched_dataset.Key.DateTo:
+                        if file_list.RemoteURL is not None:
+                            _matched_dataset._base_files_location = file_list.RemoteURL
+
                         file_link = None
                         missing_file_msg = f"Dataset for {game_id} from {f'{month:02}/{year:04}'} was not found."
                         match str(file_type).upper():
                             case "SESSION":
-                                file_link = f"{file_list.RemoteURL}{_matched_dataset.SessionsFile.as_posix()}"   if _matched_dataset.SessionsFile   is not None else None
+                                file_link = _matched_dataset.SessionsFile
                             case "PLAYER":
-                                file_link = f"{file_list.RemoteURL}{_matched_dataset.PlayersFile.as_posix()}"    if _matched_dataset.PlayersFile    is not None else None
+                                file_link = _matched_dataset.PlayersFile
                             case "POPULATION":
-                                file_link = f"{file_list.RemoteURL}{_matched_dataset.PopulationFile.as_posix()}" if _matched_dataset.PopulationFile is not None else None
+                                file_link = _matched_dataset.PopulationFile
                             case "EVENT":
                                 missing_file_msg="Event files are not yet supported."
                             case _:
