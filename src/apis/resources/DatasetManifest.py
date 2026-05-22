@@ -60,9 +60,9 @@ class DatasetManifest(Resource):
             if _matched_dataset and _matched_dataset.Key.DateFrom and _matched_dataset.Key.DateTo:
                 if file_list.RemoteURL is not None:
                     _matched_dataset._base_files_location = file_list.RemoteURL
-                file_info = DatasetManifestModel(dataset_schema=_matched_dataset)
+                manifest = DatasetManifestModel(dataset_schema=_matched_dataset)
 
-                ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=file_info.AsDict)
+                ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=manifest.AsDict)
             else:
                 ret_val.RequestErrored(msg=f"Could not find a dataset for {sanitary_params.GameID} in {sanitary_params.Month:>02}/{sanitary_params.Year:>04}", status=ResponseStatus.NOT_FOUND)
 
