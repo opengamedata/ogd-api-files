@@ -4,13 +4,12 @@ from flask_restful import Api
 
 # import local files
 from apis.resources.GameList import GameList
-from apis.resources.GameListDetails import GameListDetails
+from apis.resources.GameSummaries import GameSummaries
 from apis.resources.GameSummary import GameSummary
 from apis.resources.DatasetList import DatasetList
-from apis.resources.DatasetInfo import DatasetInfo
+from apis.resources.DatasetResources import DatasetResources
 from apis.resources.DatasetFile import DatasetFile
 from apis.resources.DatasetManifest import DatasetManifest
-from apis.resources.DatasetsYear import DatasetsYear
 from configs.FileAPIConfig import FileAPIConfig
 
 class FileAPI:
@@ -36,11 +35,11 @@ class FileAPI:
         api = Api(app)
 
         api.add_resource(GameList,        '/games')
-        api.add_resource(GameListDetails, '/games/details')
+        api.add_resource(GameSummaries,   '/games/details')
         api.add_resource(GameSummary,     '/games/<string:game_id>')
-        api.add_resource(DatasetList,     '/games/<string:game_id>/datasets')
-        api.add_resource(DatasetsYear,    '/games/<string:game_id>/datasets/<int:year>')
-        api.add_resource(DatasetInfo,     '/games/<string:game_id>/datasets/<int:year>/<int:month>')
+        api.add_resource(DatasetList,     '/games/<string:game_id>/datasets',
+                                          '/games/<string:game_id>/datasets/<int:year>')
+        api.add_resource(DatasetResources,     '/games/<string:game_id>/datasets/<int:year>/<int:month>')
         api.add_resource(DatasetManifest, '/games/<string:game_id>/datasets/<int:year>/<int:month>/manifest')
         api.add_resource(DatasetFile,     '/games/<string:game_id>/datasets/<int:year>/<int:month>/<string:file_type>')
         FileAPI.server_config = settings
