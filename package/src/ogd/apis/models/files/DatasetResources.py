@@ -49,22 +49,22 @@ class DatasetResources:
     def EndDate(self) -> date | str:
         return self._dataset_schema.EndDate
     @property
-    def GameEventsFile(self) -> Optional[Path]:
+    def GameEventsFile(self) -> Optional[str]:
         return self._dataset_schema.GameEventsFile
     @property
-    def AllEventsFile(self) -> Optional[Path]:
+    def AllEventsFile(self) -> Optional[str]:
         return self._dataset_schema.AllEventsFile
     @property
-    def SessionsFile(self) -> Optional[Path]:
+    def SessionsFile(self) -> Optional[str]:
         return self._dataset_schema.SessionsFile
     @property
-    def PlayersFile(self) -> Optional[Path]:
+    def PlayersFile(self) -> Optional[str]:
         return self._dataset_schema.PlayersFile
     @property
-    def PopulationFile(self) -> Optional[Path]:
+    def PopulationFile(self) -> Optional[str]:
         return self._dataset_schema.PopulationFile
     @property
-    def CombinedFeaturesFile(self) -> Optional[Path]:
+    def CombinedFeaturesFile(self) -> Optional[str]:
         return self._dataset_schema.CombinedFeaturesFile
     @property
     def EventsTemplate(self) -> Optional[str]:
