@@ -11,18 +11,18 @@ from ogd.common.utils.typing import Map
 
 @dataclass
 class Dataset:
-    year            : int
-    month           : int
+    year            : Optional[int]
+    month           : Optional[int]
     total_sessions  : Optional[int]
     sessions_file   : Optional[str]
     players_file    : Optional[str]
     population_file : Optional[str]
 
     @property
-    def Year(self) -> int:
+    def Year(self) -> Optional[int]:
         return self.year
     @property
-    def Month(self) -> int:
+    def Month(self) -> Optional[int]:
         return self.month
     @property
     def TotalSessions(self) -> Optional[int]:
@@ -60,8 +60,8 @@ class Dataset:
     @staticmethod
     def FromDatasetSchema(schema:DatasetSchema) -> "Dataset":
         return Dataset(
-            year=schema.StartDate.year if isinstance(schema.StartDate, date) else int(schema.StartDate.split('-')[0]),
-            month=schema.StartDate.month if isinstance(schema.StartDate, date) else int(schema.StartDate.split('-')[1]),
+            year=schema.StartDate.year if isinstance(schema.StartDate, date) else None,
+            month=schema.StartDate.month if isinstance(schema.StartDate, date) else None,
             total_sessions=schema.SessionCount,
             sessions_file=str(schema.SessionsFile) if schema.SessionsFile else None,
             players_file=str(schema.PlayersFile) if schema.PlayersFile else None,
