@@ -43,10 +43,10 @@ class DatasetResources:
         self._features_link        = features_link
 
     @property
-    def StartDate(self) -> date | str:
+    def StartDate(self) -> Optional[date]:
         return self._dataset_schema.StartDate
     @property
-    def EndDate(self) -> date | str:
+    def EndDate(self) -> Optional[date]:
         return self._dataset_schema.EndDate
     @property
     def GameEventsFile(self) -> Optional[str]:
