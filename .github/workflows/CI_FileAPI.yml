@@ -17,6 +17,8 @@ jobs:
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:
       deploy_host: ${{ vars.OGD_STAGING_HOST }}
+      branch: ${{ github.ref_name }}
+      remove: false
     secrets: inherit
 
   testbed_hello_remote:
