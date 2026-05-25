@@ -2,13 +2,6 @@
 name: Deploy Script - FileAPI
 run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' && github.event.head_commit.message || 'Manual Run') }}
 on:
-  workflow_dispatch:
-    inputs:
-      as_latest:
-        type: boolean
-        description: "Whether to also deploy as the 'latest' version of API"
-        required: false
-        default: false
   workflow_call:
     inputs:
       deploy_host:
@@ -16,21 +9,31 @@ on:
         description: "The host on which to deploy."
         required: true
         default: ${{ vars.OGD_STAGING_HOST }}
+      branch:
+        type: string
+        description: "The specific branch to deploy to/from. This is used because workflow dispatches appear to default to main branch."
+        required: true
+      remove:
+        type: boolean
+        description: "Whether to remove the deploy for the current branch."
+        required: true
+        default: false
       as_latest:
         type: boolean
-        description: "Whether to also deploy as the 'latest' version of API"
+        description: "Whether to also deploy/remove as the 'latest' version of API"
         required: false
         default: false
 
 env:
   DEPLOY_HOST: ${{ inputs.deploy_host }}
-  DEPLOY_DIR:                            ${{ vars.API_BASE_PATH }}/files/${{ github.ref_name }}
-  DEPLOY_URL:  ${{ inputs.deploy_host }}/${{ vars.API_BASE_URL  }}/files/${{ github.ref_name }}/app.wsgi
+  DEPLOY_DIR:                            ${{ vars.API_BASE_PATH }}/files/${{ inputs.branch }}
+  DEPLOY_URL:  ${{ inputs.deploy_host }}/${{ vars.API_BASE_URL  }}/files/${{ inputs.branch }}/app.wsgi
   DEPLOY_DIR_LATEST:                     ${{ vars.API_BASE_PATH }}/files/latest
 
 jobs:
-  ci_deploy:
-    name: CI Deploy of Website API
+  deploy_fileapi:
+    name: Deploy File API
+    if: inputs.remove == false
     runs-on: ubuntu-22.04
     concurrency:
       group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-deploy
@@ -38,10 +41,10 @@ jobs:
 
     steps:
 
-    # 1. Local checkout & config
     - name: Announce deploy
       run: echo "Deploying to ${{ env.DEPLOY_URL }}"
 
+    # 1. Local checkout & config
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
@@ -93,3 +96,46 @@ jobs:
     # 4. Cleanup & complete
     - name: Restart httpd via ssh
       run: ssh -o StrictHostKeyChecking=no -T -i ./key.txt ${{ secrets.DEPLOY_USER }}@${{ env.DEPLOY_HOST }} "sudo systemctl restart apache2"
+
+  branch_delete:
+    name: Remove FileAPI Deploy
+    if: inputs.remove == true
+    runs-on: ubuntu-22.04
+    concurrency:
+      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}
+      cancel-in-progress: false
+    
+    steps:
+    
+    - name: Announce cleanup
+      run: echo "Removing branch deploy at ${{ env.DEPLOY_URL }}"
+
+    # 1. Local checkout & config
+    
+    # 2. Build 
+
+    # 3. Remote config & clean
+    - name: Connect to VPN
+      uses: opengamedata/actions-openconnect-vpn@v1.1
+      with:
+        username: ${{ secrets.VPN_USER }}
+        password: ${{ secrets.VPN_PASS }}
+        endpoint: "soe.vpn.wisc.edu"
+
+    - name: Setup Access Key
+      run: |
+        mkdir -p ~/.ssh
+        echo '${{secrets.CLEAN_KEY}}' >> ./key.txt
+        chmod 600 ./key.txt
+
+    - name: Remove branch folder
+      run: ssh -o StrictHostKeyChecking=no -T -i ./key.txt ${{ secrets.CLEAN_USER }}@${{ env.DEPLOY_HOST }} "rm -r ${{ env.DEPLOY_DIR }}"
+    # This allows us to yank down a recent release, if needed. Generally don't intend to do this.
+    - name: Remove 'latest' folder
+      if: ${{ inputs.as_latest }}
+      run: ssh -o StrictHostKeyChecking=no -T -i ./key.txt ${{ secrets.CLEAN_USER }}@${{ env.DEPLOY_HOST }} "rm -r ${{ env.DEPLOY_DIR_LATEST }}"
+
+    - name: Upload logs as artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        path: ./*.log
