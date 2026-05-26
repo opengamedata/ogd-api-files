@@ -8,6 +8,7 @@ on:
     - '.github/workflows/CI_FileAPI.yml'
     - '.github/workflows/DEPLOY_FileAPI.yml'
     - '.github/actions/**'
+    - 'package/**'
     - 'src/**'
     - 'requirements.txt'
 
