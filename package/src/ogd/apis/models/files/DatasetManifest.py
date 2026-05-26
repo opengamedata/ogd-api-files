@@ -1,5 +1,6 @@
 import logging
 from typing import Optional
+from urllib.parse import urljoin
 
 from ogd.apis.models.APIRequest import APIRequest
 from ogd.apis.models.APIResponse import APIResponse
@@ -9,7 +10,7 @@ from ogd.common.utils.typing import JSONMap, Map
 
 class DatasetManifestRequest(APIRequest):
     def __init__(self, api_base_url:str, game_id:str, year:int, month:int, timeout:int=1):
-        _url = f"{api_base_url}/games/{game_id}/datasets/{year}/{month}/manifest"
+        _url = urljoin(base=api_base_url, url=f"/games/{game_id}/datasets/{year}/{month}/manifest")
         super().__init__(url=_url, request_type=RESTType.GET, params=None, body=None, timeout=timeout)
 
     def Execute(self, logger:Optional[logging.Logger]=None, retry:int=0) -> "DatasetManifest | APIResponse":

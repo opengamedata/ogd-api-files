@@ -2,6 +2,7 @@ import logging
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, List, Optional
+from urllib.parse import urljoin
 
 from ogd.apis.models.APIRequest import APIRequest
 from ogd.apis.models.APIResponse import APIResponse
@@ -25,7 +26,7 @@ class FileTypes(Enum):
 
 class DatasetFileRequest(APIRequest):
     def __init__(self, api_base_url:str, game_id:str, year:int, month:int, file_type:FileTypes | str, timeout:int=1):
-        _url = f"{api_base_url}/games/{game_id}/datasets/{year}/{month}/{file_type}"
+        _url = urljoin(base=api_base_url, url=f"/games/{game_id}/datasets/{year}/{month}/{file_type}")
         super().__init__(url=_url, request_type=RESTType.GET, params=None, body=None, timeout=timeout)
 
     def Execute(self, logger:Optional[logging.Logger]=None, retry:int=0) -> "DatasetFile | APIResponse":

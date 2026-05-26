@@ -2,6 +2,7 @@ import logging
 from dataclasses import dataclass
 from datetime import date
 from typing import List, Optional
+from urllib.parse import urljoin
 
 from ogd.apis.models.APIRequest import APIRequest
 from ogd.apis.models.APIResponse import APIResponse
@@ -71,7 +72,7 @@ class Dataset:
 class DatasetListRequest(APIRequest):
     def __init__(self, api_base_url:str, game_id:str, year:Optional[int]=None, timeout:int=1):
         _year_component = f"/{year}" if year is not None else ""
-        _url = f"{api_base_url}/games/{game_id}/datasets{_year_component}"
+        _url = urljoin(base=api_base_url, url=f"/games/{game_id}/datasets{_year_component}")
         super().__init__(url=_url, request_type=RESTType.GET, params=None, body=None, timeout=timeout)
 
     def Execute(self, logger:Optional[logging.Logger]=None, retry:int=0) -> "DatasetList | APIResponse":
