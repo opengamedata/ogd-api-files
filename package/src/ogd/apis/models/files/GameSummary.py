@@ -1,6 +1,7 @@
 import logging
 from dataclasses import dataclass
 from typing import List, Optional
+from urllib.parse import urljoin
 
 from ogd.apis.models.APIRequest import APIRequest
 from ogd.apis.models.APIResponse import APIResponse
@@ -10,7 +11,7 @@ from ogd.common.utils.typing import Map
 
 class GameSummaryRequest(APIRequest):
     def __init__(self, api_base_url:str, game_id:str, timeout:int=1):
-        _url = f"{api_base_url}/games/{game_id}"
+        _url = urljoin(base=api_base_url, url=f"/games/{game_id}")
         super().__init__(url=_url, request_type=RESTType.GET, params=None, body=None, timeout=timeout)
 
     def Execute(self, logger:Optional[logging.Logger]=None, retry:int=0) -> "GameSummary | APIResponse":
