@@ -100,8 +100,8 @@ class DatasetResources:
     @property
     def AsDict(self) -> Map:
         return {
-            "start_date" : str(self.StartDate),
-            "end_date" : str(self.EndDate),
+            "start_date" : self.StartDate.strftime("%m/%d/%Y") if self.StartDate else None,
+            "end_date" : self.EndDate.strftime("%m/%d/%Y") if self.EndDate else None,
             "game_events_file" : str(self.GameEventsFile) if self.GameEventsFile else None,
             "all_events_file" : str(self.AllEventsFile) if self.AllEventsFile else None,
             "sessions_file" : str(self.SessionsFile) if self.SessionsFile else None,
