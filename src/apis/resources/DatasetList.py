@@ -52,7 +52,7 @@ class DatasetList(Resource):
             ]
             dataset_list_model = DatasetListModel(game_id=parsed_game_id, datasets=as_list)
 
-            value = { "game_id": parsed_game_id, "datasets": dataclasses.asdict(dataset_list_model) }
+            value = dataclasses.asdict(dataset_list_model)
             ret_val.RequestSucceeded(msg="Retrieved monthly game usage", val=value)
         # If the given game isn't in our dictionary, or our dictionary doesn't have any date ranges for this game
         else:
