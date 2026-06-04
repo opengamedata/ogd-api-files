@@ -201,7 +201,12 @@ We intend to deprecate these in the near future.
 Steps to run:
 
 1. Ensure you have Python and pip installed in your development environment.
-2. From the app's root directory run `pip install -r requirements.txt` to ensure you have Flask and other dependencies installed for the app.
-3. If you don't have a src/config.py file for local development, copy config/config.py.template to src/config.py to create one. Populate config.py with secret values as needed.
-4. Run `python -m flask --app src/app.wsgi run`, or optionally include the `--debug` flag.
-5. A web server should begin running at http://localhost:5000
+2. (optional) From the project root folder, run `python -m venv .venv` to create the `.venv` directory that will contain the virtual environment.
+3. (optional) Activate the environment with `source .venv/bin/activate` on Mac/Linux, or `.venv/Scripts/activate` on Windows.
+4. From the app's root directory run `pip install -r requirements.txt` to ensure you have Flask and other dependencies installed for the app.
+    * If you are performing local development, instead do the following:
+        1. Run `pip install package/`
+        2. Run `pip install -e ./`
+5. Copy `config/config.py.template` to `src/config.py` to create a config. Update `config.py` configuration values as needed.
+6. Enter the source folder with `cd src` and then run `python -m flask run`, or optionally include the `--debug` flag.
+7. A web server should begin running at http://localhost:5000
