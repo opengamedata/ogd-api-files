@@ -64,9 +64,9 @@ class Dataset:
             year=schema.StartDate.year if isinstance(schema.StartDate, date) else None,
             month=schema.StartDate.month if isinstance(schema.StartDate, date) else None,
             total_sessions=schema.SessionCount,
-            sessions_file=str(schema.SessionsFile) if schema.SessionsFile else None,
-            players_file=str(schema.PlayersFile) if schema.PlayersFile else None,
-            population_file=str(schema.PopulationFile) if schema.PopulationFile else None
+            sessions_file=schema.SessionsFile(),
+            players_file=schema.PlayersFile(),
+            population_file=schema.PopulationFile()
         )
 
 class DatasetListRequest(APIRequest):
