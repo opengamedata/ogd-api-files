@@ -1,4 +1,5 @@
 # import standard libraries
+import dataclasses
 import json
 import zipfile
 from io import BytesIO
@@ -66,15 +67,18 @@ class DatasetFile(Resource):
 
                 if _matched_dataset:
                     if _matched_dataset.Key.DateFrom and _matched_dataset.Key.DateTo:
+                        if file_list.RemoteURL is not None:
+                            _matched_dataset._base_files_location = file_list.RemoteURL
+
                         file_link = None
                         missing_file_msg = f"Dataset for {game_id} from {f'{month:02}/{year:04}'} was not found."
                         match str(file_type).upper():
                             case "SESSION":
-                                file_link = f"{file_list.RemoteURL}{_matched_dataset.SessionsFile.as_posix()}"   if _matched_dataset.SessionsFile   is not None else None
+                                file_link = _matched_dataset.SessionsFile
                             case "PLAYER":
-                                file_link = f"{file_list.RemoteURL}{_matched_dataset.PlayersFile.as_posix()}"    if _matched_dataset.PlayersFile    is not None else None
+                                file_link = _matched_dataset.PlayersFile
                             case "POPULATION":
-                                file_link = f"{file_list.RemoteURL}{_matched_dataset.PopulationFile.as_posix()}" if _matched_dataset.PopulationFile is not None else None
+                                file_link = _matched_dataset.PopulationFile
                             case "EVENT":
                                 missing_file_msg="Event files are not yet supported."
                             case _:
@@ -84,13 +88,13 @@ class DatasetFile(Resource):
                             with zipfile.ZipFile(BytesIO(datafile_response.read())) as zipped:
                                 for f_name in zipped.namelist():
                                     if f_name.endswith(".tsv"):
-                                        data = pd.read_csv(zipped.open(f_name), sep="\t").replace({float('nan'):None})
-                                        data = self._secondaryParse(data)
-                                        result = DatasetFileModel(
-                                            columns=list(data.columns),
-                                            rows=list(data.apply(lambda series : series.to_dict(), axis=1))
+                                        raw_data = pd.read_csv(zipped.open(f_name), sep="\t").replace({float('nan'):None})
+                                        raw_data = self._secondaryParse(raw_data)
+                                        dataset = DatasetFileModel(
+                                            columns=list(raw_data.columns),
+                                            rows=list(raw_data.apply(lambda series : series.to_dict(), axis=1))
                                         )
-                                        ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=result.AsDict)
+                                        ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=dataclasses.asdict(dataset))
                         else:
                             ret_val.RequestErrored(msg=missing_file_msg)
                     else:
