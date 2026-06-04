@@ -147,11 +147,11 @@ class DatasetResources(DatasetSchema):
         _branch_name       = game_id.lower().replace('_', '-')
         return DatasetResources(
             dataset_schema=dataset_schema,
-            events_template=f"{template_url_base}/tree/{_branch_name}",
+            events_template=f"{template_url_base}/tree/{_branch_name}"     if dataset_schema.HasAllEventsFile or dataset_schema.HasGameEventsFile else None,
             sessions_template=f"{template_url_base}/tree/{_branch_name}"   if dataset_schema.HasSessionsFile   else None,
             players_template=f"{template_url_base}/tree/{_branch_name}"    if dataset_schema.HasPlayersFile    else None,
             population_template=f"{template_url_base}/tree/{_branch_name}" if dataset_schema.HasPopulationFile else None,
-            events_codespace=f"{codespace_tree_url}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fevent-template%2Fdevcontainer.json",
+            events_codespace=f"{codespace_tree_url}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fevent-template%2Fdevcontainer.json"        if dataset_schema.HasAllEventsFile or dataset_schema.HasGameEventsFile else None,
             sessions_codespace=f"{codespace_tree_url}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%session-template%2Fdevcontainer.json"      if dataset_schema.HasSessionsFile   else None,
             players_codespace=f"{codespace_tree_url}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%player-template%2Fdevcontainer.json"        if dataset_schema.HasPlayersFile    else None,
             population_codespace=f"{codespace_tree_url}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%population-template%2Fdevcontainer.json" if dataset_schema.HasPopulationFile else None,
