@@ -25,12 +25,36 @@ class DatasetResourcesRequest(APIRequest):
 
         return ret_val
 
-class DatasetResources:
+class DatasetResources(DatasetSchema):
     def __init__(self, dataset_schema:DatasetSchema,
                  events_template:Optional[str],  sessions_template:Optional[str],  players_template:Optional[str],  population_template:Optional[str],
                  events_codespace:Optional[str], sessions_codespace:Optional[str], players_codespace:Optional[str], population_codespace:Optional[str],
                  detectors_link:Optional[str],   features_link:Optional[str]):
         self._dataset_schema : DatasetSchema = dataset_schema
+        super().__init__(
+            name=dataset_schema.Name,
+            game_id=dataset_schema._key.GameID,
+            dataset_id=None,
+            filters=dataset_schema.Filters,
+            session_ct=dataset_schema.SessionCount,
+            player_ct=dataset_schema.PlayerCount,
+            game_state=dataset_schema.GameState,
+            events=dataset_schema.Events,
+            features=dataset_schema.Features,
+            event_spec_version=dataset_schema.EventSpecificationVersion,
+            ogd_version=dataset_schema.OGDVersion,
+            ogd_revision=dataset_schema.OGDRevision,
+            base_files_location=dataset_schema.BaseFileLocation,
+            all_events_file=dataset_schema._all_events_file,
+            game_events_file=dataset_schema._game_events_file,
+            combined_feats_file=dataset_schema._all_features_file,
+            sessions_file=dataset_schema._sessions_file,
+            players_file=dataset_schema._players_file,
+            population_file=dataset_schema._population_file,
+            start_date=dataset_schema.StartDate,
+            end_date=dataset_schema.EndDate,
+            date_modified=dataset_schema.DateModified
+        )
         self._events_template      = events_template
         self._sessions_template    = sessions_template
         self._players_template     = players_template
@@ -42,30 +66,6 @@ class DatasetResources:
         self._detectors_link       = detectors_link
         self._features_link        = features_link
 
-    @property
-    def StartDate(self) -> Optional[date]:
-        return self._dataset_schema.StartDate
-    @property
-    def EndDate(self) -> Optional[date]:
-        return self._dataset_schema.EndDate
-    @property
-    def GameEventsFile(self) -> Optional[str]:
-        return self._dataset_schema.GameEventsFile
-    @property
-    def AllEventsFile(self) -> Optional[str]:
-        return self._dataset_schema.AllEventsFile
-    @property
-    def SessionsFile(self) -> Optional[str]:
-        return self._dataset_schema.SessionsFile
-    @property
-    def PlayersFile(self) -> Optional[str]:
-        return self._dataset_schema.PlayersFile
-    @property
-    def PopulationFile(self) -> Optional[str]:
-        return self._dataset_schema.PopulationFile
-    @property
-    def CombinedFeaturesFile(self) -> Optional[str]:
-        return self._dataset_schema.CombinedFeaturesFile
     @property
     def EventsTemplate(self) -> Optional[str]:
         return self._events_template
@@ -102,12 +102,12 @@ class DatasetResources:
         return {
             "start_date" : self.StartDate.strftime("%m/%d/%Y") if self.StartDate else None,
             "end_date" : self.EndDate.strftime("%m/%d/%Y") if self.EndDate else None,
-            "game_events_file" : str(self.GameEventsFile) if self.GameEventsFile else None,
-            "all_events_file" : str(self.AllEventsFile) if self.AllEventsFile else None,
-            "sessions_file" : str(self.SessionsFile) if self.SessionsFile else None,
-            "players_file" : str(self.PlayersFile) if self.PlayersFile else None,
-            "population_file" : str(self.PopulationFile) if self.PopulationFile else None,
-            "combined_features_file" : str(self.CombinedFeaturesFile) if self.CombinedFeaturesFile else None,
+            "game_events_file" : self.GameEventsFile(relative=False),
+            "all_events_file" : self.AllEventsFile(relative=False),
+            "sessions_file" : self.SessionsFile(relative=False),
+            "players_file" : self.PlayersFile(relative=False),
+            "population_file" : self.PopulationFile(relative=False),
+            "combined_features_file" : self.CombinedFeaturesFile(relative=False),
             "events_template" : self.EventsTemplate,
             "sessions_template" : self.SessionsTemplate,
             "players_template" : self.PlayersTemplate,
