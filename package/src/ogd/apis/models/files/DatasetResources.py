@@ -1,7 +1,7 @@
 import logging
 from datetime import date
-from pathlib import Path
 from typing import Optional
+from urllib.parse import urljoin
 
 from ogd.apis.models.APIRequest import APIRequest
 from ogd.apis.models.APIResponse import APIResponse
@@ -11,7 +11,7 @@ from ogd.common.utils.typing import Map
 
 class DatasetResourcesRequest(APIRequest):
     def __init__(self, api_base_url:str, game_id:str, year:int, month:int, timeout:int=1):
-        _url = f"{api_base_url}/games/{game_id}/datasets/{year}/{month}"
+        _url = urljoin(base=api_base_url, url=f"/games/{game_id}/datasets/{year}/{month}")
         super().__init__(url=_url, request_type=RESTType.GET, params=None, body=None, timeout=timeout)
 
     def Execute(self, logger:Optional[logging.Logger]=None, retry:int=0) -> "DatasetResources | APIResponse":
@@ -25,12 +25,36 @@ class DatasetResourcesRequest(APIRequest):
 
         return ret_val
 
-class DatasetResources:
+class DatasetResources(DatasetSchema):
     def __init__(self, dataset_schema:DatasetSchema,
                  events_template:Optional[str],  sessions_template:Optional[str],  players_template:Optional[str],  population_template:Optional[str],
                  events_codespace:Optional[str], sessions_codespace:Optional[str], players_codespace:Optional[str], population_codespace:Optional[str],
                  detectors_link:Optional[str],   features_link:Optional[str]):
         self._dataset_schema : DatasetSchema = dataset_schema
+        super().__init__(
+            name=dataset_schema.Name,
+            game_id=dataset_schema._key.GameID,
+            dataset_id=None,
+            filters=dataset_schema.Filters,
+            session_ct=dataset_schema.SessionCount,
+            player_ct=dataset_schema.PlayerCount,
+            game_state=dataset_schema.GameState,
+            events=dataset_schema.Events,
+            features=dataset_schema.Features,
+            event_spec_version=dataset_schema.EventSpecificationVersion,
+            ogd_version=dataset_schema.OGDVersion,
+            ogd_revision=dataset_schema.OGDRevision,
+            base_files_location=dataset_schema.BaseFileLocation,
+            all_events_file=dataset_schema._all_events_file,
+            game_events_file=dataset_schema._game_events_file,
+            combined_feats_file=dataset_schema._all_features_file,
+            sessions_file=dataset_schema._sessions_file,
+            players_file=dataset_schema._players_file,
+            population_file=dataset_schema._population_file,
+            start_date=dataset_schema.StartDate,
+            end_date=dataset_schema.EndDate,
+            date_modified=dataset_schema.DateModified
+        )
         self._events_template      = events_template
         self._sessions_template    = sessions_template
         self._players_template     = players_template
@@ -42,30 +66,6 @@ class DatasetResources:
         self._detectors_link       = detectors_link
         self._features_link        = features_link
 
-    @property
-    def StartDate(self) -> date | str:
-        return self._dataset_schema.StartDate
-    @property
-    def EndDate(self) -> date | str:
-        return self._dataset_schema.EndDate
-    @property
-    def GameEventsFile(self) -> Optional[Path]:
-        return self._dataset_schema.GameEventsFile
-    @property
-    def AllEventsFile(self) -> Optional[Path]:
-        return self._dataset_schema.AllEventsFile
-    @property
-    def SessionsFile(self) -> Optional[Path]:
-        return self._dataset_schema.SessionsFile
-    @property
-    def PlayersFile(self) -> Optional[Path]:
-        return self._dataset_schema.PlayersFile
-    @property
-    def PopulationFile(self) -> Optional[Path]:
-        return self._dataset_schema.PopulationFile
-    @property
-    def CombinedFeaturesFile(self) -> Optional[Path]:
-        return self._dataset_schema.CombinedFeaturesFile
     @property
     def EventsTemplate(self) -> Optional[str]:
         return self._events_template
@@ -100,14 +100,14 @@ class DatasetResources:
     @property
     def AsDict(self) -> Map:
         return {
-            "start_date" : str(self.StartDate),
-            "end_date" : str(self.EndDate),
-            "game_events_file" : str(self.GameEventsFile) if self.GameEventsFile else None,
-            "all_events_file" : str(self.AllEventsFile) if self.AllEventsFile else None,
-            "sessions_file" : str(self.SessionsFile) if self.SessionsFile else None,
-            "players_file" : str(self.PlayersFile) if self.PlayersFile else None,
-            "population_file" : str(self.PopulationFile) if self.PopulationFile else None,
-            "combined_features_file" : str(self.CombinedFeaturesFile) if self.CombinedFeaturesFile else None,
+            "start_date" : self.StartDate.strftime("%m/%d/%Y") if self.StartDate else None,
+            "end_date" : self.EndDate.strftime("%m/%d/%Y") if self.EndDate else None,
+            "game_events_file" : self.GameEventsFile(relative=False),
+            "all_events_file" : self.AllEventsFile(relative=False),
+            "sessions_file" : self.SessionsFile(relative=False),
+            "players_file" : self.PlayersFile(relative=False),
+            "population_file" : self.PopulationFile(relative=False),
+            "combined_features_file" : self.CombinedFeaturesFile(relative=False),
             "events_template" : self.EventsTemplate,
             "sessions_template" : self.SessionsTemplate,
             "players_template" : self.PlayersTemplate,
@@ -147,14 +147,14 @@ class DatasetResources:
         _branch_name       = game_id.lower().replace('_', '-')
         return DatasetResources(
             dataset_schema=dataset_schema,
-            events_template=f"{template_url_base}/tree/{_branch_name}",
-            sessions_template=f"{template_url_base}/tree/{_branch_name}",
-            players_template=f"{template_url_base}/tree/{_branch_name}",
-            population_template=f"{template_url_base}/tree/{_branch_name}",
-            events_codespace=f"{codespace_tree_url}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fevent-template%2Fdevcontainer.json",
-            sessions_codespace=f"{codespace_tree_url}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%session-template%2Fdevcontainer.json",
-            players_codespace=f"{codespace_tree_url}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%player-template%2Fdevcontainer.json",
-            population_codespace=f"{codespace_tree_url}?quickstart=1&devcontainer_path=.devcontainer%population-template%2Fdevcontainer.json",
+            events_template=f"{template_url_base}/tree/{_branch_name}"     if dataset_schema.AllEventsFile() or dataset_schema.GameEventsFile() else None,
+            sessions_template=f"{template_url_base}/tree/{_branch_name}"   if dataset_schema.SessionsFile()   else None,
+            players_template=f"{template_url_base}/tree/{_branch_name}"    if dataset_schema.PlayersFile()    else None,
+            population_template=f"{template_url_base}/tree/{_branch_name}" if dataset_schema.PopulationFile() else None,
+            events_codespace=f"{codespace_tree_url}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%2Fevent-template%2Fdevcontainer.json"        if dataset_schema.AllEventsFile() or dataset_schema.GameEventsFile() else None,
+            sessions_codespace=f"{codespace_tree_url}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%session-template%2Fdevcontainer.json"      if dataset_schema.SessionsFile()   else None,
+            players_codespace=f"{codespace_tree_url}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%player-template%2Fdevcontainer.json"        if dataset_schema.PlayersFile()    else None,
+            population_codespace=f"{codespace_tree_url}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%population-template%2Fdevcontainer.json" if dataset_schema.PopulationFile() else None,
             features_link=f"{github_tree_url}{dataset_schema.OGDRevision}/src/ogd/games/{game_id}/detectors" if dataset_schema.OGDRevision else None,
             detectors_link=f"{github_tree_url}{dataset_schema.OGDRevision}/src/ogd/games/{game_id}/detectors" if dataset_schema.OGDRevision else None,
         )

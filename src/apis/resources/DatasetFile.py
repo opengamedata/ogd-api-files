@@ -74,11 +74,11 @@ class DatasetFile(Resource):
                         missing_file_msg = f"Dataset for {game_id} from {f'{month:02}/{year:04}'} was not found."
                         match str(file_type).upper():
                             case "SESSION":
-                                file_link = _matched_dataset.SessionsFile
+                                file_link = _matched_dataset.SessionsFile(relative=False)
                             case "PLAYER":
-                                file_link = _matched_dataset.PlayersFile
+                                file_link = _matched_dataset.PlayersFile(relative=False)
                             case "POPULATION":
-                                file_link = _matched_dataset.PopulationFile
+                                file_link = _matched_dataset.PopulationFile(relative=False)
                             case "EVENT":
                                 missing_file_msg="Event files are not yet supported."
                             case _:

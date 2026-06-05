@@ -5,49 +5,15 @@ run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'delete'
 on:
   delete: # Trigger automatically when we do a deletion of a branch
   workflow_dispatch:
-
-env:
-  DEPLOY_HOST: ${{ vars.OGD_STAGING_HOST }}
-  DEPLOY_DIR:                               ${{ vars.API_BASE_PATH }}/files/${{ github.event.ref }}
-  DEPLOY_URL:  ${{ vars.OGD_STAGING_HOST }}/${{ vars.API_BASE_URL  }}/files/${{ github.event.ref }}/app.wsgi
     
 jobs:
   branch_delete:
     name: Dead Branch Cleanup
     if: github.event.ref_type == 'branch'
-    runs-on: ubuntu-22.04
-    # concurrency:
-    #   group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}
-    #   cancel-in-progress: false
-    
-    steps:
-
-    # 1. Local checkout & config
-    
-    # 2. Build 
-
-    # 3. Remote config & clean
-    - name: Connect to VPN
-      uses: opengamedata/actions-openconnect-vpn@v1.1
-      with:
-        username: ${{ secrets.VPN_USER }}
-        password: ${{ secrets.VPN_PASS }}
-        endpoint: "soe.vpn.wisc.edu"
-
-    - name: Setup Access Key
-      run: |
-        mkdir -p ~/.ssh
-        echo '${{secrets.CLEAN_KEY}}' >> ./key.txt
-        chmod 600 ./key.txt
-
-    - name: Remove branch folder
-      run: ssh -o StrictHostKeyChecking=no -T -i ./key.txt ${{ secrets.CLEAN_USER }}@${{ env.DEPLOY_HOST }} "rm -r ${{ env.DEPLOY_DIR }}"
-    
-    - name: Announce cleanup
-      run: echo "Removed branch deploy at ${{ env.DEPLOY_URL }}"
-
-    - name: Upload logs as artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        path: ./*.log
-    
+    uses: ./.github/workflows/DEPLOY_FileAPI.yml
+    with:
+      deploy_host: ${{ vars.OGD_STAGING_HOST }}
+      branch: ${{ github.event.ref }}
+      remove: true
+      as_latest: false
+    secrets: inherit
