@@ -1,18 +1,24 @@
 import dataclasses
 import logging
 from typing import Any, Dict, Optional
-from urllib.parse import urljoin
 
 from ogd.apis.models.APIRequest import APIRequest
 from ogd.apis.models.APIResponse import APIResponse
 from ogd.apis.models.enums.RESTType import RESTType
 from ogd.apis.models.files.GameSummary import GameSummary
+from ogd.common.configs.locations.URLLocationConfig import URLLocationConfig
 from ogd.common.utils.typing import Map
 
 class GameSummariesRequest(APIRequest):
     def __init__(self, api_base_url:str, timeout:int=1):
-        _url = urljoin(base=api_base_url, url=f"/games/details")
-        super().__init__(url=_url, request_type=RESTType.GET, params=None, body=None, timeout=timeout)
+        url : URLLocationConfig
+        match api_base_url:
+            case URLLocationConfig():
+                url = api_base_url
+            case str():
+                url = URLLocationConfig.FromString(name="API Location", raw_url=api_base_url)
+        endpoint = URLLocationConfig.FromString(name="Endpoint", raw_url="/games/details")
+        super().__init__(url=url + endpoint, request_type=RESTType.GET, params=None, body=None, timeout=timeout)
 
     def Execute(self, logger:Optional[logging.Logger]=None, retry:int=0) -> "GameSummaries | APIResponse":
         ret_val : GameSummaries | APIResponse
