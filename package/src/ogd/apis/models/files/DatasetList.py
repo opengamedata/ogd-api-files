@@ -2,11 +2,11 @@ import logging
 from dataclasses import dataclass
 from datetime import date
 from typing import List, Optional
-from urllib.parse import urljoin
 
 from ogd.apis.models.APIRequest import APIRequest
 from ogd.apis.models.APIResponse import APIResponse
 from ogd.apis.models.enums.RESTType import RESTType
+from ogd.common.configs.locations.URLLocationConfig import URLLocationConfig
 from ogd.common.schemas.datasets.DatasetSchema import DatasetSchema
 from ogd.common.utils.typing import Map
 
@@ -70,10 +70,17 @@ class Dataset:
         )
 
 class DatasetListRequest(APIRequest):
-    def __init__(self, api_base_url:str, game_id:str, year:Optional[int]=None, timeout:int=1):
+    def __init__(self, api_base_url:URLLocationConfig | str, game_id:str, year:Optional[int]=None, timeout:int=1):
+
+        url : URLLocationConfig
+        match api_base_url:
+            case URLLocationConfig():
+                url = api_base_url
+            case str():
+                url = URLLocationConfig.FromString(name="API Location", raw_url=api_base_url)
         _year_component = f"/{year}" if year is not None else ""
-        _url = urljoin(base=api_base_url, url=f"/games/{game_id}/datasets{_year_component}")
-        super().__init__(url=_url, request_type=RESTType.GET, params=None, body=None, timeout=timeout)
+        endpoint = URLLocationConfig.FromString(name="Endpoint", raw_url=f"/games/{game_id}/datasets{_year_component}")
+        super().__init__(url=url + endpoint, request_type=RESTType.GET, params=None, body=None, timeout=timeout)
 
     def Execute(self, logger:Optional[logging.Logger]=None, retry:int=0) -> "DatasetList | APIResponse":
         ret_val : DatasetList | APIResponse
@@ -116,7 +123,7 @@ class DatasetList:
                 game_id=raw_dict["game_id"],
                 datasets=[Dataset.FromDict(dataset) for dataset in raw_dict["datasets"]])
         else:
-            raise KeyError(f"DatasetList source dict did not have datasets element!")
+            raise KeyError("DatasetList source dict did not have datasets element!")
 
         return ret_val
     

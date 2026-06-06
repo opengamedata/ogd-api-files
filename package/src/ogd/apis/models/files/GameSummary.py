@@ -1,18 +1,24 @@
 import logging
 from dataclasses import dataclass
 from typing import List, Optional
-from urllib.parse import urljoin
 
 from ogd.apis.models.APIRequest import APIRequest
 from ogd.apis.models.APIResponse import APIResponse
 from ogd.apis.models.enums.RESTType import RESTType
+from ogd.common.configs.locations.URLLocationConfig import URLLocationConfig
 from ogd.common.schemas.datasets.DatasetCollectionSchema import DatasetCollectionSchema
 from ogd.common.utils.typing import Map
 
 class GameSummaryRequest(APIRequest):
-    def __init__(self, api_base_url:str, game_id:str, timeout:int=1):
-        _url = urljoin(base=api_base_url, url=f"/games/{game_id}")
-        super().__init__(url=_url, request_type=RESTType.GET, params=None, body=None, timeout=timeout)
+    def __init__(self, api_base_url:URLLocationConfig | str, game_id:str, timeout:int=1):
+        url : URLLocationConfig
+        match api_base_url:
+            case URLLocationConfig():
+                url = api_base_url
+            case str():
+                url = URLLocationConfig.FromString(name="API Location", raw_url=api_base_url)
+        endpoint = URLLocationConfig.FromString(name="Endpoint", raw_url=f"/games/{game_id}")
+        super().__init__(url=url + endpoint, request_type=RESTType.GET, params=None, body=None, timeout=timeout)
 
     def Execute(self, logger:Optional[logging.Logger]=None, retry:int=0) -> "GameSummary | APIResponse":
         ret_val : GameSummary | APIResponse
@@ -78,7 +84,7 @@ class GameSummary:
         if response.Value is not None:
             ret_val = GameSummary.FromDict(raw_dict=response.Value)
         else:
-            raise ValueError(f"Response for GameSummary contained no values!")
+            raise ValueError("Response for GameSummary contained no values!")
 
         return ret_val
 
