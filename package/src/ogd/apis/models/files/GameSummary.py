@@ -10,7 +10,7 @@ from ogd.common.schemas.datasets.DatasetCollectionSchema import DatasetCollectio
 from ogd.common.utils.typing import Map
 
 class GameSummaryRequest(APIRequest):
-    def __init__(self, api_base_url:str, game_id:str, timeout:int=1):
+    def __init__(self, api_base_url:URLLocationConfig | str, game_id:str, timeout:int=1):
         url : URLLocationConfig
         match api_base_url:
             case URLLocationConfig():

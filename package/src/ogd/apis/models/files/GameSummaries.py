@@ -10,7 +10,7 @@ from ogd.common.configs.locations.URLLocationConfig import URLLocationConfig
 from ogd.common.utils.typing import Map
 
 class GameSummariesRequest(APIRequest):
-    def __init__(self, api_base_url:str, timeout:int=1):
+    def __init__(self, api_base_url:URLLocationConfig | str, timeout:int=1):
         url : URLLocationConfig
         match api_base_url:
             case URLLocationConfig():

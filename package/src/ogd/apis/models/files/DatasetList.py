@@ -70,7 +70,7 @@ class Dataset:
         )
 
 class DatasetListRequest(APIRequest):
-    def __init__(self, api_base_url:str, game_id:str, year:Optional[int]=None, timeout:int=1):
+    def __init__(self, api_base_url:URLLocationConfig | str, game_id:str, year:Optional[int]=None, timeout:int=1):
 
         url : URLLocationConfig
         match api_base_url:

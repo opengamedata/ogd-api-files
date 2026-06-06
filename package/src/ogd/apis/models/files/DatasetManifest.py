@@ -9,7 +9,7 @@ from ogd.common.schemas.datasets.DatasetSchema import DatasetSchema
 from ogd.common.utils.typing import JSONMap, Map
 
 class DatasetManifestRequest(APIRequest):
-    def __init__(self, api_base_url:str, game_id:str, year:int, month:int, timeout:int=1):
+    def __init__(self, api_base_url:URLLocationConfig | str, game_id:str, year:int, month:int, timeout:int=1):
         url : URLLocationConfig
         match api_base_url:
             case URLLocationConfig():
