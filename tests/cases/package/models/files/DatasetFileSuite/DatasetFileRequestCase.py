@@ -40,16 +40,19 @@ class DatasetFileRequestCase(TestCase):
         request = DatasetFileRequest(api_base_url=self.base_url, game_id="AQUALAB", year=2025, month=6, file_type="session")
         result = request.Execute()
         self.assertIsInstance(result, DatasetFile)
-        self.assertEqual(len(result.Rows), 3315)
+        if isinstance(result, DatasetFile):
+            self.assertEqual(len(result.Rows), 3315)
 
     def test_Execute_players(self):
         request = DatasetFileRequest(api_base_url=self.base_url, game_id="AQUALAB", year=2025, month=6, file_type="player")
         result = request.Execute()
         self.assertIsInstance(result, DatasetFile)
-        self.assertEqual(len(result.Rows), 100)
+        if isinstance(result, DatasetFile):
+            self.assertEqual(len(result.Rows), 100)
 
     def test_Execute_population(self):
         request = DatasetFileRequest(api_base_url=self.base_url, game_id="AQUALAB", year=2025, month=6, file_type="population")
         result = request.Execute()
         self.assertIsInstance(result, DatasetFile)
-        self.assertEqual(len(result.Rows), 1)
+        if isinstance(result, DatasetFile):
+            self.assertEqual(len(result.Rows), 1)
