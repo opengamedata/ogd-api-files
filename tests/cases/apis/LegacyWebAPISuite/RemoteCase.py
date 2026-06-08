@@ -106,7 +106,7 @@ class test_MonthlyGameUsage(TestCase):
             "month"   : 1
         }
         try:
-            result : APIResponse = APIRequest(url=_url, request_type="GET", params=_params).Execute(logger=Logger.std_logger)
+            result : APIResponse = APIRequest(url=_url, request_type="GET", params=params).Execute(logger=Logger.std_logger)
         except Exception as err: # pylint: disable=broad-exception-caught
             self.fail(str(err))
         else:
