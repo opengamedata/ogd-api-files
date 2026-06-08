@@ -56,7 +56,7 @@ jobs:
 
   # 3. Perform export
     - name: Execute testbed
-      run: python -m unittest ${{ env.LOCAL_TEST_DIR }}
+      run: python -m unittest discover -s tests/cases/apis/LegacyWebAPISuite -p "RemoteCase.py" -t ./
 
   # 4. Cleanup & complete
     - name: Announce test completed
