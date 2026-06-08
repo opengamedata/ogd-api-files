@@ -1,11 +1,10 @@
 # import libraries
 import logging
 import unittest
-from typing import Optional
 from unittest import TestCase
 # import ogd libraries
 from ogd.apis.models.APIRequest import APIRequest
-from ogd.apis.models.APIResponse import APIResponse, ResponseStatus
+from ogd.apis.models.APIResponse import APIResponse
 from ogd.apis.utils.APIUtils import urljoin
 from ogd.common.utils.Logger import Logger
 # import locals
