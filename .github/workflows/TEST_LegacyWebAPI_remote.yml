@@ -1,5 +1,5 @@
 # Workflow to test Legacy Web API on the CI server
-name: Testbed - LegacyWebAPI
+name: Remote Testbed - LegacyWebAPI
 run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' && github.event.head_commit.message || 'Manual Run') }}
 on:
   workflow_dispatch:
