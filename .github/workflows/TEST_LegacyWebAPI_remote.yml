@@ -19,7 +19,6 @@ on:
 
 env:
   DEPLOY_URL:  ${{ vars.OGD_STAGING_HOST }}/${{ vars.API_BASE_URL }}/files/${{ github.ref_name }}/app.wsgi
-  LOCAL_TEST_DIR: ./tests/cases/apis/LegacyWebAPI/t_LegacyWebAPI.py 
 
 jobs:
   run_testbed_files:
