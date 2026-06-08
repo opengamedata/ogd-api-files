@@ -1,14 +1,9 @@
 # import libraries
 import logging
-import unittest
-from json.decoder import JSONDecodeError
-from typing import Optional
 from unittest import TestCase
-# import 3rd-party libraries
-import requests
 # import ogd libraries
 from ogd.apis.models.APIRequest import APIRequest
-from ogd.apis.models.APIResponse import APIResponse, ResponseStatus
+from ogd.apis.models.APIResponse import APIResponse
 from ogd.common.utils.Logger import Logger
 # import locals
 from tests.config import t_config
