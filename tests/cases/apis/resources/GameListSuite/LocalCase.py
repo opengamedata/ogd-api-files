@@ -1,16 +1,12 @@
 # import libraries
 import logging
-import unittest
 from json.decoder import JSONDecodeError
-from typing import Optional
 from unittest import TestCase
 # import 3rd-party libraries
-import requests
 from flask import Flask
-from werkzeug.test import TestResponse
 # import ogd libraries
-from ogd.apis.models.APIRequest import APIRequest
 from ogd.apis.models.APIResponse import APIResponse, ResponseStatus
+from ogd.apis.models.enums.RESTType import RESTType
 from ogd.common.utils.Logger import Logger
 # import locals
 from src.configs.FileAPIConfig import FileAPIConfig
@@ -18,22 +14,20 @@ from src.apis.FileAPI import FileAPI
 from tests.FileAPITestConfig import FileAPITestConfig
 from tests.config.t_config import settings
 
-class test_GameList_local(TestCase):
+class LocalCase(TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.url    : str
-        cls.result : Optional[TestResponse]
-        cls.content : Optional[APIResponse]    = None
-
         # 1. Get testing config
-        cls.testing_cfg = FileAPITestConfig.FromDict(name="FileAPITestConfig", unparsed_elements=settings)
-        _level     = logging.DEBUG if cls.testing_cfg.Verbose else logging.INFO
-        _str_level =       "DEBUG" if cls.testing_cfg.Verbose else "INFO"
-        Logger.std_logger.setLevel(_level)
+        testing_cfg = FileAPITestConfig.FromDict(name="FileAPITestConfig", unparsed_elements=settings)
+
+        _level     = logging.DEBUG if testing_cfg.Verbose else logging.INFO
+        _str_level =       "DEBUG" if testing_cfg.Verbose else "INFO"
+        Logger.InitializeLogger(level=_level, use_logfile=False)
 
         # 2. Set up local Flask app to run tests
         cls.application = Flask(__name__)
         cls.application.logger.setLevel(_level)
+        cls.application.secret_key = b'thisisafakesecretkey'
 
         _server_cfg_elems = {
             "API_VERSION"   : "0.0.0-Testing",
@@ -46,47 +40,37 @@ class test_GameList_local(TestCase):
 
         cls.server = cls.application.test_client()
 
-        cls.url    = f"/games"
-        Logger.Log(f"Sending request to {cls.url}", logging.INFO)
-        cls.result = cls.server.get(cls.url)
-        if cls.result is not None:
-            try:
-                _raw = cls.result.json
-            except JSONDecodeError as err:
-                print(f"Could not parse {cls.result.text} to JSON!\n{err}")
+    def test_get(self):
+
+        _url = "/games"
+        # 1. Run request
+        raw_response = self.server.get(_url)
+        try:
+            response = APIResponse.FromDict(all_elements=raw_response.json or {}, status=ResponseStatus(raw_response.status_code))
+        except JSONDecodeError as err:
+            self.fail(f"Could not parse {raw_response.text} to JSON!\n{err}")
+        raw_response.close()
+        # 2. Perform assertions
+        if response:
+            self.assertIsNotNone(response, f"No response from {_url}")
+            self.assertTrue(response.OK, f"Bad status from {_url}")
+            self.assertEqual(response.Type, RESTType.GET, f"Bad type from {_url}")
+            self.assertIsInstance(response.Value, dict, f"Bad value type from {_url}")
+            if response.Value:
+                self.assertIn("game_ids", response.Value.keys(), "Response did not contain game_ids")
+                self.assertIsNotNone(response.Value.get("game_ids"), "Response had null game_ids")
+                known_games = [
+                    "AQUALAB", "BACTERIA", "BALLOON", "BLOOM", "CRYSTAL",
+                    "CYCLE_CARBON", "CYCLE_NITROGEN", "CYCLE_WATER", "EARTHQUAKE",
+                    "ICECUBE", "JOURNALISM", "JOWILDER", "LAKELAND", "MAGNET",
+                    "MASHOPOLIS", "PENGUINS", "PENNYCOOK", "SHADOWSPECT", "SHIPWRECKS",
+                    "THERMOLAB", "THERMOVR", "TRANSFORMATION_QUEST", "WAVES",
+                    "WEATHER_STATION", "WIND"
+                ]
+                for game in known_games:
+                    self.assertIn(game, known_games, f"No datasets for {game}")
             else:
-                cls.content = APIResponse.FromDict(all_elements=_raw or {}, status=ResponseStatus(cls.result.status_code))
-
-    @classmethod
-    def tearDownClass(cls):
-        if cls.result is not None:
-            cls.result.close()
-
-    def test_Responded(self):
-        self.assertIsNotNone(self.result, f"No result from request to {self.url}")
-
-    def test_Succeeded(self):
-        if self.result is not None:
-            self.assertEqual(self.result.status_code, 200)
+                self.fail(f"No Value element from {_url}")
         else:
-            self.fail(f"No result from request to {self.url}")
+            self.fail("Could not generate APIResponse from test response")
 
-    def test_Correct(self):
-        known_games = [
-            "AQUALAB", "BACTERIA", "BALLOON", "BLOOM", "CRYSTAL",
-            "CYCLE_CARBON", "CYCLE_NITROGEN", "CYCLE_WATER", "EARTHQUAKE",
-            "ICECUBE", "JOURNALISM", "JOWILDER", "LAKELAND", "MAGNET",
-            "MASHOPOLIS", "PENGUINS", "PENNYCOOK", "SHADOWSPECT", "SHIPWRECKS",
-            "THERMOLAB", "THERMOVR", "TRANSFORMATION_QUEST", "WAVES",
-            "WEATHER_STATION", "WIND"
-        ]
-        if self.content is not None and self.content.Value is not None:
-            self.assertIsInstance(self.content.Value, dict)
-            # check game ID
-            self.assertIn("game_ids", self.content.Value.keys(), "Response did not contain game_ids")
-            game_ids = self.content.Value.get("game_ids")
-            self.assertIsNotNone(game_ids, "Response had null game_ids")
-            for game in known_games:
-                self.assertIn(game, known_games, f"No datasets for {game}")
-        else:
-            self.fail(f"No JSON content from request to {self.url}")
