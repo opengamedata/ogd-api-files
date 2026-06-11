@@ -42,7 +42,7 @@ class LocalCase(TestCase):
 
     def test_get(self):
 
-        _url = "/games"
+        _url = "/games/AQUALAB/datasets/2026/1/population"
         # 1. Run request
         raw_response = self.server.get(_url)
         try:
@@ -57,18 +57,20 @@ class LocalCase(TestCase):
             self.assertEqual(response.Type, RESTType.GET, f"Bad type from {_url}")
             self.assertIsInstance(response.Value, dict, f"Bad value type from {_url}")
             if response.Value:
-                self.assertIn("game_ids", response.Value.keys(), "Response did not contain game_ids")
+                self.assertIn("columns", response.Value.keys(), "Response did not contain game_ids")
                 self.assertIsNotNone(response.Value.get("game_ids"), "Response had null game_ids")
-                known_games = [
-                    "AQUALAB", "BACTERIA", "BALLOON", "BLOOM", "CRYSTAL",
-                    "CYCLE_CARBON", "CYCLE_NITROGEN", "CYCLE_WATER", "EARTHQUAKE",
-                    "ICECUBE", "JOURNALISM", "JOWILDER", "LAKELAND", "MAGNET",
-                    "MASHOPOLIS", "PENGUINS", "PENNYCOOK", "SHADOWSPECT", "SHIPWRECKS",
-                    "THERMOLAB", "THERMOVR", "TRANSFORMATION_QUEST", "WAVES",
-                    "WEATHER_STATION", "WIND"
+                known_cols = [
+                    "PlayerCount", "SessionCount", "ActiveJobs",
+                    "AppVersions", "ExperimentalCondition", "JobsCompleted",
+                    "JobsCompleted-UniqueCount", "JobsCompleted-Names", "PlayedNonexperimentalVersion",
+                    "SessionDiveSitesCount", "SessionID", "SwitchJobsCount",
+                    "TimeInJournal", "TimeInJournal-Seconds", "TimeInJournal-Active",
+                    "TimeInJournal-Active-Seconds", "TimeInJournal-Idle", "TimeInJournal-Idle-Seconds",
+                    "TotalArgumentationTime", "TotalArgumentationTime-Seconds", "TotalArgumentationTime-Active",
+                    "TotalArgumentationTime-Active-Seconds"
                 ]
-                for game in known_games:
-                    self.assertIn(game, known_games, f"No datasets for {game}")
+                for col in known_cols:
+                    self.assertIn(col, response.Value.get("columns", []), f"No datasets for {col}")
             else:
                 self.fail(f"No Value element from {_url}")
         else:
