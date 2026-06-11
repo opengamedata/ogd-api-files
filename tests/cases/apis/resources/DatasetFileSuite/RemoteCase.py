@@ -1,10 +1,10 @@
 # import libraries
 import logging
-from typing import Optional
 from unittest import TestCase
 # import ogd libraries
 from ogd.apis.models.APIRequest import APIRequest
-from ogd.apis.models.APIResponse import APIResponse, ResponseStatus
+from ogd.apis.models.enums.RESTType import RESTType
+from ogd.apis.models.APIResponse import APIResponse
 from ogd.common.utils.Logger import Logger
 # import locals
 from tests.FileAPITestConfig import FileAPITestConfig
@@ -17,38 +17,35 @@ Logger.std_logger.setLevel(_level)
 class RemoteCase(TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.url    : str
-        cls.content : Optional[APIResponse]    = None
+        cls.testing_config = FileAPITestConfig.FromDict(name="FileAPITestConfig", unparsed_elements=settings)
+        cls.base_url : str = f"{_testing_cfg.ExternEndpoint}"
 
-        cls.url    = f"{_testing_cfg.ExternEndpoint}/games"
-        Logger.Log(f"Sending request to {cls.url}", logging.INFO)
-        cls.content = APIRequest(url=cls.url, request_type="GET", timeout=30).Execute(logger=Logger.std_logger)
+        _level = logging.DEBUG if cls.testing_config.Verbose else logging.INFO
+        Logger.InitializeLogger(level=_level, use_logfile=False)
 
-    def test_Responded(self):
-        self.assertIsNotNone(self.content, f"No result from request to {self.url}")
-
-    def test_Succeeded(self):
-        if self.content is not None:
-            self.assertEqual(self.content.Status, ResponseStatus.OK)
+    def test_get(self):
+        _url = f"{self.base_url}/games/AQUALAB/datasets/2026/1/population"
+        try:
+            response : APIResponse = APIRequest(url=_url, request_type="GET", params={}).Execute(logger=Logger.std_logger)
+        except Exception as err: # pylint: disable=broad-exception-caught
+            self.fail(str(err))
         else:
-            self.fail(f"No result from request to {self.url}")
-
-    def test_Correct(self):
-        known_games = [
-            "AQUALAB", "BACTERIA", "BALLOON", "BLOOM", "CRYSTAL",
-            "CYCLE_CARBON", "CYCLE_NITROGEN", "CYCLE_WATER", "EARTHQUAKE",
-            "ICECUBE", "JOURNALISM", "JOWILDER", "LAKELAND", "MAGNET",
-            "MASHOPOLIS", "PENGUINS", "PENNYCOOK", "SHADOWSPECT", "SHIPWRECKS",
-            "THERMOLAB", "THERMOVR", "TRANSFORMATION_QUEST", "WAVES",
-            "WEATHER_STATION", "WIND"
-        ]
-        if self.content is not None and self.content.Value is not None:
-            self.assertIsInstance(self.content.Value, dict)
-            # check game ID
-            self.assertIn("game_ids", self.content.Value.keys(), "Response did not contain game_ids")
-            game_ids = self.content.Value.get("game_ids")
-            self.assertIsNotNone(game_ids, "Response had null game_ids")
-            for game in known_games:
-                self.assertIn(game, known_games, f"No datasets for {game}")
-        else:
-            self.fail(f"No JSON content from request to {self.url}")
+            self.assertIsNotNone(response, f"No response from {_url}")
+            self.assertTrue(response.OK, f"Bad status from {_url}")
+            self.assertEqual(response.Type, RESTType.GET, f"Bad type from {_url}")
+            self.assertIsInstance(response.Value, dict, f"Bad value type from {_url}")
+            if response.Value:
+                self.assertIn("columns", response.Value.keys(), "Response did not contain game_ids")
+                self.assertIsNotNone(response.Value.get("game_ids"), "Response had null game_ids")
+                known_cols = [
+                    "PlayerCount", "SessionCount", "ActiveJobs",
+                    "AppVersions", "ExperimentalCondition", "JobsCompleted",
+                    "JobsCompleted-UniqueCount", "JobsCompleted-Names", "PlayedNonexperimentalVersion",
+                    "SessionDiveSitesCount", "SessionID", "SwitchJobsCount",
+                    "TimeInJournal", "TimeInJournal-Seconds", "TimeInJournal-Active",
+                    "TimeInJournal-Active-Seconds", "TimeInJournal-Idle", "TimeInJournal-Idle-Seconds",
+                    "TotalArgumentationTime", "TotalArgumentationTime-Seconds", "TotalArgumentationTime-Active",
+                    "TotalArgumentationTime-Active-Seconds"
+                ]
+                for col in known_cols:
+                    self.assertIn(col, response.Value.get("columns", []), f"No datasets for {col}")

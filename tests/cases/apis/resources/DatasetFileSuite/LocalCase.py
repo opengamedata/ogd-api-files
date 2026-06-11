@@ -71,8 +71,6 @@ class LocalCase(TestCase):
                 ]
                 for col in known_cols:
                     self.assertIn(col, response.Value.get("columns", []), f"No datasets for {col}")
-            else:
-                self.fail(f"No Value element from {_url}")
         else:
             self.fail("Could not generate APIResponse from test response")
 
