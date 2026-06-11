@@ -1,17 +1,16 @@
 # Workflow to test Files API on the CI server
-name: Testbed - FileAPI
+name: Remote Testbed - FileAPI
 run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' && github.event.head_commit.message || 'Manual Run') }}
 on:
   workflow_dispatch:
   workflow_call:
   push:
     paths:
-    - '.github/workflows/TEST_FileAPI.yml'
+    - '.github/workflows/TEST_FileAPI_remote.yml'
     - '.github/actions/test_config/**'
-    - 'tests/cases/apis/FileAPI/**'
+    - 'tests/cases/apis/resources/**'
     - 'tests/config/**'
     - 'tests/FileAPITestConfig.py'
-    - 'requirements.txt'
     - '!.github/workflows/CI_FileAPI.yml'
     - '!.github/actions/**'
     - '!src/**'
@@ -19,7 +18,7 @@ on:
 
 env:
   DEPLOY_URL:     ${{ vars.OGD_STAGING_HOST }}/${{ vars.API_BASE_URL }}/files/${{ github.ref_name }}/app.wsgi
-  LOCAL_TEST_DIR: ./tests/cases/apis/FileAPI/remote/t_FileAPI.py
+  LOCAL_TEST_DIR: ./tests/cases/apis/resources/**/RemoteCase.py
 
 jobs:
   run_testbed_files:
