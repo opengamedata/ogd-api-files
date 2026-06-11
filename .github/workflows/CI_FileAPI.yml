@@ -35,4 +35,4 @@ jobs:
   testbed_legacyapi:
     name: LegacyWebAPI Testbed
     needs: ci_deploy
-    uses: ./.github/workflows/TEST_LegacyWebAPI.yml
+    uses: ./.github/workflows/TEST_LegacyWebAPI_remote.yml
