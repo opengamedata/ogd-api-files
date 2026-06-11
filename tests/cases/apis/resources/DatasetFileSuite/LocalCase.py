@@ -57,8 +57,8 @@ class LocalCase(TestCase):
             self.assertEqual(response.Type, RESTType.GET, f"Bad type from {_url}")
             self.assertIsInstance(response.Value, dict, f"Bad value type from {_url}")
             if response.Value:
-                self.assertIn("columns", response.Value.keys(), "Response did not contain game_ids")
-                self.assertIsNotNone(response.Value.get("game_ids"), "Response had null game_ids")
+                self.assertIn("columns", response.Value.keys(), "Response did not contain columns")
+                self.assertIsInstance(response.Value.get("columns"), list, "Response columns were not in a list")
                 known_cols = [
                     "PlayerCount", "SessionCount", "ActiveJobs",
                     "AppVersions", "ExperimentalCondition", "JobsCompleted",

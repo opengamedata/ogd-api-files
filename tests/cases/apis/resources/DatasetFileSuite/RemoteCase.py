@@ -26,7 +26,7 @@ class RemoteCase(TestCase):
     def test_get(self):
         _url = f"{self.base_url}/games/AQUALAB/datasets/2026/1/population"
         try:
-            response : APIResponse = APIRequest(url=_url, request_type="GET", params={}).Execute(logger=Logger.std_logger)
+            response : APIResponse = APIRequest(url=_url, request_type="GET", params={}, timeout=5).Execute(logger=Logger.std_logger)
         except Exception as err: # pylint: disable=broad-exception-caught
             self.fail(str(err))
         else:
@@ -35,8 +35,8 @@ class RemoteCase(TestCase):
             self.assertEqual(response.Type, RESTType.GET, f"Bad type from {_url}")
             self.assertIsInstance(response.Value, dict, f"Bad value type from {_url}")
             if response.Value:
-                self.assertIn("columns", response.Value.keys(), "Response did not contain game_ids")
-                self.assertIsNotNone(response.Value.get("game_ids"), "Response had null game_ids")
+                self.assertIn("columns", response.Value.keys(), "Response did not contain columns")
+                self.assertIsInstance(response.Value.get("columns"), list, "Response columns were not in a list")
                 known_cols = [
                     "PlayerCount", "SessionCount", "ActiveJobs",
                     "AppVersions", "ExperimentalCondition", "JobsCompleted",
