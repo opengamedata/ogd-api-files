@@ -68,7 +68,7 @@ class LocalCase(TestCase):
                     "WEATHER_STATION", "WIND"
                 ]
                 for game in known_games:
-                    self.assertIn(game, known_games, f"No datasets for {game}")
+                    self.assertIn(game, response.Value.get("game_ids", []), f"No datasets for {game}")
             else:
                 self.fail(f"No Value element from {_url}")
         else:
