@@ -81,4 +81,4 @@ jobs:
   testbed_fileapi:
     name: FileAPI Testbed
     needs: release_deploy
-    uses: ./.github/workflows/TEST_FileAPI.yml
+    uses: ./.github/workflows/TEST_FileAPI_remote.yml
