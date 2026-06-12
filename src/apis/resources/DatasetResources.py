@@ -59,8 +59,9 @@ class DatasetResources(Resource):
                     ret_val.RequestErrored(msg=f"Could not find a dataset for {safe_game_id} in {safe_month:>02}/{safe_year:>04}", status=ResponseStatus.NOT_FOUND)
                 return ret_val.AsFlaskResponse
             except Exception as err: # pylint: disable=broad-exception-caught
-                current_app.logger.error(f"{type(err)} error processing request inputs:\n{err}")
-                ret_val.ServerErrored("Unexpected error processing request inputs.")
+                msg = f"Unexpected error while retrieving dataset resources for {safe_game_id} in {safe_month:>02}/{safe_year:>04}!"
+                current_app.logger.error(f"{msg}\n{type(err)}:\n{err}")
+                ret_val.ServerErrored(msg=msg)
         elif safe_game_id is None:
             ret_val.RequestErrored(msg=f"Invalid GameID '{game_id}'", status=ResponseStatus.BAD_REQUEST)
         elif safe_year is None:
