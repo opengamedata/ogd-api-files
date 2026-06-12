@@ -42,17 +42,17 @@ class SanitizedParams:
         return ret_val
 
     @staticmethod
-    def SanitizeYear(year:Union[int, str]) -> Optional[int]:
+    def SanitizeYear(year:int | str) -> Optional[int]:
         ret_val: Optional[int] = None
 
-        match type(year):
-            case builtins.int:
+        match year:
+            case int():
                 ret_val = int(year)
-            case builtins.str:
-                if re.search("^[0-9]+$", str(year)) is not None:
+            case str():
+                if re.search(r"^[0-9]{4}$", str(year)) is not None:
                     ret_val = int(year)
             case _:
-                if re.search("^[0-9]+$", str(year)) is not None:
+                if re.search(r"^[0-9]{4}$", str(year)) is not None:
                     ret_val = int(str(year))
 
         if ret_val and ret_val not in range(2000, datetime.date.today().year+1):
@@ -61,17 +61,17 @@ class SanitizedParams:
         return ret_val
 
     @staticmethod
-    def SanitizeMonth(month:Union[int, str]) -> Optional[int]:
+    def SanitizeMonth(month:int | str) -> Optional[int]:
         ret_val: Optional[int] = None
 
-        match type(month):
-            case builtins.int:
+        match month:
+            case int():
                 ret_val = int(month)
-            case builtins.str:
-                if re.search("^[0-9]+$", str(month)) is not None:
+            case str():
+                if re.search(r"^[0-9]{1,2}$", month) is not None:
                     ret_val = int(month)
             case _:
-                if re.search("^[0-9]+$", str(month)) is not None:
+                if re.search(r"^[0-9]{1,2}+$", str(month)) is not None:
                     ret_val = int(str(month))
         
         if ret_val and ret_val not in range(1, 12+1):
