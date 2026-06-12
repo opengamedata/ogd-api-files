@@ -1,5 +1,6 @@
 # import standard libraries
 import json
+from dataclasses import dataclass
 from typing import Any, Dict, Optional
 from urllib import request as url_request
 
@@ -12,7 +13,6 @@ from flask import current_app
 # import local files
 from ogd.common.schemas.datasets.DatasetCollectionSchema import DatasetCollectionSchema
 from ogd.common.schemas.datasets.DatasetSchema import DatasetSchema
-from utils.SanitizedParams import SanitizedParams
 
 def GetFileList(url:str) -> DatasetRepositoryConfig:
     # Pull the file list data into a dictionary
@@ -27,18 +27,24 @@ def GetFileList(url:str) -> DatasetRepositoryConfig:
     file_list          : DatasetRepositoryConfig   = DatasetRepositoryConfig.FromDict(name="file_list", unparsed_elements=file_list_json)
     return file_list
 
-def MatchDatasetRequest(sanitary_request:SanitizedParams, available_datasets:DatasetCollectionSchema) -> Optional[DatasetSchema]:
+class DataMatchParams:
+    game_id:str
+    year:int
+    month:int
+
+def MatchDatasetRequest(target:DataMatchParams, available_datasets:Dict[str, DatasetCollectionSchema]) -> Optional[DatasetSchema]:
     _matched_dataset : Optional[DatasetSchema] = None
 
+    game_datasets : DatasetCollectionSchema = available_datasets.get(target.game_id, DatasetCollectionSchema.Default())
     # Find the best match of a dataset to the requested month-year.
     # If there was no requested month-year, we skip this step.
-    for _key, _dataset_schema in available_datasets.Datasets.items():
+    for _key, _dataset_schema in game_datasets.Datasets.items():
         if _dataset_schema.Key.DateFrom and _dataset_schema.Key.DateTo:
             # If this range contains the given year & month
-            if (sanitary_request.Year >= _dataset_schema.Key.DateFrom.year \
-            and sanitary_request.Month >= _dataset_schema.Key.DateFrom.month \
-            and sanitary_request.Year <= _dataset_schema.Key.DateTo.year \
-            and sanitary_request.Month <= _dataset_schema.Key.DateTo.month):
+            if (target.year >= _dataset_schema.Key.DateFrom.year \
+            and target.month >= _dataset_schema.Key.DateFrom.month \
+            and target.year <= _dataset_schema.Key.DateTo.year \
+            and target.month <= _dataset_schema.Key.DateTo.month):
                 if _dataset_schema.IsNewerThan(_matched_dataset):
                     _matched_dataset = _dataset_schema
         else:
