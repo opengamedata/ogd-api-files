@@ -27,27 +27,25 @@ def GetFileList(url:str) -> DatasetRepositoryConfig:
     file_list          : DatasetRepositoryConfig   = DatasetRepositoryConfig.FromDict(name="file_list", unparsed_elements=file_list_json)
     return file_list
 
-class DataMatchParams:
-    game_id:str
-    year:int
-    month:int
-
-def MatchDatasetRequest(target:DataMatchParams, available_datasets:Dict[str, DatasetCollectionSchema]) -> Optional[DatasetSchema]:
+def FindDataset(game_id:str, year:int, month:int, available_datasets:Dict[str, DatasetCollectionSchema]) -> Optional[DatasetSchema]:
     _matched_dataset : Optional[DatasetSchema] = None
 
-    game_datasets : DatasetCollectionSchema = available_datasets.get(target.game_id, DatasetCollectionSchema.Default())
+    game_datasets : DatasetCollectionSchema = available_datasets.get(game_id, DatasetCollectionSchema.Default())
     # Find the best match of a dataset to the requested month-year.
     # If there was no requested month-year, we skip this step.
-    for _key, _dataset_schema in game_datasets.Datasets.items():
-        if _dataset_schema.Key.DateFrom and _dataset_schema.Key.DateTo:
-            # If this range contains the given year & month
-            if (target.year >= _dataset_schema.Key.DateFrom.year \
-            and target.month >= _dataset_schema.Key.DateFrom.month \
-            and target.year <= _dataset_schema.Key.DateTo.year \
-            and target.month <= _dataset_schema.Key.DateTo.month):
-                if _dataset_schema.IsNewerThan(_matched_dataset):
-                    _matched_dataset = _dataset_schema
-        else:
-            current_app.logger.debug(f"While searching for dataset request match, found invalid dataset key '{_dataset_schema.Key}' in the server file list.")
+    if len(game_datasets.Datasets) > 0:
+        for _key, _dataset_schema in game_datasets.Datasets.items():
+            if _dataset_schema.Key.DateFrom and _dataset_schema.Key.DateTo:
+                # If this range contains the given year & month
+                if (year >= _dataset_schema.Key.DateFrom.year \
+                and month >= _dataset_schema.Key.DateFrom.month \
+                and year <= _dataset_schema.Key.DateTo.year \
+                and month <= _dataset_schema.Key.DateTo.month):
+                    if _dataset_schema.IsNewerThan(_matched_dataset):
+                        _matched_dataset = _dataset_schema
+            else:
+                current_app.logger.debug(f"While searching for dataset request match, found invalid dataset key '{_dataset_schema.Key}' in the server file list.")
+    else:
+        current_app.logger.warning(msg=f"GameID '{game_id}' has no available datasets")
 
     return _matched_dataset
