@@ -2,6 +2,8 @@
 import datetime, re
 from typing import Optional
 
+from ogd.apis.models.files.DatasetFile import FileTypes
+
 class SanitizedParams:
     """Dumb struct to store the sanitized params from a request
     """
@@ -56,5 +58,20 @@ class SanitizedParams:
         
         if ret_val and ret_val not in range(1, 12+1):
             ret_val = None
+
+        return ret_val
+
+    @staticmethod
+    def SanitizeFileType(file_type:Optional[FileTypes | str]) -> Optional[FileTypes]:
+        ret_val: Optional[FileTypes] = None
+
+        match file_type:
+            case None:
+                ret_val = None
+            case FileTypes():
+                ret_val = file_type
+            case str():
+                if re.search("^[A-Za-z_]+$", file_type) is not None:
+                    ret_val = FileTypes[file_type.upper()]
 
         return ret_val
