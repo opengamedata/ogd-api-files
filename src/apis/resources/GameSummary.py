@@ -29,18 +29,18 @@ class GameSummary(Resource):
     def get(self, game_id):
         ret_val = APIResponse.Default(req_type=RESTType.GET)
         
-        if game_id := SanitizedParams.SanitizeGameID(game_id):
+        if safe_game_id := SanitizedParams.SanitizeGameID(game_id):
             try:
                 cfg           : FileAPIConfig           = FileAPIConfig("FileAPIConfig", {})
                 file_list     : DatasetRepositoryConfig = GetFileList(cfg.FileListURL)
-                game_datasets : Optional[DatasetCollectionSchema] = file_list.Games.get(game_id, None)
+                game_datasets : Optional[DatasetCollectionSchema] = file_list.Games.get(safe_game_id, None)
 
                 if game_datasets and len(game_datasets.Datasets) > 0:
-                    summary = GameSummaryModel.FromDatasetCollection(game_id=game_id, dataset_collection=game_datasets)
-                    ret_val.RequestSucceeded(f"Retrieved {game_id} summary", val=dataclasses.asdict(summary))
+                    summary = GameSummaryModel.FromDatasetCollection(game_id=safe_game_id, dataset_collection=game_datasets)
+                    ret_val.RequestSucceeded(f"Retrieved {safe_game_id} summary", val=dataclasses.asdict(summary))
                 else:
                     # If the given game isn't in our dictionary, or our dictionary doesn't have any date ranges for this game
-                    ret_val.ServerErrored(msg=f"GameID '{game_id}' not found in list of games with datasets, or had no datasets listed")
+                    ret_val.ServerErrored(msg=f"GameID '{safe_game_id}' not found in list of games with datasets, or had no datasets listed")
             except Exception as err: # pylint: disable=broad-exception-caught
                 msg = "Unexpected error while retrieving list of games with available datasets!"
                 current_app.logger.error(f"{msg}\n{type(err)}:\n{err}")
