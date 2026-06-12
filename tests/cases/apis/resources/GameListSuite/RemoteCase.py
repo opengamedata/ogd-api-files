@@ -48,4 +48,5 @@ class RemoteCase(TestCase):
                     "WEATHER_STATION", "WIND"
                 ]
                 for game in known_games:
-                    self.assertIn(game, response.Value.get("game_ids", []), f"No datasets for {game}")
+                    with self.subTest(game=game):
+                        self.assertIn(game, response.Value.get("game_ids", []), f"No datasets for {game}")
