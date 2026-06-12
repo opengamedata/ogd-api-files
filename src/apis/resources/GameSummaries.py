@@ -36,11 +36,11 @@ class GameSummaries(Resource):
                     game_id:GameSummaryModel.FromDatasetCollection(game_id=game_id, dataset_collection=datasets)
                     for game_id,datasets in file_list.Games.items()
                 })
-                ret_val.RequestSucceeded(msg="Retrieved list of games with available datasets", val=summaries.AsDict)
+                ret_val.RequestSucceeded(msg="Retrieved list of game summaries", val=summaries.AsDict)
             else:
                 ret_val.RequestErrored(msg="Could not find any games!", status=ResponseStatus.NOT_FOUND)
         except Exception as err: # pylint: disable=broad-exception-caught
-            msg = "Unexpected error while retrieving list of games with available datasets!"
+            msg = "Unexpected error while retrieving list of game summaries!"
             current_app.logger.error(f"{msg}\n{type(err)}:\n{err}")
             ret_val.ServerErrored(msg=msg)
 

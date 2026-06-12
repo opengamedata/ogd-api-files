@@ -34,11 +34,11 @@ class GameList(Resource):
             # If the given game isn't in our dictionary, or our dictionary doesn't have any date ranges for this game
             if file_list.Games is not None and len(file_list.Games) > 0:
                 games = GameListModel(game_ids=list(file_list.Games.keys()))
-                ret_val.RequestSucceeded(msg="Retrieved list of games with available datasets", val=dataclasses.asdict(games))
+                ret_val.RequestSucceeded(msg="Retrieved list of games with available data", val=dataclasses.asdict(games))
             else:
                 ret_val.RequestErrored(msg="Could not find any games!", status=ResponseStatus.NOT_FOUND)
         except Exception as err: # pylint: disable=broad-exception-caught
-            msg = "Unexpected error while retrieving list of games with available datasets!"
+            msg = "Unexpected error while retrieving list of games with available data!"
             current_app.logger.error(f"{msg}\n{type(err)}:\n{err}")
             ret_val.ServerErrored(msg=msg)
 

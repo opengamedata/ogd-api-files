@@ -42,7 +42,7 @@ class GameSummary(Resource):
                     # If the given game isn't in our dictionary, or our dictionary doesn't have any date ranges for this game
                     ret_val.ServerErrored(msg=f"GameID '{safe_game_id}' not found in list of games with datasets, or had no datasets listed")
             except Exception as err: # pylint: disable=broad-exception-caught
-                msg = "Unexpected error while retrieving list of games with available datasets!"
+                msg = f"Unexpected error while retrieving {safe_game_id} summary!"
                 current_app.logger.error(f"{msg}\n{type(err)}:\n{err}")
                 ret_val.ServerErrored(msg=msg)
         else:
