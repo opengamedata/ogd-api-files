@@ -24,7 +24,7 @@ class RemoteCase(TestCase):
         Logger.InitializeLogger(level=_level, use_logfile=False)
 
     def test_get(self):
-        _url = f"{self.base_url}/games"
+        _url = f"{self.base_url}/games/AQUALAB"
         # 1. Run request
         try:
             response : APIResponse = APIRequest(url=_url, request_type="GET", params={}, timeout=2).Execute(logger=Logger.std_logger)
@@ -37,7 +37,7 @@ class RemoteCase(TestCase):
             self.assertEqual(response.Type, RESTType.GET, f"Bad type from {_url}")
             self.assertIsInstance(response.Value, dict, f"Bad value type from {_url}")
             if response.Value:
-                expected_keys = {"game_id", "dataset_count", "average_sessions", "initial_datset"}
+                expected_keys = {"game_id", "dataset_count", "average_sessions", "initial_dataset"}
                 self.assertEqual(set(response.Value.keys()), expected_keys, "Response did not contain expected keys")
                 self.assertEqual(response.Value.get("game_id"), "AQUALAB", "Incorrect game ID")
                 self.assertEqual(response.Value.get("initial_dataset"), "2021-04-11", "Incorrect initial dataset date for AQUALAB")
