@@ -21,6 +21,27 @@ env:
   LOCAL_TEST_DIR: ./tests/cases/apis/resources/**/RemoteCase.py
 
 jobs:
+  check_deploy:
+    name: Check for Existing Deploy
+    runs-on: ubuntu-22.04
+    concurrency:
+      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}
+      cancel-in-progress: true
+    
+    steps:
+    - name: cURL Check Hello Endpoint
+      run: curl -Is --fail-with-body ${{ env.DEPLOY_URL }}/hello
+
+  deploy_if_needed:
+    name: FileAPI Deploy (If Needed)
+    if: failure()
+    uses: ./.github/workflows/DEPLOY_FileAPI.yml
+    secrets: inherit
+    with:
+      deploy_host: ${{ vars.OGD_STAGING_HOST }}
+      branch: ${{ github.ref_name }}
+      remove: false
+
   run_testbed_files:
     name: Run FileAPI Testbed
     runs-on: ubuntu-22.04
