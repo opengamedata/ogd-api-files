@@ -79,15 +79,6 @@ else:
     FileAPI.register(application, settings=_server_cfg)
 
 try:
-    from apis.LegacyWebAPI import LegacyWebAPI
-except ImportError as err:
-    _logImportErr(msg="Could not import Legacy Web API:", err=err)
-except Exception as err:
-    _logImportErr(msg="Could not import Legacy Web API, general error:", err=err)
-else:
-    LegacyWebAPI.register(application, settings=_server_cfg)
-
-try:
     from ogd.apis.HelloAPI import HelloAPI
 except ImportError as err:
     _logImportErr(msg="Could not import Hello API:", err=err)
