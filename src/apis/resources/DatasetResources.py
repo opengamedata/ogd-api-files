@@ -57,7 +57,6 @@ class DatasetResources(Resource):
                     ret_val.RequestSucceeded(msg=f"Retrieved dataset resources for {safe_game_id} in {safe_month:>02}/{safe_year:>04}", val=dataset_resources.AsDict)
                 else:
                     ret_val.RequestErrored(msg=f"Could not find a dataset for {safe_game_id} in {safe_month:>02}/{safe_year:>04}", status=ResponseStatus.NOT_FOUND)
-                return ret_val.AsFlaskResponse
             except Exception as err: # pylint: disable=broad-exception-caught
                 msg = f"Unexpected error while retrieving dataset resources for {safe_game_id} in {safe_month:>02}/{safe_year:>04}!"
                 current_app.logger.error(f"{msg}\n{type(err)}:\n{err}")
