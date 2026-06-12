@@ -37,7 +37,7 @@ class GameList(Resource):
                 ret_val.RequestSucceeded(msg="Retrieved list of games with available datasets", val=dataclasses.asdict(games))
             else:
                 ret_val.RequestErrored(msg="Could not find any games!", status=ResponseStatus.NOT_FOUND)
-        except Exception as err:
+        except Exception as err: # pylint: disable=broad-exception-caught
             msg = "Unexpected error while retrieving list of games with available datasets!"
             current_app.logger.error(f"{msg}\n{type(err)}:\n{err}")
             ret_val.ServerErrored(msg=msg)

@@ -1,5 +1,4 @@
 # import standard libraries
-from pathlib import Path
 from typing import Optional
 
 # import 3rd-party libraries
@@ -50,7 +49,7 @@ class DatasetManifest(Resource):
                     return ret_val.AsFlaskResponse
             else:
                 raise ValueError("Could not process inputs!")
-        except Exception as err:
+        except Exception as err: # pylint: disable=broad-exception-caught
             current_app.logger.error(f"{type(err)} error processing request inputs:\n{err}")
             ret_val.ServerErrored("Unexpected error processing request inputs.")
         else:
@@ -60,7 +59,7 @@ class DatasetManifest(Resource):
             if _matched_dataset and _matched_dataset.Key.DateFrom and _matched_dataset.Key.DateTo:
                 manifest = DatasetManifestModel(dataset_schema=_matched_dataset)
                 if file_list.RemoteURL is not None:
-                    manifest._base_files_location = file_list.RemoteURL
+                    manifest.BaseFileLocation = file_list.RemoteURL
 
                 ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=manifest.AsDict)
             else:

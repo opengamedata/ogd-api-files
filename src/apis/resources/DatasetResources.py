@@ -1,5 +1,4 @@
 # import standard libraries
-from pathlib import Path
 from typing import Optional
 
 # import 3rd-party libraries
@@ -50,7 +49,7 @@ class DatasetResources(Resource):
                     return ret_val.AsFlaskResponse
             else:
                 raise ValueError("Could not process inputs!")
-        except Exception as err:
+        except Exception as err: # pylint: disable=broad-exception-caught
             current_app.logger.error(f"{type(err)} error processing request inputs:\n{err}")
             ret_val.ServerErrored("Unexpected error processing request inputs.")
         else:
@@ -59,9 +58,9 @@ class DatasetResources(Resource):
 
             if _matched_dataset and _matched_dataset.Key.DateFrom and _matched_dataset.Key.DateTo:
                 if file_list.RemoteURL is not None:
-                    _matched_dataset._base_files_location = file_list.RemoteURL
+                    _matched_dataset.BaseFileLocation = file_list.RemoteURL
                 # Base URLs
-                CODESPACES_BASE_URL : str = f"https://codespaces.new/opengamedata/opengamedata-samples/tree/"
+                CODESPACES_BASE_URL : str = "https://codespaces.new/opengamedata/opengamedata-samples/tree/"
                 GITHUB_BASE_URL     : str = "https://github.com/opengamedata/opengamedata-core/tree/"
                 
                 dataset_resources = DatasetResourcesModel.FromBaseURLs(

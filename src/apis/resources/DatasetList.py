@@ -1,8 +1,7 @@
 import dataclasses
-from typing import List, Optional
+from typing import Optional
 
 # import 3rd-party libraries
-from flask import current_app
 from flask_restful import Resource
 
 # import ogd libraries
@@ -44,7 +43,7 @@ class DatasetList(Resource):
             # inject file_list.RemoteURL into the file locations for the datasets. In particular, probably need to set each dataset's base file location to the RemoteURL base.
             if file_list.RemoteURL is not None:
                 for dataset in game_datasets.Datasets.values():
-                    dataset._base_files_location = file_list.RemoteURL
+                    dataset.BaseFileLocation = file_list.RemoteURL
             as_list = [
                     Dataset.FromDatasetSchema(dataset)
                     for dataset in game_datasets.Datasets.values()

@@ -1,5 +1,3 @@
-import dataclasses
-
 # import 3rd-party libraries
 from flask import current_app
 from flask_restful import Resource
@@ -11,7 +9,6 @@ from ogd.apis.models.files.GameSummaries import GameSummaries as GameSummariesMo
 from ogd.common.configs.storage.DatasetRepositoryConfig import DatasetRepositoryConfig
 
 # import local files
-from apis.resources.GameSummary import GameSummary
 from configs.FileAPIConfig import FileAPIConfig
 from utils.utils import GetFileList
 
@@ -42,7 +39,7 @@ class GameSummaries(Resource):
                 ret_val.RequestSucceeded(msg="Retrieved list of games with available datasets", val=summaries.AsDict)
             else:
                 ret_val.RequestErrored(msg="Could not find any games!", status=ResponseStatus.NOT_FOUND)
-        except Exception as err:
+        except Exception as err: # pylint: disable=broad-exception-caught
             msg = "Unexpected error while retrieving list of games with available datasets!"
             current_app.logger.error(f"{msg}\n{type(err)}:\n{err}")
             ret_val.ServerErrored(msg=msg)

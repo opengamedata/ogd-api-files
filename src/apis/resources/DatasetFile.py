@@ -57,7 +57,7 @@ class DatasetFile(Resource):
                     return ret_val.AsFlaskResponse
             else:
                 raise ValueError("Could not process inputs!")
-        except Exception as err:
+        except Exception as err: # pylint: disable=broad-exception-caught
             current_app.logger.error(f"{type(err)} error processing request inputs:\n{err}")
             ret_val.ServerErrored("Unexpected error processing request inputs.")
         else:
@@ -68,8 +68,7 @@ class DatasetFile(Resource):
                 if _matched_dataset:
                     if _matched_dataset.Key.DateFrom and _matched_dataset.Key.DateTo:
                         if file_list.RemoteURL is not None:
-                            _matched_dataset._base_files_location = file_list.RemoteURL
-
+                            _matched_dataset.BaseFileLocation = file_list.RemoteURL
                         file_link = None
                         missing_file_msg = f"Dataset for {game_id} from {f'{month:02}/{year:04}'} was not found."
                         match str(file_type).upper():

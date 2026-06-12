@@ -1,7 +1,6 @@
 # import standard libraries
 import json
 from typing import Any, Dict, Optional
-from urllib import error as url_error
 from urllib import request as url_request
 
 # import ogd libraries
