@@ -1,6 +1,5 @@
 # import standard libraries
 import json
-from dataclasses import dataclass
 from typing import Any, Dict, Optional
 from urllib import request as url_request
 
