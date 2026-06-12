@@ -1,5 +1,5 @@
 # Workflow to test Legacy Web API on the CI server
-name: Testbed - LegacyWebAPI
+name: Remote Testbed - LegacyWebAPI
 run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' && github.event.head_commit.message || 'Manual Run') }}
 on:
   workflow_dispatch:
@@ -8,7 +8,7 @@ on:
     paths:
     - '.github/workflows/TEST_LegacyWebAPI.yml'
     - '.github/actions/test_config/**'
-    - 'tests/cases/apis/LegacyWebAPI/**'
+    - 'tests/cases/apis/LegacyWebAPISuite/**'
     - 'tests/config/**'
     - 'tests/FileAPITestConfig.py'
     - 'requirements.txt'
@@ -19,7 +19,8 @@ on:
 
 env:
   DEPLOY_URL:  ${{ vars.OGD_STAGING_HOST }}/${{ vars.API_BASE_URL }}/files/${{ github.ref_name }}/app.wsgi
-  LOCAL_TEST_DIR: ./tests/cases/apis/LegacyWebAPI/t_LegacyWebAPI.py 
+  LOCAL_TEST_DIR: tests/cases/apis/LegacyWebAPISuite
+  PYTHONPATH: "src"
 
 jobs:
   run_testbed_files:
@@ -56,7 +57,7 @@ jobs:
 
   # 3. Perform export
     - name: Execute testbed
-      run: python -m unittest ${{ env.LOCAL_TEST_DIR }}
+      run: python -m unittest discover -s ${{ env.LOCAL_TEST_DIR }} -p "RemoteCase.py" -t ./
 
   # 4. Cleanup & complete
     - name: Announce test completed

@@ -21,9 +21,6 @@ class FileAPI:
 
     server_config : FileAPIConfig
 
-    # TODO: Remove this action and dependencies (interfaces, config) if we're certain they won't be needed.
-    # The SQL for BigQuery did take a bit of effort to compose, but could always be retrieved from old commits
-
     @staticmethod
     def register(app:Flask, settings:FileAPIConfig):
         """Set up the Legacy Web api in a flask app.
@@ -31,7 +28,6 @@ class FileAPI:
         :param app: _description_
         :type app: Flask
         """
-        # Expected WSGIScriptAlias URL path is /data
         api = Api(app)
 
         api.add_resource(GameList,        '/games')
