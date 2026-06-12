@@ -1,14 +1,10 @@
 # import libraries
 import logging
-import unittest
-from json.decoder import JSONDecodeError
-from typing import Optional
 from unittest import TestCase
-# import 3rd-party libraries
-import requests
 # import ogd libraries
 from ogd.apis.models.APIRequest import APIRequest
-from ogd.apis.models.APIResponse import APIResponse, ResponseStatus
+from ogd.apis.models.enums.RESTType import RESTType
+from ogd.apis.models.APIResponse import APIResponse
 from ogd.common.utils.Logger import Logger
 # import locals
 from tests.FileAPITestConfig import FileAPITestConfig
@@ -18,41 +14,40 @@ _testing_cfg = FileAPITestConfig.FromDict(name="FileAPITestConfig", unparsed_ele
 _level       = logging.DEBUG if _testing_cfg.Verbose else logging.INFO
 Logger.std_logger.setLevel(_level)
 
-class test_GameList(TestCase):
+class RemoteCase(TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.url    : str
-        cls.content : Optional[APIResponse]    = None
+        cls.testing_config = FileAPITestConfig.FromDict(name="FileAPITestConfig", unparsed_elements=settings)
+        cls.base_url : str = f"{_testing_cfg.ExternEndpoint}"
 
-        cls.url    = f"{_testing_cfg.ExternEndpoint}/games"
-        Logger.Log(f"Sending request to {cls.url}", logging.INFO)
-        cls.content = APIRequest(url=cls.url, request_type="GET", timeout=30).Execute(logger=Logger.std_logger)
+        _level = logging.DEBUG if cls.testing_config.Verbose else logging.INFO
+        Logger.InitializeLogger(level=_level, use_logfile=False)
 
-    def test_Responded(self):
-        self.assertIsNotNone(self.content, f"No result from request to {self.url}")
-
-    def test_Succeeded(self):
-        if self.content is not None:
-            self.assertEqual(self.content.Status, ResponseStatus.OK)
+    def test_get(self):
+        _url = f"{self.base_url}/games"
+        # 1. Run request
+        try:
+            response : APIResponse = APIRequest(url=_url, request_type="GET", params={}, timeout=2).Execute(logger=Logger.std_logger)
+        except Exception as err: # pylint: disable=broad-exception-caught
+            self.fail(str(err))
         else:
-            self.fail(f"No result from request to {self.url}")
-
-    def test_Correct(self):
-        known_games = [
-            "AQUALAB", "BACTERIA", "BALLOON", "BLOOM", "CRYSTAL",
-            "CYCLE_CARBON", "CYCLE_NITROGEN", "CYCLE_WATER", "EARTHQUAKE",
-            "ICECUBE", "JOURNALISM", "JOWILDER", "LAKELAND", "MAGNET",
-            "MASHOPOLIS", "PENGUINS", "PENNYCOOK", "SHADOWSPECT", "SHIPWRECKS",
-            "THERMOLAB", "THERMOVR", "TRANSFORMATION_QUEST", "WAVES",
-            "WEATHER_STATION", "WIND"
-        ]
-        if self.content is not None and self.content.Value is not None:
-            self.assertIsInstance(self.content.Value, dict)
-            # check game ID
-            self.assertIn("game_ids", self.content.Value.keys(), "Response did not contain game_ids")
-            game_ids = self.content.Value.get("game_ids")
-            self.assertIsNotNone(game_ids, "Response had null game_ids")
-            for game in known_games:
-                self.assertIn(game, known_games, f"No datasets for {game}")
-        else:
-            self.fail(f"No JSON content from request to {self.url}")
+        # 2. Perform assertions
+            self.assertIsNotNone(response, f"No response from {_url}")
+            self.assertTrue(response.OK, f"Bad status from {_url}")
+            self.assertEqual(response.Type, RESTType.GET, f"Bad type from {_url}")
+            self.assertIsInstance(response.Value, dict, f"Bad value type from {_url}")
+            if response.Value:
+                self.assertIn("game_ids", response.Value.keys(), "Response did not contain game_ids")
+                self.assertIsNotNone(response.Value.get("game_ids"), "Response had null game_ids")
+                known_games = [
+                    "AQUALAB", "BACTERIA", "BALLOON", "BLOOM", "CRYSTAL",
+                    "CYCLE_CARBON", "CYCLE_NITROGEN", "CYCLE_WATER", "EARTHQUAKE",
+                    "ICECUBE", "JOURNALISM", "JOWILDER", "LAKELAND", "MAGNET",
+                    "MASHOPOLIS", "PENGUINS", "PENNYCOOK", "SHADOWSPECT", "SHIPWRECKS",
+                    "THERMOLAB", "THERMOVR", "TRANSFORMATION_QUEST", "WAVES",
+                    "WEATHER_STATION", "WIND"
+                ]
+                for game in known_games:
+                    self.assertIn(game, response.Value.get("game_ids", []), f"No datasets for {game}")
+            else:
+                self.fail(f"No Value element from {_url}")
