@@ -15,14 +15,14 @@ from utils.utils import GetFileList
 
 class GameList(Resource):
     """
-    Get the per-month number of sessions for a given game
+    Get the list of games that have data available.
 
     Inputs:
-    - Game ID
+    - None
     Uses:
     - Index file list
     Outputs:
-    - Session count for each month of game's data
+    - List of games that have data available.
     """
     def get(self):
         ret_val = APIResponse.Default(req_type=RESTType.GET)
