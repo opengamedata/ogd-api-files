@@ -15,7 +15,7 @@ from ogd.common.schemas.datasets.DatasetSchema import DatasetSchema
 
 # import local files
 from configs.FileAPIConfig import FileAPIConfig
-from models.SanitizedParams import SanitizedParams
+from utils.SanitizedParams import SanitizedParams
 from utils.utils import GetFileList, MatchDatasetRequest
 
 class DatasetManifest(Resource):

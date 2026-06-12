@@ -13,7 +13,7 @@ from ogd.common.schemas.datasets.DatasetCollectionSchema import DatasetCollectio
 
 # import local files
 from configs.FileAPIConfig import FileAPIConfig
-from models.SanitizedParams import SanitizedParams
+from utils.SanitizedParams import SanitizedParams
 from utils.utils import GetFileList
 
 

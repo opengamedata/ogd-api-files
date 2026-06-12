@@ -13,7 +13,7 @@ from flask import current_app
 # import local files
 from ogd.common.schemas.datasets.DatasetCollectionSchema import DatasetCollectionSchema
 from ogd.common.schemas.datasets.DatasetSchema import DatasetSchema
-from models.SanitizedParams import SanitizedParams
+from utils.SanitizedParams import SanitizedParams
 
 def GetFileList(url:str) -> DatasetRepositoryConfig:
     # Pull the file list data into a dictionary
