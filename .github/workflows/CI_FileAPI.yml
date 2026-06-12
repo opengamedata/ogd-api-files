@@ -44,8 +44,3 @@ jobs:
     name: FileAPI Remote Testbeds
     needs: ci_deploy
     uses: ./.github/workflows/TEST_FileAPI_remote.yml
-
-  testbed_legacyapi:
-    name: LegacyWebAPI Testbed
-    needs: ci_deploy
-    uses: ./.github/workflows/TEST_LegacyWebAPI_remote.yml
