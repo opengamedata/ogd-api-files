@@ -103,7 +103,7 @@ class DatasetFile(Resource):
             except url_error.HTTPError as err:
                 current_app.logger.error(f"HTTP error getting {file_type} file from {file_link}:\n{err}")
                 ret_val.ServerErrored(msg=f"Server experienced an error retrieving {file_type} file from {f'{sanitary_params.Month:>02}/{sanitary_params.Year:>04}'} for {sanitary_params.GameID}.")
-            except Exception as err:
+            except Exception as err: # pylint: disable=broad-exception-caught
                 current_app.logger.error(f"Uncaught {type(err)} getting {file_type} file from {file_link}:\n{err}\n{err.__traceback__}")
                 ret_val.ServerErrored(msg=f"Server experienced an error retrieving {file_type} file from {f'{sanitary_params.Month:>02}/{sanitary_params.Year:>04}'} for {sanitary_params.GameID}.")
 
