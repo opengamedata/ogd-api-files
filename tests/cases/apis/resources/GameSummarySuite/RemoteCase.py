@@ -1,14 +1,10 @@
 # import libraries
 import logging
-import unittest
-from json.decoder import JSONDecodeError
-from typing import Optional
 from unittest import TestCase
-# import 3rd-party libraries
-import requests
 # import ogd libraries
 from ogd.apis.models.APIRequest import APIRequest
-from ogd.apis.models.APIResponse import APIResponse, ResponseStatus
+from ogd.apis.models.enums.RESTType import RESTType
+from ogd.apis.models.APIResponse import APIResponse
 from ogd.common.utils.Logger import Logger
 # import locals
 from tests.FileAPITestConfig import FileAPITestConfig
@@ -18,3 +14,30 @@ _testing_cfg = FileAPITestConfig.FromDict(name="FileAPITestConfig", unparsed_ele
 _level       = logging.DEBUG if _testing_cfg.Verbose else logging.INFO
 Logger.std_logger.setLevel(_level)
 
+class RemoteCase(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.testing_config = FileAPITestConfig.FromDict(name="FileAPITestConfig", unparsed_elements=settings)
+        cls.base_url : str = f"{_testing_cfg.ExternEndpoint}"
+
+        _level = logging.DEBUG if cls.testing_config.Verbose else logging.INFO
+        Logger.InitializeLogger(level=_level, use_logfile=False)
+
+    def test_get(self):
+        _url = f"{self.base_url}/games"
+        # 1. Run request
+        try:
+            response : APIResponse = APIRequest(url=_url, request_type="GET", params={}, timeout=2).Execute(logger=Logger.std_logger)
+        except Exception as err: # pylint: disable=broad-exception-caught
+            self.fail(str(err))
+        else:
+        # 2. Perform assertions
+            self.assertIsNotNone(response, f"No response from {_url}")
+            self.assertTrue(response.OK, f"Bad status from {_url}")
+            self.assertEqual(response.Type, RESTType.GET, f"Bad type from {_url}")
+            self.assertIsInstance(response.Value, dict, f"Bad value type from {_url}")
+            if response.Value:
+                expected_keys = {"game_id", "dataset_count", "average_sessions", "initial_datset"}
+                self.assertEqual(set(response.Value.keys()), expected_keys, "Response did not contain expected keys")
+                self.assertEqual(response.Value.get("game_id"), "AQUALAB", "Incorrect game ID")
+                self.assertEqual(response.Value.get("initial_dataset"), "2021-04-11", "Incorrect initial dataset date for AQUALAB")
