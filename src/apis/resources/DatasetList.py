@@ -31,7 +31,7 @@ class DatasetList(Resource):
     def get(self, game_id:str, year:Optional[int]=None):
         ret_val = APIResponse.Default(req_type=RESTType.GET)
         
-        parsed_game_id = SanitizedParams.sanitizeGameId(game_id)
+        parsed_game_id = SanitizedParams.SanitizeGameID(game_id)
         if parsed_game_id is None or parsed_game_id == "":
             ret_val.RequestErrored(msg=f"Bad GameID '{parsed_game_id}'")
             return ret_val.AsFlaskResponse

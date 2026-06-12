@@ -29,7 +29,7 @@ class GameSummary(Resource):
     def get(self, game_id):
         ret_val = APIResponse.Default(req_type=RESTType.GET)
         
-        game_id = SanitizedParams.sanitizeGameId(game_id)
+        game_id = SanitizedParams.SanitizeGameID(game_id)
         if game_id is None or game_id == "":
             ret_val.RequestErrored(msg=f"Bad GameID '{game_id}'")
             return ret_val.AsFlaskResponse

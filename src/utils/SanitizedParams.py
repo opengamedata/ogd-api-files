@@ -32,7 +32,7 @@ class SanitizedParams:
 
     # If the given game_id contains allowed characters, return it in UPPERCASE, otherwise return empty string
     @staticmethod
-    def sanitizeGameId(game_id:str) -> Optional[str]:
+    def SanitizeGameID(game_id:str) -> Optional[str]:
         ret_val: Optional[str] = None
 
         if re.search("^[A-Za-z_]+$", game_id) is not None:
@@ -80,7 +80,7 @@ class SanitizedParams:
 
     @staticmethod
     def FromParams(game_id:Optional[str], year:int, month:int) -> Optional["SanitizedParams"]:
-        _game_id : Optional[str] = SanitizedParams.sanitizeGameId(game_id) if game_id is not None else None
+        _game_id : Optional[str] = SanitizedParams.SanitizeGameID(game_id) if game_id is not None else None
         _year    : Optional[int] = SanitizedParams.sanitizeYear(year)
         _month   : Optional[int] = SanitizedParams.sanitizeMonth(month)
         if _game_id is not None and _year is not None and _month is not None:
@@ -100,7 +100,7 @@ class SanitizedParams:
         parser.add_argument("month",   type=int, nullable=True, required=False, default="", location="args")
         args : Dict[str, Any] = parser.parse_args()
 
-        game_id : Optional[str] = SanitizedParams.sanitizeGameId(args.get("game_id", ""))
+        game_id : Optional[str] = SanitizedParams.SanitizeGameID(args.get("game_id", ""))
         year    : int           = args.get("year", 0)
         month   : int           = args.get("month", 0)
 
