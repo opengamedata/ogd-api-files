@@ -8,19 +8,22 @@ class SanitizedParams:
 
     # If the given game_id contains allowed characters, return it in UPPERCASE, otherwise return empty string
     @staticmethod
-    def SanitizeGameID(game_id:str) -> Optional[str]:
+    def SanitizeGameID(game_id:Optional[str]) -> Optional[str]:
         ret_val: Optional[str] = None
-
-        if re.search("^[A-Za-z_]+$", game_id) is not None:
+        if game_id is None:
+            ret_val = None
+        elif re.search("^[A-Za-z_]+$", game_id) is not None:
             ret_val = game_id.upper()
 
         return ret_val
 
     @staticmethod
-    def SanitizeYear(year:int | str) -> Optional[int]:
+    def SanitizeYear(year:Optional[int | str]) -> Optional[int]:
         ret_val: Optional[int] = None
 
         match year:
+            case None:
+                ret_val = None
             case int():
                 ret_val = int(year)
             case str():
@@ -36,10 +39,12 @@ class SanitizedParams:
         return ret_val
 
     @staticmethod
-    def SanitizeMonth(month:int | str) -> Optional[int]:
+    def SanitizeMonth(month:Optional[int | str]) -> Optional[int]:
         ret_val: Optional[int] = None
 
         match month:
+            case None:
+                ret_val = None
             case int():
                 ret_val = int(month)
             case str():
