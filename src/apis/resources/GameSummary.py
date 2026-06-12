@@ -2,6 +2,7 @@ import dataclasses
 from typing import Optional
 
 # import 3rd-party libraries
+from flask import current_app
 from flask_restful import Resource
 
 # import ogd libraries
@@ -28,20 +29,23 @@ class GameSummary(Resource):
     def get(self, game_id):
         ret_val = APIResponse.Default(req_type=RESTType.GET)
         
-        game_id = SanitizedParams.SanitizeGameID(game_id)
-        if game_id is None or game_id == "":
-            ret_val.RequestErrored(msg=f"Bad GameID '{game_id}'")
-            return ret_val.AsFlaskResponse
+        if game_id := SanitizedParams.SanitizeGameID(game_id):
+            try:
+                cfg           : FileAPIConfig           = FileAPIConfig("FileAPIConfig", {})
+                file_list     : DatasetRepositoryConfig = GetFileList(cfg.FileListURL)
+                game_datasets : Optional[DatasetCollectionSchema] = file_list.Games.get(game_id, None)
 
-        cfg           : FileAPIConfig           = FileAPIConfig("FileAPIConfig", {})
-        file_list     : DatasetRepositoryConfig = GetFileList(cfg.FileListURL)
-        game_datasets : Optional[DatasetCollectionSchema] = file_list.Games.get(game_id, None)
-
-        if game_datasets and len(game_datasets.Datasets) > 0:
-            summary = GameSummaryModel.FromDatasetCollection(game_id=game_id, dataset_collection=game_datasets)
-            ret_val.RequestSucceeded(f"Retrieved {game_id} summary", val=dataclasses.asdict(summary))
+                if game_datasets and len(game_datasets.Datasets) > 0:
+                    summary = GameSummaryModel.FromDatasetCollection(game_id=game_id, dataset_collection=game_datasets)
+                    ret_val.RequestSucceeded(f"Retrieved {game_id} summary", val=dataclasses.asdict(summary))
+                else:
+                    # If the given game isn't in our dictionary, or our dictionary doesn't have any date ranges for this game
+                    ret_val.ServerErrored(msg=f"GameID '{game_id}' not found in list of games with datasets, or had no datasets listed")
+            except Exception as err: # pylint: disable=broad-exception-caught
+                msg = "Unexpected error while retrieving list of games with available datasets!"
+                current_app.logger.error(f"{msg}\n{type(err)}:\n{err}")
+                ret_val.ServerErrored(msg=msg)
         else:
-            # If the given game isn't in our dictionary, or our dictionary doesn't have any date ranges for this game
-            ret_val.ServerErrored(msg=f"GameID '{game_id}' not found in list of games with datasets, or had no datasets listed")
+            ret_val.RequestErrored(msg=f"Bad GameID '{game_id}'")
 
         return ret_val.AsFlaskResponse
