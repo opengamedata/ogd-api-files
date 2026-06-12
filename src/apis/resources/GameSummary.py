@@ -46,6 +46,6 @@ class GameSummary(Resource):
                 current_app.logger.error(f"{msg}\n{type(err)}:\n{err}")
                 ret_val.ServerErrored(msg=msg)
         else:
-            ret_val.RequestErrored(msg=f"Bad GameID '{game_id}'")
+            ret_val.RequestErrored(msg=f"Invalid GameID '{game_id}'")
 
         return ret_val.AsFlaskResponse
