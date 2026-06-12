@@ -1,29 +1,10 @@
 # standard imports
 import datetime, re
-from dataclasses import dataclass
 from typing import Optional
 
-@dataclass
 class SanitizedParams:
     """Dumb struct to store the sanitized params from a request
     """
-    game_id : str
-    year    : int
-    month   : int
-    
-    @property
-    def GameID(self) -> str:
-        return self.game_id
-    @property
-    def Year(self) -> int:
-        return self.year
-    @property
-    def Month(self) -> int:
-        return self.month
-
-    @property
-    def IsValid(self) -> bool:
-        return None not in {self.GameID, self.Year, self.Month}
 
     # If the given game_id contains allowed characters, return it in UPPERCASE, otherwise return empty string
     @staticmethod
@@ -72,13 +53,3 @@ class SanitizedParams:
             ret_val = None
 
         return ret_val
-
-    @staticmethod
-    def FromParams(game_id:Optional[str], year:int, month:int) -> Optional["SanitizedParams"]:
-        _game_id : Optional[str] = SanitizedParams.SanitizeGameID(game_id) if game_id is not None else None
-        _year    : Optional[int] = SanitizedParams.SanitizeYear(year)
-        _month   : Optional[int] = SanitizedParams.SanitizeMonth(month)
-        if _game_id is not None and _year is not None and _month is not None:
-            return SanitizedParams(game_id=_game_id, year=_year, month=_month)
-        else:
-            return None
