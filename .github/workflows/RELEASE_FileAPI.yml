@@ -77,8 +77,12 @@ jobs:
     name: HelloAPI Remote Testbed
     needs: release_deploy
     uses: ./.github/workflows/TEST_HelloAPI_remote.yml
+    with:
+      host: ${{ vars.OGD_SERVICES_HOST }}
 
   testbed_fileapi:
     name: FileAPI Testbed
     needs: release_deploy
     uses: ./.github/workflows/TEST_FileAPI_remote.yml
+    with:
+      host: ${{ vars.OGD_SERVICES_HOST }}
