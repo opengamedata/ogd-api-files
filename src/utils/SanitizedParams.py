@@ -1,13 +1,7 @@
 # standard imports
 import datetime, re
-import builtins
 from dataclasses import dataclass
-from typing import Any, Dict, Optional, Union
-
-# 3rd-party imports
-from flask_restful import reqparse
-
-# local imports
+from typing import Optional
 
 @dataclass
 class SanitizedParams:
