@@ -27,6 +27,7 @@ jobs:
 
   ci_deploy:
     name: CI Deploy of Website API
+    needs: build
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:
       deploy_host: ${{ vars.OGD_STAGING_HOST }}
