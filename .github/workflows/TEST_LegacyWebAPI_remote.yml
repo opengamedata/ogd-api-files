@@ -3,6 +3,12 @@ name: Remote Testbed - LegacyWebAPI
 run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' && github.event.head_commit.message || 'Manual Run') }}
 on:
   workflow_dispatch:
+    inputs:
+      host:
+        type: string
+        description: "Which host to run test on"
+        required: false
+        default: ""
   workflow_call:
   push:
     paths:
@@ -18,7 +24,7 @@ on:
     - '!requirements.txt'
 
 env:
-  DEPLOY_URL:  ${{ vars.OGD_STAGING_HOST }}/${{ vars.API_BASE_URL }}/files/${{ github.ref_name }}/app.wsgi
+  DEPLOY_URL:  ${{ inputs.host || vars.OGD_STAGING_HOST }}/${{ vars.API_BASE_URL }}/files/${{ github.ref_name }}/app.wsgi
   LOCAL_TEST_DIR: tests/cases/apis/LegacyWebAPISuite
   PYTHONPATH: "src"
 
