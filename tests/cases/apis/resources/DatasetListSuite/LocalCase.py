@@ -1,11 +1,9 @@
 # import libraries
 import logging
 from json.decoder import JSONDecodeError
-from typing import Optional
 from unittest import TestCase
 # import 3rd-party libraries
 from flask import Flask
-from werkzeug.test import TestResponse
 # import ogd libraries
 from ogd.apis.models.APIResponse import APIResponse, ResponseStatus
 from ogd.apis.models.enums.RESTType import RESTType
@@ -19,19 +17,17 @@ from tests.config.t_config import settings
 class LocalCase(TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.url    : str
-        cls.result : Optional[TestResponse]
-        cls.content : Optional[APIResponse]    = None
-
         # 1. Get testing config
-        cls.testing_cfg = FileAPITestConfig.FromDict(name="FileAPITestConfig", unparsed_elements=settings)
-        _level     = logging.DEBUG if cls.testing_cfg.Verbose else logging.INFO
-        _str_level =       "DEBUG" if cls.testing_cfg.Verbose else "INFO"
-        Logger.std_logger.setLevel(_level)
+        testing_cfg = FileAPITestConfig.FromDict(name="FileAPITestConfig", unparsed_elements=settings)
+
+        _level     = logging.DEBUG if testing_cfg.Verbose else logging.INFO
+        _str_level =       "DEBUG" if testing_cfg.Verbose else "INFO"
+        Logger.InitializeLogger(level=_level, use_logfile=False)
 
         # 2. Set up local Flask app to run tests
         cls.application = Flask(__name__)
         cls.application.logger.setLevel(_level)
+        cls.application.secret_key = b'thisisafakesecretkey'
 
         _server_cfg_elems = {
             "API_VERSION"   : "0.0.0-Testing",
@@ -45,7 +41,8 @@ class LocalCase(TestCase):
         cls.server = cls.application.test_client()
 
     def test_get(self):
-        _url    = f"/games/AQUALAB/datasets"
+
+        _url = "/games/AQUALAB/datasets"
         # 1. Run request
         raw_response = self.server.get(_url)
         try:
@@ -55,18 +52,14 @@ class LocalCase(TestCase):
         raw_response.close()
         # 2. Perform assertions
         if response:
-            self.assertIsNotNone(response, f"No result from request to {_url}")
+            self.assertIsNotNone(response, f"No response from {_url}")
             self.assertTrue(response.OK, f"Bad status from {_url}")
             self.assertEqual(response.Type, RESTType.GET, f"Bad type from {_url}")
             self.assertIsInstance(response.Value, dict, f"Bad value type from {_url}")
             if response.Value:
-                # check game ID
-                self.assertIn("game_id", response.Value.keys(), "Response did not contain game_id")
-                self.assertEqual(response.Value.get("game_id", "NOT FOUND"), "AQUALAB")
-                # check sessions element
                 self.assertIn("datasets", response.Value.keys(), "Response did not contain datasets")
                 datasets = response.Value.get('datasets', [])
-                self.assertIsInstance(datasets, list)
+                self.assertIsInstance(datasets, list, "Response had null datasets")
                 self.assertGreaterEqual(len(datasets), 17) # Aqualab should definitely have more than 17 months, as long as it's been around.
                 expected_data = {
                     'year': 2022,

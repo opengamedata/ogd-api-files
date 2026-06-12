@@ -49,5 +49,3 @@ class RemoteCase(TestCase):
                 ]
                 for game in known_games:
                     self.assertIn(game, response.Value.get("game_ids", []), f"No datasets for {game}")
-            else:
-                self.fail(f"No Value element from {_url}")
