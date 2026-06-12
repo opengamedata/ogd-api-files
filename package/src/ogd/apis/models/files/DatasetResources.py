@@ -160,7 +160,7 @@ class DatasetResources(DatasetSchema):
             sessions_codespace=f"{codespace_tree_url}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%session-template%2Fdevcontainer.json"      if dataset_schema.SessionsFile()   else None,
             players_codespace=f"{codespace_tree_url}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%player-template%2Fdevcontainer.json"        if dataset_schema.PlayersFile()    else None,
             population_codespace=f"{codespace_tree_url}{_branch_name}?quickstart=1&devcontainer_path=.devcontainer%population-template%2Fdevcontainer.json" if dataset_schema.PopulationFile() else None,
-            features_link=f"{github_tree_url}{dataset_schema.OGDRevision}/src/ogd/games/{game_id}/detectors" if dataset_schema.OGDRevision else None,
+            features_link=f"{github_tree_url}{dataset_schema.OGDRevision}/src/ogd/games/{game_id}/features" if dataset_schema.OGDRevision else None,
             detectors_link=f"{github_tree_url}{dataset_schema.OGDRevision}/src/ogd/games/{game_id}/detectors" if dataset_schema.OGDRevision else None,
         )
 
