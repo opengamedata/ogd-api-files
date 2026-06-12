@@ -22,7 +22,7 @@ from ogd.common.schemas.datasets.DatasetSchema import DatasetSchema
 # import local files
 from configs.FileAPIConfig import FileAPIConfig
 from utils.SanitizedParams import SanitizedParams
-from utils.utils import GetFileList, MatchDatasetRequest
+from utils.utils import GetFileList, FindDataset
 
 
 class DatasetFile(Resource):
@@ -63,7 +63,7 @@ class DatasetFile(Resource):
         else:
         # 2. Search for the most recently modified dataset that contains the requested month and year
             try:
-                _matched_dataset : Optional[DatasetSchema] = MatchDatasetRequest(sanitary_request=sanitary_params, available_datasets=game_datasets)
+                _matched_dataset : Optional[DatasetSchema] = FindDataset(target=sanitary_params, available_datasets=game_datasets)
 
                 if _matched_dataset:
                     if _matched_dataset.Key.DateFrom and _matched_dataset.Key.DateTo:
