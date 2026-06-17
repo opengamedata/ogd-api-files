@@ -36,13 +36,13 @@ jobs:
       uses: opengamedata/actions-setup-ogd-py-dependencies@v1.3
       with:
         python_version: ${{ vars.OGD_PYTHON_VERSION }}
-        package_dir: "./package"
+        package_dir: "./"
     - name: Get Build Dependencies
       uses: opengamedata/setup-ogd-py-build@v2.0
 
     # 2. Build 
     - name: Build Package
-      run: python -m build package/
+      run: python -m build
 
     # 3. Cache for use by others
     - name: Cache Build for Publishing
@@ -51,7 +51,7 @@ jobs:
       uses: actions/cache/save@v4
       with:
         key: opengamedata-api-files-build-${{ github.run_id }}-${{ github.run_attempt }}
-        path: package/dist/
+        path: dist/
     - name: Non-Cached Build
       if: inputs.with_caching != true
       run: echo "No build cached"
