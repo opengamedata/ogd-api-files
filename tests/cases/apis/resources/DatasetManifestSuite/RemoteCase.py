@@ -73,12 +73,12 @@ class RemoteCase(TestCase):
 
     def test_get_invalidinput(self):
         invalid_urls = {
-            "/games/1NVAL1D_GAM3/datasets/2026/1/manifest",
-            "/games/AQUALAB/datasets/1900/1/manifest",
-            "/games/AQUALAB/datasets/2026/13/manifest",
+            f"{self.base_url}/games/1NVAL1D_GAM3/datasets/2026/1/manifest",
+            f"{self.base_url}/games/AQUALAB/datasets/1900/1/manifest",
+            f"{self.base_url}/games/AQUALAB/datasets/2026/13/manifest",
         }
         for url in invalid_urls:
-            with self.subTest(url=f"{self.base_url}{url}"):
+            with self.subTest(url=url):
                 try:
                     response : APIResponse = APIRequest(url=url, request_type="GET", params={}, timeout=5).Execute(logger=Logger.std_logger)
                 except Exception as err: # pylint: disable=broad-exception-caught
@@ -91,12 +91,12 @@ class RemoteCase(TestCase):
 
     def test_get_nonexistentdataset(self):
         invalid_dataset_urls = {
-            "/games/NONEXISTENT_GAME/datasets/2026/1/manifest",
-            "/games/BLOOM/datasets/2020/1/manifest", # Bloom data doesn't start until well after 2020
-            "/games/BLOOM/datasets/2024/1/manifest" # We have 2024 data for Bloom, but it starts in February.
+            f"{self.base_url}/games/NONEXISTENT_GAME/datasets/2026/1/manifest",
+            f"{self.base_url}/games/BLOOM/datasets/2020/1/manifest", # Bloom data doesn't start until well after 2020
+            f"{self.base_url}/games/BLOOM/datasets/2024/1/manifest" # We have 2024 data for Bloom, but it starts in February.
         }
         for url in invalid_dataset_urls:
-            with self.subTest(url=f"{self.base_url}{url}"):
+            with self.subTest(url=url):
                 try:
                     response : APIResponse = APIRequest(url=url, request_type="GET", params={}, timeout=5).Execute(logger=Logger.std_logger)
                 except Exception as err: # pylint: disable=broad-exception-caught
