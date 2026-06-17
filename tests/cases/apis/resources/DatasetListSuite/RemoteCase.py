@@ -3,8 +3,9 @@ import logging
 from unittest import TestCase
 # import ogd libraries
 from ogd.apis.models.APIRequest import APIRequest
-from ogd.apis.models.enums.RESTType import RESTType
 from ogd.apis.models.APIResponse import APIResponse
+from ogd.apis.models.enums.RESTType import RESTType
+from ogd.apis.models.enums.ResponseStatus import ResponseStatus
 from ogd.common.utils.Logger import Logger
 # import locals
 from tests.FileAPITestConfig import FileAPITestConfig
@@ -33,7 +34,7 @@ class RemoteCase(TestCase):
         else:
         # 2. Perform assertions
             self.assertIsNotNone(response, f"No response from {_url}")
-            self.assertTrue(response.OK, f"Bad status from {_url}")
+            self.assertTrue(response.OK, f"Bad status from {_url}: {response.Status}")
             self.assertEqual(response.Type, RESTType.GET, f"Bad type from {_url}")
             self.assertIsInstance(response.Value, dict, f"Bad value type from {_url}")
             if response.Value:
@@ -50,3 +51,35 @@ class RemoteCase(TestCase):
                     "population_file" : "https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20220801_to_20220831_0c348a5_population-features.zip"
                 }
                 self.assertEqual(datasets[17], expected_data)
+
+    def test_get_invalidgame(self):
+        _url = f"{self.base_url}/games/1NVAL1D_GAM3/datasets"
+        # 1. Run request
+        try:
+            response : APIResponse = APIRequest(url=_url, request_type="GET", params={}, timeout=2).Execute(logger=Logger.std_logger)
+        except Exception as err: # pylint: disable=broad-exception-caught
+            self.fail(str(err))
+        # 2. Perform assertions
+        if response:
+            self.assertIsNotNone(response, f"No response from {_url}")
+            self.assertEqual(response.Status, ResponseStatus.BAD_REQUEST, f"Unexpected status from {_url}: {response.Status}")
+            self.assertEqual(response.Type, RESTType.GET, f"Bad type from {_url}")
+            self.assertIsNone(response.Value, f"Non-empty value from {_url}")
+        else:
+            self.fail("Could not generate APIResponse from test response")
+
+    def test_get_nonexistentgame(self):
+        _url = f"{self.base_url}/games/NONEXISTENT_GAME/datasets"
+        # 1. Run request
+        try:
+            response : APIResponse = APIRequest(url=_url, request_type="GET", params={}, timeout=2).Execute(logger=Logger.std_logger)
+        except Exception as err: # pylint: disable=broad-exception-caught
+            self.fail(str(err))
+        # 2. Perform assertions
+        if response:
+            self.assertIsNotNone(response, f"No response from {_url}")
+            self.assertEqual(response.Status, ResponseStatus.NOT_FOUND, f"Unexpected status from {_url}: {response.Status}")
+            self.assertEqual(response.Type, RESTType.GET, f"Bad type from {_url}")
+            self.assertIsNone(response.Value, f"Non-empty value from {_url}")
+        else:
+            self.fail("Could not generate APIResponse from test response")

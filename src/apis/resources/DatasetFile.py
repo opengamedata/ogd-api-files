@@ -13,16 +13,17 @@ from flask import current_app
 from flask_restful import Resource
 
 # import ogd libraries
-from ogd.apis.models.APIResponse import APIResponse, RESTType, ResponseStatus
+from ogd.apis.models.APIResponse import APIResponse
+from ogd.apis.models.enums.RESTType import RESTType
+from ogd.apis.models.enums.ResponseStatus import ResponseStatus
 from ogd.apis.models.files.DatasetFile import DatasetFile as DatasetFileModel
 from ogd.common.configs.storage.DatasetRepositoryConfig import DatasetRepositoryConfig
-from ogd.common.schemas.datasets.DatasetCollectionSchema import DatasetCollectionSchema
 from ogd.common.schemas.datasets.DatasetSchema import DatasetSchema
 
 # import local files
 from configs.FileAPIConfig import FileAPIConfig
-from models.SanitizedParams import SanitizedParams
-from utils.utils import GetFileList, MatchDatasetRequest
+from utils.SanitizedParams import SanitizedParams
+from utils.utils import GetFileList, FindDataset
 
 
 class DatasetFile(Resource):
@@ -39,74 +40,68 @@ class DatasetFile(Resource):
     def get(self, game_id, month, year, file_type):
         ret_val = APIResponse.Default(req_type=RESTType.GET)
 
-        try:
-            sanitary_params = SanitizedParams.FromParams(game_id=game_id, year=year, month=month)
+        safe_game_id  = SanitizedParams.SanitizeGameID(game_id=game_id)
+        safe_year     = SanitizedParams.SanitizeYear(year=year)
+        safe_month    = SanitizedParams.SanitizeMonth(month=month)
+        safe_filetype = SanitizedParams.SanitizeFileType(file_type=file_type)
 
         # 1. Get the list of datasets available on the server, for given game.
-            if sanitary_params:
-                cfg           : FileAPIConfig           = FileAPIConfig("FileAPIConfig", {})
-                file_list     : DatasetRepositoryConfig = GetFileList(cfg.FileListURL)
-                game_datasets : DatasetCollectionSchema = file_list.Games.get(sanitary_params.GameID or "NO GAME REQUESTED", DatasetCollectionSchema.Default())
-
-                # If we couldn't find the requested game in file_list.json, or the game didn't have any date ranges, skip.
-                if (sanitary_params.GameID is None):
-                    ret_val.RequestErrored(msg=f"Bad GameID '{sanitary_params.GameID}'")
-                    return ret_val.AsFlaskResponse
-                elif (len(game_datasets.Datasets) == 0):
-                    ret_val.ServerErrored(msg=f"GameID '{sanitary_params.GameID}' did not have available datasets")
-                    return ret_val.AsFlaskResponse
-            else:
-                raise ValueError("Could not process inputs!")
-        except Exception as err:
-            current_app.logger.error(f"{type(err)} error processing request inputs:\n{err}")
-            ret_val.ServerErrored("Unexpected error processing request inputs.")
-        else:
-        # 2. Search for the most recently modified dataset that contains the requested month and year
+        if safe_game_id and safe_year and safe_month and safe_filetype:
             try:
-                _matched_dataset : Optional[DatasetSchema] = MatchDatasetRequest(sanitary_request=sanitary_params, available_datasets=game_datasets)
+                cfg             : FileAPIConfig           = FileAPIConfig("FileAPIConfig", {})
+                file_list       : DatasetRepositoryConfig = GetFileList(cfg.FileListURL)
+                matched_dataset : Optional[DatasetSchema] = FindDataset(game_id=safe_game_id, year=safe_year, month=safe_month, available_datasets=file_list.Games)
 
-                if _matched_dataset:
-                    if _matched_dataset.Key.DateFrom and _matched_dataset.Key.DateTo:
-                        if file_list.RemoteURL is not None:
-                            _matched_dataset._base_files_location = file_list.RemoteURL
+            # 2. Search for the most recently modified dataset that contains the requested month and year
 
-                        file_link = None
-                        missing_file_msg = f"Dataset for {game_id} from {f'{month:02}/{year:04}'} was not found."
-                        match str(file_type).upper():
-                            case "SESSION":
-                                file_link = _matched_dataset.SessionsFile(relative=False)
-                            case "PLAYER":
-                                file_link = _matched_dataset.PlayersFile(relative=False)
-                            case "POPULATION":
-                                file_link = _matched_dataset.PopulationFile(relative=False)
-                            case "EVENT":
-                                missing_file_msg="Event files are not yet supported."
-                            case _:
-                                missing_file_msg=f"Unrecognized file type {file_type}."
-                        if file_link:
-                            datafile_response = url_request.urlopen(file_link)
-                            with zipfile.ZipFile(BytesIO(datafile_response.read())) as zipped:
-                                for f_name in zipped.namelist():
-                                    if f_name.endswith(".tsv"):
-                                        raw_data = pd.read_csv(zipped.open(f_name), sep="\t").replace({float('nan'):None})
-                                        raw_data = self._secondaryParse(raw_data)
-                                        dataset = DatasetFileModel(
-                                            columns=list(raw_data.columns),
-                                            rows=list(raw_data.apply(lambda series : series.to_dict(), axis=1))
-                                        )
-                                        ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=dataclasses.asdict(dataset))
-                        else:
-                            ret_val.RequestErrored(msg=missing_file_msg)
+                if matched_dataset and matched_dataset.Key.DateFrom and matched_dataset.Key.DateTo:
+                    if file_list.RemoteURL is not None:
+                        matched_dataset.BaseFileLocation = file_list.RemoteURL
+
+                    file_link = None
+                    missing_file_msg = f"Dataset for {game_id} from {f'{month:02}/{year:04}'} was not found."
+                    match str(file_type).upper():
+                        case "SESSION":
+                            file_link = matched_dataset.SessionsFile(relative=False)
+                        case "PLAYER":
+                            file_link = matched_dataset.PlayersFile(relative=False)
+                        case "POPULATION":
+                            file_link = matched_dataset.PopulationFile(relative=False)
+                        case "EVENT":
+                            missing_file_msg="Event files are not yet supported."
+                        case _:
+                            missing_file_msg=f"Unrecognized file type {file_type}."
+                    if file_link:
+                        datafile_response = url_request.urlopen(file_link)
+                        with zipfile.ZipFile(BytesIO(datafile_response.read())) as zipped:
+                            for f_name in zipped.namelist():
+                                if f_name.endswith(".tsv"):
+                                    raw_data = pd.read_csv(zipped.open(f_name), sep="\t").replace({float('nan'):None})
+                                    raw_data = self._secondaryParse(raw_data)
+                                    dataset = DatasetFileModel(
+                                        columns=list(raw_data.columns),
+                                        rows=list(raw_data.apply(lambda series : series.to_dict(), axis=1))
+                                    )
+                                    ret_val.RequestSucceeded(msg="Retrieved game file info by month", val=dataclasses.asdict(dataset))
                     else:
-                        ret_val.RequestErrored(msg=f"Dataset key {_matched_dataset.Key} was invalid.")
+                        ret_val.RequestErrored(msg=missing_file_msg, status=ResponseStatus.BAD_REQUEST)
                 else:
-                    ret_val.RequestErrored(msg=f"Could not find a dataset for {sanitary_params.GameID} in {sanitary_params.Month:>02}/{sanitary_params.Year:>04}", status=ResponseStatus.NOT_FOUND)
+                    ret_val.RequestErrored(msg=f"Could not find a dataset for {safe_game_id} in {safe_month:>02}/{safe_year:>04}", status=ResponseStatus.NOT_FOUND)
             except url_error.HTTPError as err:
                 current_app.logger.error(f"HTTP error getting {file_type} file from {file_link}:\n{err}")
-                ret_val.ServerErrored(msg=f"Server experienced an error retrieving {file_type} file from {f'{sanitary_params.Month:>02}/{sanitary_params.Year:>04}'} for {sanitary_params.GameID}.")
-            except Exception as err:
-                current_app.logger.error(f"Uncaught {type(err)} getting {file_type} file from {file_link}:\n{err}\n{err.__traceback__}")
-                ret_val.ServerErrored(msg=f"Server experienced an error retrieving {file_type} file from {f'{sanitary_params.Month:>02}/{sanitary_params.Year:>04}'} for {sanitary_params.GameID}.")
+                ret_val.ServerErrored(msg=f"Server experienced an error retrieving {file_type} file from {safe_game_id} in {safe_month:>02}/{safe_year:>04}.", status=ResponseStatus.INTERNAL_ERR)
+            except Exception as err: # pylint: disable=broad-exception-caught
+                msg = f"Unexpected error while retrieving dataset file contents from {safe_game_id} in {safe_month:>02}/{safe_year:>04}!"
+                current_app.logger.error(f"{msg}\n{type(err)}:\n{err}")
+                ret_val.ServerErrored(msg=msg, status=ResponseStatus.INTERNAL_ERR)
+        elif safe_game_id is None:
+            ret_val.RequestErrored(msg=f"Invalid GameID '{game_id}'", status=ResponseStatus.BAD_REQUEST)
+        elif safe_year is None:
+            ret_val.RequestErrored(msg=f"Invalid Year '{year}'", status=ResponseStatus.BAD_REQUEST)
+        elif safe_month is None:
+            ret_val.RequestErrored(msg=f"Invalid Month '{month}'", status=ResponseStatus.BAD_REQUEST)
+        elif safe_filetype is None:
+            ret_val.RequestErrored(msg=f"Invalid File Type '{file_type}'", status=ResponseStatus.BAD_REQUEST)
 
         return ret_val.AsFlaskResponse
 

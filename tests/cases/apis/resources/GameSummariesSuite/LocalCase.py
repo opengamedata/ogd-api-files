@@ -5,8 +5,9 @@ from unittest import TestCase
 # import 3rd-party libraries
 from flask import Flask
 # import ogd libraries
-from ogd.apis.models.APIResponse import APIResponse, ResponseStatus
+from ogd.apis.models.APIResponse import APIResponse
 from ogd.apis.models.enums.RESTType import RESTType
+from ogd.apis.models.enums.ResponseStatus import ResponseStatus
 from ogd.common.utils.Logger import Logger
 # import locals
 from src.configs.FileAPIConfig import FileAPIConfig
@@ -53,7 +54,7 @@ class LocalCase(TestCase):
         # 2. Perform assertions
         if response:
             self.assertIsNotNone(response, f"No response from {_url}")
-            self.assertTrue(response.OK, f"Bad status from {_url}")
+            self.assertTrue(response.OK, f"Bad status from {_url}: {response.Status}")
             self.assertEqual(response.Type, RESTType.GET, f"Bad type from {_url}")
             self.assertIsInstance(response.Value, dict, f"Bad value type from {_url}")
             if response.Value:

@@ -5,8 +5,9 @@ from unittest import TestCase
 # import 3rd-party libraries
 from flask import Flask
 # import ogd libraries
-from ogd.apis.models.APIResponse import APIResponse, ResponseStatus
+from ogd.apis.models.APIResponse import APIResponse
 from ogd.apis.models.enums.RESTType import RESTType
+from ogd.apis.models.enums.ResponseStatus import ResponseStatus
 from ogd.common.utils.Logger import Logger
 # import locals
 from src.configs.FileAPIConfig import FileAPIConfig
@@ -53,7 +54,7 @@ class LocalCase(TestCase):
         # 2. Perform assertions
         if response:
             self.assertIsNotNone(response, f"No response from {_url}")
-            self.assertTrue(response.OK, f"Bad status from {_url}")
+            self.assertTrue(response.OK, f"Bad status from {_url}: {response.Status}")
             self.assertEqual(response.Type, RESTType.GET, f"Bad type from {_url}")
             self.assertIsInstance(response.Value, dict, f"Bad value type from {_url}")
             if response.Value:
@@ -70,5 +71,41 @@ class LocalCase(TestCase):
                     "population_file" : "https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20220801_to_20220831_0c348a5_population-features.zip"
                 }
                 self.assertEqual(datasets[17], expected_data)
+        else:
+            self.fail("Could not generate APIResponse from test response")
+
+    def test_get_invalidgame(self):
+        _url = "/games/1NVAL1D_GAM3/datasets"
+        # 1. Run request
+        raw_response = self.server.get(_url)
+        try:
+            response = APIResponse.FromDict(all_elements=raw_response.json or {}, status=ResponseStatus(raw_response.status_code))
+        except JSONDecodeError as err:
+            self.fail(f"Could not parse {raw_response.text} to JSON!\n{err}")
+        raw_response.close()
+        # 2. Perform assertions
+        if response:
+            self.assertIsNotNone(response, f"No response from {_url}")
+            self.assertEqual(response.Status, ResponseStatus.BAD_REQUEST, f"Unexpected status from {_url}: {response.Status}")
+            self.assertEqual(response.Type, RESTType.GET, f"Bad type from {_url}")
+            self.assertIsNone(response.Value, f"Non-empty value from {_url}")
+        else:
+            self.fail("Could not generate APIResponse from test response")
+
+    def test_get_nonexistentgame(self):
+        _url = "/games/NONEXISTENT_GAME/datasets"
+        # 1. Run request
+        raw_response = self.server.get(_url)
+        try:
+            response = APIResponse.FromDict(all_elements=raw_response.json or {}, status=ResponseStatus(raw_response.status_code))
+        except JSONDecodeError as err:
+            self.fail(f"Could not parse {raw_response.text} to JSON!\n{err}")
+        raw_response.close()
+        # 2. Perform assertions
+        if response:
+            self.assertIsNotNone(response, f"No response from {_url}")
+            self.assertEqual(response.Status, ResponseStatus.NOT_FOUND, f"Unexpected status from {_url}: {response.Status}")
+            self.assertEqual(response.Type, RESTType.GET, f"Bad type from {_url}")
+            self.assertIsNone(response.Value, f"Non-empty value from {_url}")
         else:
             self.fail("Could not generate APIResponse from test response")

@@ -1,7 +1,6 @@
 # import standard libraries
 import json
 from typing import Any, Dict, Optional
-from urllib import error as url_error
 from urllib import request as url_request
 
 # import ogd libraries
@@ -13,7 +12,6 @@ from flask import current_app
 # import local files
 from ogd.common.schemas.datasets.DatasetCollectionSchema import DatasetCollectionSchema
 from ogd.common.schemas.datasets.DatasetSchema import DatasetSchema
-from models.SanitizedParams import SanitizedParams
 
 def GetFileList(url:str) -> DatasetRepositoryConfig:
     # Pull the file list data into a dictionary
@@ -28,21 +26,25 @@ def GetFileList(url:str) -> DatasetRepositoryConfig:
     file_list          : DatasetRepositoryConfig   = DatasetRepositoryConfig.FromDict(name="file_list", unparsed_elements=file_list_json)
     return file_list
 
-def MatchDatasetRequest(sanitary_request:SanitizedParams, available_datasets:DatasetCollectionSchema) -> Optional[DatasetSchema]:
+def FindDataset(game_id:str, year:int, month:int, available_datasets:Dict[str, DatasetCollectionSchema]) -> Optional[DatasetSchema]:
     _matched_dataset : Optional[DatasetSchema] = None
 
+    game_datasets : DatasetCollectionSchema = available_datasets.get(game_id, DatasetCollectionSchema.Default())
     # Find the best match of a dataset to the requested month-year.
     # If there was no requested month-year, we skip this step.
-    for _key, _dataset_schema in available_datasets.Datasets.items():
-        if _dataset_schema.Key.DateFrom and _dataset_schema.Key.DateTo:
-            # If this range contains the given year & month
-            if (sanitary_request.Year >= _dataset_schema.Key.DateFrom.year \
-            and sanitary_request.Month >= _dataset_schema.Key.DateFrom.month \
-            and sanitary_request.Year <= _dataset_schema.Key.DateTo.year \
-            and sanitary_request.Month <= _dataset_schema.Key.DateTo.month):
-                if _dataset_schema.IsNewerThan(_matched_dataset):
-                    _matched_dataset = _dataset_schema
-        else:
-            current_app.logger.debug(f"While searching for dataset request match, found invalid dataset key '{_dataset_schema.Key}' in the server file list.")
+    if len(game_datasets.Datasets) > 0:
+        for _key, _dataset_schema in game_datasets.Datasets.items():
+            if _dataset_schema.Key.DateFrom and _dataset_schema.Key.DateTo:
+                # If this range contains the given year & month
+                if (year >= _dataset_schema.Key.DateFrom.year \
+                and month >= _dataset_schema.Key.DateFrom.month \
+                and year <= _dataset_schema.Key.DateTo.year \
+                and month <= _dataset_schema.Key.DateTo.month):
+                    if _dataset_schema.IsNewerThan(_matched_dataset):
+                        _matched_dataset = _dataset_schema
+            else:
+                current_app.logger.debug(f"While searching for dataset request match, found invalid dataset key '{_dataset_schema.Key}' in the server file list.")
+    else:
+        current_app.logger.warning(msg=f"GameID '{game_id}' has no available datasets")
 
     return _matched_dataset
