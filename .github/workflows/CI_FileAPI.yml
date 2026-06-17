@@ -7,7 +7,7 @@ on:
     paths:
     - '.github/workflows/CI_FileAPI.yml'
     - '.github/workflows/DEPLOY_FileAPI.yml'
-    - '.github/actions/**'
+    - '.github/actions/FileAPI_config/**'
     - 'package/**'
     - 'src/**'
     - 'requirements.txt'
