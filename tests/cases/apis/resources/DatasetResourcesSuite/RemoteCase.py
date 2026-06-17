@@ -3,8 +3,9 @@ import logging
 from unittest import TestCase
 # import ogd libraries
 from ogd.apis.models.APIRequest import APIRequest
+from ogd.apis.models.APIResponse import APIResponse
 from ogd.apis.models.enums.RESTType import RESTType
-from ogd.apis.models.APIResponse import APIResponse, ResponseStatus
+from ogd.apis.models.enums.ResponseStatus import ResponseStatus
 from ogd.common.utils.Logger import Logger
 # import locals
 from tests.FileAPITestConfig import FileAPITestConfig

@@ -5,8 +5,9 @@ from unittest import TestCase
 # import 3rd-party libraries
 from flask import Flask
 # import ogd libraries
-from ogd.apis.models.APIResponse import APIResponse, ResponseStatus
+from ogd.apis.models.APIResponse import APIResponse
 from ogd.apis.models.enums.RESTType import RESTType
+from ogd.apis.models.enums.ResponseStatus import ResponseStatus
 from ogd.common.utils.Logger import Logger
 # import locals
 from src.configs.FileAPIConfig import FileAPIConfig
