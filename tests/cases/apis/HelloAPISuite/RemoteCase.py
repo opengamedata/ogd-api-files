@@ -20,12 +20,12 @@ class test_Hello(TestCase):
     def test_get(self):
         _url = f"{self.testing_config.ExternEndpoint}/hello"
         try:
-            result : APIResponse = APIRequest(url=_url, request_type="GET", params={}).Execute(logger=Logger.std_logger)
+            response : APIResponse = APIRequest(url=_url, request_type="GET", params={}).Execute(logger=Logger.std_logger)
         except Exception as err: # pylint: disable=broad-exception-caught
             self.fail(str(err))
         else:
-            self.assertIsNotNone(result, f"No response from {_url}")
-            self.assertTrue(result.OK, f"Bad status from {_url}: {response.Status}")
-            self.assertEqual(str(result.Type), "GET", f"Bad type from {_url}")
-            self.assertIsNone(result.Value, f"Bad val from {_url}")
-            self.assertEqual(result.Message, "Hello! You GETted successfully!", f"Bad msg from {_url}")
+            self.assertIsNotNone(response, f"No response from {_url}")
+            self.assertTrue(response.OK, f"Bad status from {_url}: {response.Status}")
+            self.assertEqual(str(response.Type), "GET", f"Bad type from {_url}")
+            self.assertIsNone(response.Value, f"Bad val from {_url}")
+            self.assertEqual(response.Message, "Hello! You GETted successfully!", f"Bad msg from {_url}")
