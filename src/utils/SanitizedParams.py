@@ -72,6 +72,9 @@ class SanitizedParams:
                 ret_val = file_type
             case str():
                 if re.search("^[A-Za-z_]+$", file_type) is not None:
-                    ret_val = FileTypes[file_type.upper()]
+                    try:
+                        ret_val = FileTypes[file_type.upper()]
+                    except KeyError:
+                        ret_val = None
 
         return ret_val
