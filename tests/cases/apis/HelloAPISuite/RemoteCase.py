@@ -25,7 +25,7 @@ class test_Hello(TestCase):
             self.fail(str(err))
         else:
             self.assertIsNotNone(result, f"No response from {_url}")
-            self.assertTrue(result.OK, f"Bad status from {_url}")
+            self.assertTrue(result.OK, f"Bad status from {_url}: {response.Status}")
             self.assertEqual(str(result.Type), "GET", f"Bad type from {_url}")
             self.assertIsNone(result.Value, f"Bad val from {_url}")
             self.assertEqual(result.Message, "Hello! You GETted successfully!", f"Bad msg from {_url}")

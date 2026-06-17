@@ -52,7 +52,7 @@ class LocalCase(TestCase):
         # 2. Perform assertions
         if response:
             self.assertIsNotNone(response, f"No response from {_url}")
-            self.assertTrue(response.OK, f"Bad status from {_url}")
+            self.assertTrue(response.OK, f"Bad status from {_url}: {response.Status}")
             self.assertEqual(response.Type, RESTType.GET, f"Bad type from {_url}")
             self.assertIsInstance(response.Value, dict, f"Bad value type from {_url}")
             if response.Value:
