@@ -6,7 +6,9 @@ from flask import current_app
 from flask_restful import Resource
 
 # import ogd libraries
-from ogd.apis.models.APIResponse import APIResponse, RESTType, ResponseStatus
+from ogd.apis.models.APIResponse import APIResponse
+from ogd.apis.models.enums.RESTType import RESTType
+from ogd.apis.models.enums.ResponseStatus import ResponseStatus
 from ogd.apis.models.files.GameSummary import GameSummary as GameSummaryModel
 from ogd.common.configs.storage.DatasetRepositoryConfig import DatasetRepositoryConfig
 from ogd.common.schemas.datasets.DatasetCollectionSchema import DatasetCollectionSchema
