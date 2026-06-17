@@ -6,7 +6,7 @@ from flask import current_app
 from flask_restful import Resource
 
 # import ogd libraries
-from ogd.apis.models.APIResponse import APIResponse, RESTType
+from ogd.apis.models.APIResponse import APIResponse, RESTType, ResponseStatus
 from ogd.apis.models.files.DatasetList import DatasetList as DatasetListModel
 from ogd.apis.models.files.DatasetList import Dataset
 from ogd.common.configs.storage.DatasetRepositoryConfig import DatasetRepositoryConfig
@@ -56,7 +56,7 @@ class DatasetList(Resource):
                     ret_val.RequestSucceeded(msg="Retrieved monthly game usage", val=value)
                 # If the given game isn't in our dictionary, or our dictionary doesn't have any date ranges for this game
                 else:
-                    ret_val.ServerErrored(msg=f"GameID '{safe_game_id}' not found in list of games with datasets, or had no datasets listed")
+                    ret_val.RequestErrored(msg=f"GameID '{safe_game_id}' not found in list of games with datasets, or had no datasets listed", status=ResponseStatus.NOT_FOUND)
             except Exception as err: # pylint: disable=broad-exception-caught
                 msg = "Unexpected error while retrieving list of games with available datasets!"
                 current_app.logger.error(f"{msg}\n{type(err)}:\n{err}")
