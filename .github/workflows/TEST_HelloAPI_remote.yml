@@ -11,6 +11,8 @@ on:
         required: false
         default: ""
   push:
+    branches:
+      - "**"
     paths:
     - '.github/workflows/TEST_HelloAPI_remote.yml'
     - '.github/actions/test_config/**'

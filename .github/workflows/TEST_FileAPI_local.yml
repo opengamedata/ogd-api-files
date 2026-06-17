@@ -5,6 +5,8 @@ on:
   workflow_dispatch:
   workflow_call:
   push:
+    branches:
+      - "**"
     paths:
     - '.github/workflows/TEST_FileAPI_local.yml'
     - '.github/actions/test_config/**'
