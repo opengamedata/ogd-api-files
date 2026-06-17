@@ -38,8 +38,8 @@ class DatasetResources(Resource):
         safe_month   = SanitizedParams.SanitizeMonth(month=month)
         if safe_game_id and safe_year and safe_month:
             try:
-                cfg           : FileAPIConfig              = FileAPIConfig("FileAPIConfig", {})
-                file_list     : DatasetRepositoryConfig    = GetFileList(cfg.FileListURL)
+                cfg             : FileAPIConfig           = FileAPIConfig("FileAPIConfig", {})
+                file_list       : DatasetRepositoryConfig = GetFileList(cfg.FileListURL)
                 matched_dataset : Optional[DatasetSchema] = FindDataset(game_id=safe_game_id, year=safe_year, month=safe_month, available_datasets=file_list.Games)
 
                 if matched_dataset and matched_dataset.Key.DateFrom and matched_dataset.Key.DateTo:
