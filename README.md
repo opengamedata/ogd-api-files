@@ -181,19 +181,6 @@ Broadly speaking, the file API has a 3-level hierarchy for retrieving informatio
   curl https://ogd-staging.fielddaylab.wisc.edu/apis/files/main/games/AQUALAB/datasets/2023/01/player
   ```
 
-### Legacy Endpoints
-
-Endpoints used by the OpenGameData website, which use an outdated convention.
-We intend to deprecate these in the near future.
-
-* `/MonthlyGameUsage` : Retrieve a list of datasets and associated session counts for a specific game.
-
-  Query string params: `game_id`
-
-* `/getGameFileInfoByMonth` : Get detailed info on the files and other resources that are available for a specific dataset.
-
-  Query string params: `game_id`, `year`, `month`
-
 ## Developer Instructions
 
 ### Running the app locally via the development Flask server
