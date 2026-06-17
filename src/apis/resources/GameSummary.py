@@ -6,7 +6,7 @@ from flask import current_app
 from flask_restful import Resource
 
 # import ogd libraries
-from ogd.apis.models.APIResponse import APIResponse, RESTType
+from ogd.apis.models.APIResponse import APIResponse, RESTType, ResponseStatus
 from ogd.apis.models.files.GameSummary import GameSummary as GameSummaryModel
 from ogd.common.configs.storage.DatasetRepositoryConfig import DatasetRepositoryConfig
 from ogd.common.schemas.datasets.DatasetCollectionSchema import DatasetCollectionSchema
@@ -40,7 +40,7 @@ class GameSummary(Resource):
                     ret_val.RequestSucceeded(f"Retrieved {safe_game_id} summary", val=dataclasses.asdict(summary))
                 else:
                     # If the given game isn't in our dictionary, or our dictionary doesn't have any date ranges for this game
-                    ret_val.ServerErrored(msg=f"GameID '{safe_game_id}' not found in list of games with datasets, or had no datasets listed")
+                    ret_val.RequestErrored(msg=f"GameID '{safe_game_id}' not found in list of games with datasets, or had no datasets listed", status=ResponseStatus.NOT_FOUND)
             except Exception as err: # pylint: disable=broad-exception-caught
                 msg = f"Unexpected error while retrieving {safe_game_id} summary!"
                 current_app.logger.error(f"{msg}\n{type(err)}:\n{err}")
