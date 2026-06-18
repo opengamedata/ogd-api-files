@@ -26,7 +26,7 @@ jobs:
     uses: ./.github/workflows/TEST_FileAPI_local.yml
 
   ci_deploy:
-    name: CI Deploy of Website API
+    name: CI Deploy
     needs: build
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:

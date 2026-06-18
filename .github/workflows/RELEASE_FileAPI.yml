@@ -59,7 +59,7 @@ jobs:
       shell: bash
 
   release_deploy:
-    name: Release Deploy of Website API
+    name: Release Deploy
     if: github.event.action == 'released'
     needs: [build, pypi_release, wait_for_pypi]
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
