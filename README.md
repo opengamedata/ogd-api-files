@@ -2,7 +2,7 @@
 
 This is the OpenGameData dataset/file repository API.
 
-Its primary use is for getting information about what data is available from the fileserver used by [opengamedata.fielddaylab.wisc.edu](opengamedata.fielddaylab.wisc.edu), but could be used for any repository of datasets using the OpenGameData pipeline.
+Its primary use is for getting information about what data is available from the fileserver used by [data.opengamedata.io](data.opengamedata.io), but could be used for any repository of datasets using the OpenGameData pipeline.
 
 ## API endpoints
 
