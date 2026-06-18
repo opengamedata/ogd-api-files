@@ -14,20 +14,20 @@ on:
 
 jobs:
 
+  testbed_fileapi_local:
+    name: FileAPI Local Testbeds
+    uses: ./.github/workflows/TEST_FileAPI_local.yml
+
   build:
     name: Build Python Package
+    needs: [testbed_fileapi_local]
     uses: ./.github/workflows/BUILD_FileAPI.yml
     with:
       with_caching: false
 
-  testbed_fileapi_local:
-    name: FileAPI Local Testbeds
-    needs: build
-    uses: ./.github/workflows/TEST_FileAPI_local.yml
-
   ci_deploy:
     name: CI Deploy
-    needs: build
+    needs: [build]
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:
       deploy_host: ${{ vars.OGD_STAGING_HOST }}
@@ -37,10 +37,10 @@ jobs:
 
   testbed_hello_remote:
     name: HelloAPI Remote Testbed
-    needs: ci_deploy
+    needs: [ci_deploy]
     uses: ./.github/workflows/TEST_HelloAPI_remote.yml
 
   testbed_fileapi_remote:
     name: FileAPI Remote Testbeds
-    needs: ci_deploy
+    needs: [ci_deploy]
     uses: ./.github/workflows/TEST_FileAPI_remote.yml
