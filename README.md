@@ -90,7 +90,6 @@ Broadly speaking, the file API has a 3-level hierarchy for retrieving informatio
   }
   ```
 
-
 ### Dataset-Level Endpoints
 
 * `/games/<game_id>/datasets`
@@ -194,4 +193,4 @@ Steps to run:
     * If you are performing local development, you should instead run `pip install -e ./`
 5. Copy `config/config.py.template` to `src/config.py` to create a config. Update `config.py` configuration values as needed.
 6. Enter the source folder with `cd src` and then run `python -m flask run`, or optionally include the `--debug` flag.
-7. A web server should begin running at http://localhost:5000
+7. A web server should begin running at `http://localhost:5000`
