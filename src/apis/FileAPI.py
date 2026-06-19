@@ -50,12 +50,12 @@ class FileAPI:
         except Exception as err:
             app.logger.warning(f"Couldn't register DatasetResources resource:\n   {err}")
         try:
-            from apis.resources.DatasetFile import DatasetFile
+            from apis.resources.DatasetManifest import DatasetManifest
             api.add_resource(DatasetManifest,  '/games/<string:game_id>/datasets/<int:year>/<int:month>/manifest')
         except Exception as err:
             app.logger.warning(f"Couldn't register DatasetManifest resource:\n   {err}")
         try:
-            from apis.resources.DatasetManifest import DatasetManifest
+            from apis.resources.DatasetFile import DatasetFile
             api.add_resource(DatasetFile,      '/games/<string:game_id>/datasets/<int:year>/<int:month>/<string:file_type>')
         except Exception as err:
             app.logger.warning(f"Couldn't register DatasetFile resource:\n   {err}")
