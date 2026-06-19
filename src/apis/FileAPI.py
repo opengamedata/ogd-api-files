@@ -30,12 +30,33 @@ class FileAPI:
         """
         api = Api(app)
 
-        api.add_resource(GameList,        '/games')
-        api.add_resource(GameSummaries,   '/games/details')
-        api.add_resource(GameSummary,     '/games/<string:game_id>')
-        api.add_resource(DatasetList,     '/games/<string:game_id>/datasets',
-                                          '/games/<string:game_id>/datasets/<int:year>')
-        api.add_resource(DatasetResources,     '/games/<string:game_id>/datasets/<int:year>/<int:month>')
-        api.add_resource(DatasetManifest, '/games/<string:game_id>/datasets/<int:year>/<int:month>/manifest')
-        api.add_resource(DatasetFile,     '/games/<string:game_id>/datasets/<int:year>/<int:month>/<string:file_type>')
+        try:
+            api.add_resource(GameList,         '/games')
+        except Exception as err:
+            app.logger.warning(f"Couldn't register GameList resource:\n{err}")
+        try:
+            api.add_resource(GameSummaries,    '/games/details')
+        except Exception as err:
+            app.logger.warning(f"Couldn't register GameSummaries resource:\n{err}")
+        try:
+            api.add_resource(GameSummary,      '/games/<string:game_id>')
+        except Exception as err:
+            app.logger.warning(f"Couldn't register GameSummary resource:\n{err}")
+        try:
+            api.add_resource(DatasetList,      '/games/<string:game_id>/datasets',
+                                               '/games/<string:game_id>/datasets/<int:year>')
+        except Exception as err:
+            app.logger.warning(f"Couldn't register DatasetList resource:\n{err}")
+        try:
+            api.add_resource(DatasetResources, '/games/<string:game_id>/datasets/<int:year>/<int:month>')
+        except Exception as err:
+            app.logger.warning(f"Couldn't register DatasetResources resource:\n{err}")
+        try:
+            api.add_resource(DatasetManifest,  '/games/<string:game_id>/datasets/<int:year>/<int:month>/manifest')
+        except Exception as err:
+            app.logger.warning(f"Couldn't register DatasetManifest resource:\n{err}")
+        try:
+            api.add_resource(DatasetFile,      '/games/<string:game_id>/datasets/<int:year>/<int:month>/<string:file_type>')
+        except Exception as err:
+            app.logger.warning(f"Couldn't register DatasetFile resource:\n{err}")
         FileAPI.server_config = settings
