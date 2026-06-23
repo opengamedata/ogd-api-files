@@ -69,11 +69,8 @@ jobs:
         password: ${{ secrets.VPN_PASS }}
         endpoint: "soe.vpn.wisc.edu"
 
-    - name: Upload requirements.txt
-      run: scp -o StrictHostKeyChecking=no -o ConnectTimeout=30 -T -i ./key.txt ./requirements.txt ${{ secrets.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:${{ env.DEPLOY_DIR }}
-
     - name: Deploy to Server
-      uses: opengamedata/actions-deploy-project@v1.2
+      uses: opengamedata/actions-deploy-project@v1.3
       with:
         local_path: ./src
         remote_path: ${{ env.DEPLOY_DIR }}
@@ -81,10 +78,11 @@ jobs:
         remote_user: ${{ secrets.DEPLOY_USER }}
         remote_key:  ${{ secrets.DEPLOY_KEY }}
         with_venv: true
+        with_reqs_file: "./requirements.txt"
 
     - name: Deploy as Latest
       if: ${{ inputs.as_latest }}
-      uses: opengamedata/actions-deploy-project@v1.2
+      uses: opengamedata/actions-deploy-project@v1.3
       with:
         local_path: ./src
         remote_path: ${{ env.DEPLOY_DIR_LATEST }}
@@ -92,6 +90,7 @@ jobs:
         remote_user: ${{ secrets.DEPLOY_USER }}
         remote_key:  ${{ secrets.DEPLOY_KEY }}
         with_venv: true
+        with_reqs_file: "./requirements.txt"
 
     # 4. Cleanup & complete
     - name: Restart httpd via ssh
