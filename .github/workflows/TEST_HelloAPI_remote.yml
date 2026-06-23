@@ -43,6 +43,7 @@ jobs:
 
   deploy_if_needed:
     name: FileAPI Deploy (If Needed)
+    needs: check_deploy
     if: failure()
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     secrets: inherit
