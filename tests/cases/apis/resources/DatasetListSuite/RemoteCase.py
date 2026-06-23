@@ -48,6 +48,34 @@ class RemoteCase(TestCase):
                 }
                 self.assertEqual(datasets[17], expected_data)
 
+    def test_get_singleyear(self):
+        _url = f"{self.testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/2024"
+        # 1. Run request
+        try:
+            response : APIResponse = APIRequest(url=_url, request_type="GET", params={}, timeout=2).Execute(logger=Logger.std_logger)
+        except Exception as err: # pylint: disable=broad-exception-caught
+            self.fail(str(err))
+        else:
+        # 2. Perform assertions
+            self.assertIsNotNone(response, f"No response from {_url}")
+            self.assertTrue(response.OK, f"Bad status from {_url}: {response.Status}")
+            self.assertEqual(response.Type, RESTType.GET, f"Bad type from {_url}")
+            self.assertIsInstance(response.Value, dict, f"Bad value type from {_url}")
+            if response.Value:
+                self.assertIn("datasets", response.Value.keys(), "Response did not contain datasets")
+                datasets = response.Value.get('datasets', [])
+                self.assertIsInstance(datasets, list, "Response had null datasets")
+                self.assertGreaterEqual(len(datasets), 12)
+                expected_data = {
+                    'year': 2024,
+                    'month': 1,
+                    'total_sessions': 5768,
+                    "sessions_file"   : "https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_session-features.zip",
+                    "players_file"    : "https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_player-features.zip",
+                    "population_file" : "https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_population-features.zip"
+                }
+                self.assertEqual(datasets[0], expected_data)
+
     def test_get_invalidgame(self):
         _url = f"{self.testing_cfg.ExternEndpoint}/games/1NVAL1D_GAM3/datasets"
         # 1. Run request
