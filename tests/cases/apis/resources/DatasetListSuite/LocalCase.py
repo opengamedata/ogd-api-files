@@ -42,7 +42,6 @@ class LocalCase(TestCase):
         cls.server = cls.application.test_client()
 
     def test_get(self):
-
         _url = "/games/AQUALAB/datasets"
         # 1. Run request
         raw_response = self.server.get(_url)
@@ -71,6 +70,38 @@ class LocalCase(TestCase):
                     "population_file" : "https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20220801_to_20220831_0c348a5_population-features.zip"
                 }
                 self.assertEqual(datasets[17], expected_data)
+        else:
+            self.fail("Could not generate APIResponse from test response")
+
+    def test_get_singleyear(self):
+        _url = "/games/AQUALAB/datasets/2024"
+        # 1. Run request
+        raw_response = self.server.get(_url)
+        try:
+            response = APIResponse.FromDict(all_elements=raw_response.json or {}, status=ResponseStatus(raw_response.status_code))
+        except JSONDecodeError as err:
+            self.fail(f"Could not parse {raw_response.text} to JSON!\n{err}")
+        raw_response.close()
+        # 2. Perform assertions
+        if response:
+            self.assertIsNotNone(response, f"No response from {_url}")
+            self.assertTrue(response.OK, f"Bad status from {_url}: {response.Status}")
+            self.assertEqual(response.Type, RESTType.GET, f"Bad type from {_url}")
+            self.assertIsInstance(response.Value, dict, f"Bad value type from {_url}")
+            if response.Value:
+                self.assertIn("datasets", response.Value.keys(), "Response did not contain datasets")
+                datasets = response.Value.get('datasets', [])
+                self.assertIsInstance(datasets, list, "Response had null datasets")
+                self.assertEqual(len(datasets), 12)
+                expected_data = {
+                    'year': 2024,
+                    'month': 1,
+                    'total_sessions': 5768,
+                    "sessions_file"   : "https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_session-features.zip",
+                    "players_file"    : "https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_player-features.zip",
+                    "population_file" : "https://opengamedata.fielddaylab.wisc.edu/data/AQUALAB/AQUALAB_20240101_to_20240131_df72162_population-features.zip"
+                }
+                self.assertEqual(datasets[0], expected_data)
         else:
             self.fail("Could not generate APIResponse from test response")
 
