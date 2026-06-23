@@ -69,6 +69,9 @@ jobs:
         password: ${{ secrets.VPN_PASS }}
         endpoint: "soe.vpn.wisc.edu"
 
+    - name: Upload requirements.txt
+      run: scp -o StrictHostKeyChecking=no -o ConnectTimeout=30 -T -i ./key.txt ./requirements.txt ${{ secrets.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:${{ env.DEPLOY_DIR }}
+
     - name: Deploy to Server
       uses: opengamedata/actions-deploy-project@v1.2
       with:
