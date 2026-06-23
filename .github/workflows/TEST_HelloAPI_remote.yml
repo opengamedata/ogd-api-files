@@ -54,6 +54,8 @@ jobs:
 
   run_testbed_hello_remote:
     name: Run HelloAPI Remote Testbed
+    needs: [check_deploy, deploy_if_needed]
+    if: always() && (needs.check_deploy.result == 'success' || needs.deploy_if_needed.result == 'success')
     runs-on: ubuntu-22.04
     concurrency:
       group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-hello
