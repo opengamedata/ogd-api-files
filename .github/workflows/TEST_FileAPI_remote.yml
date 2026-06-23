@@ -34,8 +34,8 @@ jobs:
     name: Check for Existing Deploy
     runs-on: ubuntu-22.04
     concurrency:
-      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}
-      cancel-in-progress: true
+      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-file
+      cancel-in-progress: false
     
     steps:
     - name: cURL Check Hello Endpoint
