@@ -30,8 +30,32 @@ env:
   LOCAL_TEST_DIR: ./tests/cases/apis/HelloAPISuite
 
 jobs:
+  check_deploy:
+    name: Check for Existing Deploy
+    runs-on: ubuntu-22.04
+    concurrency:
+      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-hello
+      cancel-in-progress: false
+    
+    steps:
+    - name: cURL Check Hello Endpoint
+      run: curl -Is --fail-with-body https://${{ env.DEPLOY_URL }}/hello
+
+  deploy_if_needed:
+    name: FileAPI Deploy (If Needed)
+    needs: check_deploy
+    if: failure()
+    uses: ./.github/workflows/DEPLOY_FileAPI.yml
+    secrets: inherit
+    with:
+      deploy_host: ${{ vars.OGD_STAGING_HOST }}
+      branch: ${{ github.ref_name }}
+      remove: false
+
   run_testbed_hello_remote:
     name: Run HelloAPI Remote Testbed
+    needs: [check_deploy, deploy_if_needed]
+    if: always() && (needs.check_deploy.result == 'success' || needs.deploy_if_needed.result == 'success')
     runs-on: ubuntu-22.04
     concurrency:
       group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-hello

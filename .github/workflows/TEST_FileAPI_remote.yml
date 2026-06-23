@@ -34,15 +34,16 @@ jobs:
     name: Check for Existing Deploy
     runs-on: ubuntu-22.04
     concurrency:
-      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}
-      cancel-in-progress: true
+      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-file
+      cancel-in-progress: false
     
     steps:
     - name: cURL Check Hello Endpoint
-      run: curl -Is --fail-with-body ${{ env.DEPLOY_URL }}/hello
+      run: curl -Is --fail-with-body https://${{ env.DEPLOY_URL }}/hello
 
   deploy_if_needed:
     name: FileAPI Deploy (If Needed)
+    needs: check_deploy
     if: failure()
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     secrets: inherit
@@ -53,6 +54,8 @@ jobs:
 
   run_testbed_files:
     name: Run FileAPI Testbed
+    needs: [check_deploy, deploy_if_needed]
+    if: always() && (needs.check_deploy.result == 'success' || needs.deploy_if_needed.result == 'success')
     runs-on: ubuntu-22.04
     concurrency:
       group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-file
