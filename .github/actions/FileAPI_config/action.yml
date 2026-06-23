@@ -12,7 +12,7 @@ inputs:
   remote_app_path:
     description: "Remote directory where WSGI app will be deployed, not including the file itself"
     required: true
-    default: 'var/www/wsgi-bin/opengamedata/apis/files/'
+    default: 'var/www/wsgi-bin/apis/files/'
   local_app_path:
     description: "Local path to the folder containing the WSGI app to be deployed"
     required: true
