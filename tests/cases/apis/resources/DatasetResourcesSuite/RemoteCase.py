@@ -11,21 +11,17 @@ from ogd.common.utils.Logger import Logger
 from tests.FileAPITestConfig import FileAPITestConfig
 from tests.config.t_config import settings
 
-_testing_cfg = FileAPITestConfig.FromDict(name="FileAPITestConfig", unparsed_elements=settings)
-_level       = logging.DEBUG if _testing_cfg.Verbose else logging.INFO
-Logger.std_logger.setLevel(_level)
-
 class RemoteCase(TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.testing_config = FileAPITestConfig.FromDict(name="FileAPITestConfig", unparsed_elements=settings)
-        cls.base_url : str = f"{_testing_cfg.ExternEndpoint}"
-
-        _level = logging.DEBUG if cls.testing_config.Verbose else logging.INFO
-        Logger.InitializeLogger(level=_level, use_logfile=False)
+        cls.testing_cfg = FileAPITestConfig.FromDict(name="FileAPITestConfig", unparsed_elements=settings)
+        Logger.InitializeLogger(
+            level       = logging.DEBUG if cls.testing_cfg.Verbose else logging.INFO,
+            use_logfile = False
+        )
 
     def test_get(self):
-        _url = f"{_testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/2024/1"
+        _url = f"{self.testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/2024/1"
         # 1. Run request
         try:
             response : APIResponse = APIRequest(url=_url, request_type="GET", params={}, timeout=2).Execute(logger=Logger.std_logger)
@@ -65,9 +61,9 @@ class RemoteCase(TestCase):
 
     def test_get_invalidinput(self):
         invalid_urls = {
-            f"{self.base_url}/games/1NVAL1D_GAM3/datasets/2026/1",
-            f"{self.base_url}/games/AQUALAB/datasets/1900/1",
-            f"{self.base_url}/games/AQUALAB/datasets/2026/13",
+            f"{self.testing_cfg.ExternEndpoint}/games/1NVAL1D_GAM3/datasets/2026/1",
+            f"{self.testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/1900/1",
+            f"{self.testing_cfg.ExternEndpoint}/games/AQUALAB/datasets/2026/13",
         }
         for url in invalid_urls:
             with self.subTest(url=url):
@@ -83,9 +79,9 @@ class RemoteCase(TestCase):
 
     def test_get_nonexistentdataset(self):
         invalid_dataset_urls = {
-            f"{self.base_url}/games/NONEXISTENT_GAME/datasets/2026/1",
-            f"{self.base_url}/games/BLOOM/datasets/2020/1", # Bloom data doesn't start until well after 2020
-            f"{self.base_url}/games/BLOOM/datasets/2024/1" # We have 2024 data for Bloom, but it starts in February.
+            f"{self.testing_cfg.ExternEndpoint}/games/NONEXISTENT_GAME/datasets/2026/1",
+            f"{self.testing_cfg.ExternEndpoint}/games/BLOOM/datasets/2020/1", # Bloom data doesn't start until well after 2020
+            f"{self.testing_cfg.ExternEndpoint}/games/BLOOM/datasets/2024/1" # We have 2024 data for Bloom, but it starts in February.
         }
         for url in invalid_dataset_urls:
             with self.subTest(url=url):
