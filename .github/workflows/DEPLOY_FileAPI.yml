@@ -74,7 +74,7 @@ jobs:
       uses: docker/setup-docker-action@v5
 
     - name: Build image
-      run: docker build -t ${{ env.IMAGE_NAME }}
+      run: docker build -t ${{ env.IMAGE_NAME }} .
 
     - name: Push to GHCR
       run: docker push ${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}
