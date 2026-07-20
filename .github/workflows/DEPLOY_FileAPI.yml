@@ -76,6 +76,9 @@ jobs:
     - name: Build image
       run: docker build -t ${{ env.IMAGE_NAME }} .
 
+    - name: Tag image for pushing
+      run: docker tag ${{ env.IMAGE_NAME }} ${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}
+
     - name: Push to GHCR
       run: docker push ${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}
 
