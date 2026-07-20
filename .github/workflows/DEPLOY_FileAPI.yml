@@ -96,6 +96,11 @@ jobs:
 
     steps:
 
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
     # 3. Remote config & deploy
 
     - name: Authenticate to Google Cloud
