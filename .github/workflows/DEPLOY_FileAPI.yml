@@ -69,18 +69,12 @@ jobs:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Set up Docker
-      uses: docker/setup-docker-action@v5
-
-    - name: Build image
-      run: docker build -t ${{ env.IMAGE_NAME }} .
-
-    - name: Tag image for pushing
-      run: docker tag ${{ env.IMAGE_NAME }} ${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}
-
-    - name: Push to GHCR
-      run: docker push ${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}
+    - name: Build and Push to GHCR
+      uses: docker/build-push-action@v7
+      with:
+        context: .
+        push: true
+        tags: ${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}
 
   deploy_fileapi:
     name: Deploy File API to Google Cloud
