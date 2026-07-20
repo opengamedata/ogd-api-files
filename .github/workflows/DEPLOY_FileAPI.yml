@@ -69,12 +69,15 @@ jobs:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Build and Push to GHCR
       uses: docker/build-push-action@v7
       with:
         context: .
         push: true
         tags: ${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
 
   deploy_fileapi:
     name: Deploy File API to Google Cloud
