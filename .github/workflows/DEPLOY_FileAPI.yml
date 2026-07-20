@@ -29,10 +29,12 @@ env:
   DEPLOY_DIR:                            ${{ vars.API_BASE_PATH }}/files/${{ inputs.branch }}
   DEPLOY_URL:  ${{ inputs.deploy_host }}/${{ vars.API_BASE_URL  }}/files/${{ inputs.branch }}/app.wsgi
   DEPLOY_DIR_LATEST:                     ${{ vars.API_BASE_PATH }}/files/latest
+  IMAGE_NAME: ${{ github.repository }}/${{ inputs.branch }}:latest
+  REPOSITORY: ghcr.io/opengamedata
 
 jobs:
-  deploy_fileapi:
-    name: Deploy File API
+  build_image:
+    name: Build Docker Image for Deploy
     if: inputs.remove == false
     runs-on: ubuntu-22.04
     concurrency:
@@ -40,9 +42,6 @@ jobs:
       cancel-in-progress: true
 
     steps:
-
-    - name: Announce deploy
-      run: echo "Deploying to ${{ env.DEPLOY_URL }}"
 
     # 1. Local checkout & config
     - name: Checkout repository
@@ -62,7 +61,7 @@ jobs:
     # 2. Build
 
     # - name: Create Docker Image
-    #   run: docker build -t ${{ github.repository }}/${{ inputs.branch }}
+    #   run: docker build -t 
 
     - name: Login to GitHub Container Registry
       uses: docker/login-action@v4
@@ -75,10 +74,21 @@ jobs:
       uses: docker/setup-docker-action@v5
 
     - name: Build image
-      run: docker build -t ${{ github.repository }}/${{ inputs.branch }}:latest
+      run: docker build -t ${{ env.IMAGE_NAME }}
 
     - name: Push to GHCR
-      run: docker push ghcr.io/opengamedata/${{ github.repository }}/${{ inputs.branch }}:latest
+      run: docker push ${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}
+
+  deploy_fileapi:
+    name: Deploy File API to Google Cloud
+    if: inputs.remove == false
+    needs: build_image
+    runs-on: ubuntu-22.04
+    concurrency:
+      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-deploy
+      cancel-in-progress: true
+
+    steps:
 
     # 3. Remote config & deploy
 
@@ -93,7 +103,7 @@ jobs:
       uses: 'google-github-actions/deploy-cloudrun@v3'
       with:
         service: 'ogd-file-api-cloud'
-        image: 'ghcr.io/opengamedata/${{ github.repository }}/${{ inputs.branch }}:latest'
+        image: '${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}'
 
     # 4. Cleanup & complete
 
