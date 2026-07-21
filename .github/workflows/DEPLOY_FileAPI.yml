@@ -25,12 +25,8 @@ on:
         default: false
 
 env:
-  DEPLOY_HOST: ${{ inputs.deploy_host }}
-  DEPLOY_DIR:                            ${{ vars.API_BASE_PATH }}/files/${{ inputs.branch }}
-  DEPLOY_URL:  ${{ inputs.deploy_host }}/${{ vars.API_BASE_URL  }}/files/${{ inputs.branch }}/app.wsgi
-  DEPLOY_DIR_LATEST:                     ${{ vars.API_BASE_PATH }}/files/latest
+  REPOSITORY: ${{ secrets.DOCKER_IMAGE_REPO }}
   IMAGE_NAME: ${{ github.repository }}/${{ inputs.branch }}:latest
-  REPOSITORY: ghcr.io/opengamedata
 
 jobs:
   build_image:
@@ -125,33 +121,11 @@ jobs:
     
     steps:
     
-    - name: Announce cleanup
-      run: echo "Removing branch deploy at ${{ env.DEPLOY_URL }}"
-
-    # 1. Local checkout & config
-    
-    # 2. Build 
-
     # 3. Remote config & clean
-    - name: Connect to VPN
-      uses: opengamedata/actions-openconnect-vpn@v1.1
+    - name: Remove Image from Repo
+      uses: dataaxiom/ghcr-cleanup-action@v1
       with:
-        username: ${{ secrets.VPN_USER }}
-        password: ${{ secrets.VPN_PASS }}
-        endpoint: "soe.vpn.wisc.edu"
-
-    - name: Setup Access Key
-      run: |
-        mkdir -p ~/.ssh
-        echo '${{secrets.CLEAN_KEY}}' >> ./key.txt
-        chmod 600 ./key.txt
-
-    - name: Remove branch folder
-      run: ssh -o StrictHostKeyChecking=no -T -i ./key.txt ${{ secrets.CLEAN_USER }}@${{ env.DEPLOY_HOST }} "rm -r ${{ env.DEPLOY_DIR }}"
-    # This allows us to yank down a recent release, if needed. Generally don't intend to do this.
-    - name: Remove 'latest' folder
-      if: ${{ inputs.as_latest }}
-      run: ssh -o StrictHostKeyChecking=no -T -i ./key.txt ${{ secrets.CLEAN_USER }}@${{ env.DEPLOY_HOST }} "rm -r ${{ env.DEPLOY_DIR_LATEST }}"
+        delete-tags: ${{ env.IMAGE_NAME }}
 
     - name: Upload logs as artifacts
       uses: actions/upload-artifact@v4
