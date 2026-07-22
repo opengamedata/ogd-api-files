@@ -4,6 +4,7 @@
 tests/config/t_config.py
 tests/Makefile
 .vscode/*.json
+gha-creds-*.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
