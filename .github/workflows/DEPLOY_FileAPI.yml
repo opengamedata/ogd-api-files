@@ -102,6 +102,7 @@ jobs:
         project_id: ${{ secrets.GCLOUD_PROJECT_ID }}
         workload_identity_provider: 'projects/${{ secrets.GCLOUD_PROJECT_ID }}/locations/global/workloadIdentityPools/${{ secrets.GCLOUD_ID_POOL }}/providers/${{ secrets.GCLOUD_ID_ }}'
         service_account: ${{ secrets.GCLOUD_DEPLOY_USER }}
+        audience: ${{ secrets.GCLOUD_ACCESS_SUBJECT }}
 
     - id: 'deploy'
       uses: 'google-github-actions/deploy-cloudrun@v3'
