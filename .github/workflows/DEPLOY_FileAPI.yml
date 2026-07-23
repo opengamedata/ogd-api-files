@@ -100,9 +100,9 @@ jobs:
       uses: google-github-actions/auth@v3
       with:
         project_id: ${{ secrets.GCLOUD_PROJECT_ID }}
-        workload_identity_provider: 'projects/${{ secrets.GCLOUD_PROJECT_NUM }}/locations/global/workloadIdentityPools/${{ secrets.GCLOUD_ID_POOL }}/providers/${{ secrets.GCLOUD_ID_ }}'
+        workload_identity_provider: 'projects/${{ secrets.GCLOUD_PROJECT_NUM }}/locations/global/workloadIdentityPools/${{ secrets.GCLOUD_ID_POOL }}/providers/${{ secrets.GCLOUD_ID_PROVIDER }}'
         service_account: ${{ secrets.GCLOUD_DEPLOY_USER }}
-        audience: ${{ secrets.GCLOUD_AUDIENCE }}
+        # audience: ${{ secrets.GCLOUD_AUDIENCE }}
 
     - id: 'deploy'
       uses: 'google-github-actions/deploy-cloudrun@v3'
