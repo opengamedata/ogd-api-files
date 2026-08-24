@@ -56,7 +56,7 @@ jobs:
       uses: 'google-github-actions/deploy-cloudrun@v3'
       with:
         service: 'ogd-api-files-test'
-        image: ${{ inputs.image }}
+        image: ${{ secrets.DOCKER_IMAGE_REPO }}/${{ inputs.image }}
 
     # TODO : figure out how to also deploy as 'latest'
 
