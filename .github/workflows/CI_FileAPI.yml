@@ -33,7 +33,9 @@ jobs:
         run: echo "Splitting " ${{ github.ref_name }}
       - name: Get Branch short name
         id: step_branch_tag
-        run: echo "${{ github.ref_name }}" | awk '{ print(arr[split($0, arr, "/")]) }' | echo "branch_tag=$0" >> "$GITHUB_OUTPUT"
+        run: |
+          BRANCH=$(echo "${{ github.ref_name }}" | awk '{ print(arr[split($0, arr, "/")]) }')
+          echo "branch_tag=$BRANCH" >> "$GITHUB_OUTPUT"
 
   check_setup:
     name: Check Branch
