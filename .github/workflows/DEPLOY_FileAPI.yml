@@ -18,6 +18,10 @@ on:
         description: "Whether to also deploy/remove as the 'latest' version of API"
         required: false
         default: false
+    secrets:
+      image_repository:
+        required: True
+        description: "Secret indicating the repository of Docker images to use to find the image for deploy."
 
 env:
   DEPLOY_URL: ${{ github.repository }}-test-${{ vars.GCLOUD_PROJECT_NUM }}.${{ vars.GCLOUD_REGION }}.run.app
