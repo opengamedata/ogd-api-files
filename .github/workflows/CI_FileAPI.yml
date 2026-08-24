@@ -47,8 +47,8 @@ jobs:
     needs: [setup, testbed_fileapi_local]
     uses: ./.github/workflows/BUILD_FileAPI.yml
     with:
-      image_repository: ${{ env.REPOSITORY }}
-      image_name:       ${{ env.IMAGE }}
+      image_repository: ${{ secrets.DOCKER_IMAGE_REPO }}
+      image_name:       opengamedata/${{ github.repository }}
       image_tag:        ${{ needs.setup.outputs.branch_tag }}
       with_caching: false
 
@@ -57,7 +57,7 @@ jobs:
     needs: [build]
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:
-      image: ${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ needs.setup.outputs.branch_tag }}
+      image: ${{ secrets.DOCKER_IMAGE_REPO }}/opengamedata/${{ github.repository }}:${{ needs.setup.outputs.branch_tag }}
       remove: false
     secrets: inherit
 
