@@ -59,6 +59,8 @@ jobs:
         service: 'ogd-api-files-test'
         image: '${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}'
 
+    # TODO : figure out how to also deploy as 'latest'
+
     # 4. Cleanup & complete
 
   branch_delete:

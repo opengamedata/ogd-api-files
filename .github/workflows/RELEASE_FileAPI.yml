@@ -20,6 +20,9 @@ jobs:
     needs: [testbed_fileapi_local]
     uses: ./.github/workflows/BUILD_FileAPI.yml
     with:
+      image_repository: ${{ env.REPOSITORY }}
+      image_name:       ${{ env.IMAGE }}
+      image_tag:        ${{ github.ref_name }}
       with_caching: true
 
   pypi_release:
@@ -69,8 +72,7 @@ jobs:
     needs: [build, pypi_release, wait_for_pypi]
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:
-      deploy_host: ${{ vars.OGD_SERVICES_HOST }}
-      branch: ${{ github.ref_name }}
+      image: ${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ needs.setup.outputs.branch_tag }}
       as_latest: true
       remove: false
     secrets: inherit
