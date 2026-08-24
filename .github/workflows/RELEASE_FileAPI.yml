@@ -9,6 +9,10 @@ on:
   release:
     types: [released, prereleased]
 
+env:
+  REPOSITORY: ${{ secrets.DOCKER_IMAGE_REPO }}
+  IMAGE:      ${{ github.repository }} # github.repository includes organization as prefix
+
 jobs:
 
   testbed_fileapi_local:
