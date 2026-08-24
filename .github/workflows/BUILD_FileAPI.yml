@@ -4,10 +4,10 @@ run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' &
 on:
   workflow_dispatch:
     inputs:
-      image_repository:
-        type: string
-        description: "The repository in which to place the Docker image."
-        required: true
+      # image_repository:
+      #   type: string
+      #   description: "The repository in which to place the Docker image."
+      #   required: true
       image_name:
         type: string
         description: "The name of the image."
@@ -23,10 +23,10 @@ on:
         default: false
   workflow_call:
     inputs:
-      image_repository:
-        type: string
-        description: "The repository in which to place the Docker image."
-        required: true
+      # image_repository:
+      #   type: string
+      #   description: "The repository in which to place the Docker image."
+      #   required: true
       image_name:
         type: string
         description: "The name of the image."
@@ -118,6 +118,6 @@ jobs:
       with:
         context: .
         push: true
-        tags: ${{inputs.image_repository}}/${{ inputs.image_name }}:${{ inputs.image_tag }}
+        tags: ${{ secrets.image_repository }}/${{ inputs.image_name }}:${{ inputs.image_tag }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
