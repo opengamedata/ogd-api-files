@@ -37,20 +37,6 @@ jobs:
           BRANCH=$(echo "${{ github.ref_name }}" | awk '{ print(arr[split($0, arr, "/")]) }')
           echo "branch_tag=$BRANCH" >> "$GITHUB_OUTPUT"
 
-  check_setup:
-    name: Check Branch
-    runs-on: ubuntu-22.04
-    needs: [setup]
-    steps:
-      # Kinda gross string processing to get the shortened version of a branch name.
-      # Interpreting the `awk` use:
-      #  1. We call split on "/", storing to arr
-      #  2. The whole expression calls print on arr's last element:
-      #     `split` returns the number of results, so we're indexing at last index (awk uses 1-indexing)
-      #  3. Then we pipe to echo, where we construct the output string "branch_tag=<result from awk>"
-      - name: Announce branch
-        run: echo "Branch=${{ needs.setup.outputs.branch_tag }}"
-
   testbed_fileapi_local:
     name: FileAPI Local Testbeds
     uses: ./.github/workflows/TEST_FileAPI_local.yml
