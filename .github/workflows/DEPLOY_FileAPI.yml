@@ -8,7 +8,6 @@ on:
         type: string
         description: "The full location of the image to deploy."
         required: true
-        default: ${{ secrets.DOCKER_IMAGE_REPO }}/opengamedata/${{ github.repository }}:latest
       remove:
         type: boolean
         description: "Whether to remove the deploy for the current branch."
