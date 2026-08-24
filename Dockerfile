@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM python:3.12-slim-trixie
+FROM python:3.12-alpine
 
 ENV PYTHONPATH=src
 COPY requirements.txt /
