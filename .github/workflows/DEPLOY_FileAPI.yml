@@ -27,7 +27,6 @@ jobs:
   deploy_image:
     name: Deploy Image to Google Cloud
     if: inputs.remove == false
-    needs: build_image
     runs-on: ubuntu-22.04
     concurrency:
       group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-deploy
