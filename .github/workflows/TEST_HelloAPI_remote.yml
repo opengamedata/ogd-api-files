@@ -41,16 +41,16 @@ jobs:
     - name: cURL Check Hello Endpoint
       run: curl -Is --fail-with-body https://${{ env.DEPLOY_URL }}/hello
 
-  deploy_if_needed:
-    name: FileAPI Deploy (If Needed)
-    needs: check_deploy
-    if: failure()
-    uses: ./.github/workflows/DEPLOY_FileAPI.yml
-    secrets: inherit
-    with:
-      deploy_host: ${{ vars.OGD_STAGING_HOST }}
-      branch: ${{ github.ref_name }}
-      remove: false
+  # deploy_if_needed:
+  #   name: FileAPI Deploy (If Needed)
+  #   needs: check_deploy
+  #   if: failure()
+  #   uses: ./.github/workflows/DEPLOY_FileAPI.yml
+  #   secrets: inherit
+  #   with:
+  #     deploy_host: ${{ vars.OGD_STAGING_HOST }}
+  #     branch: ${{ github.ref_name }}
+  #     remove: false
 
   run_testbed_hello_remote:
     name: Run HelloAPI Remote Testbed
