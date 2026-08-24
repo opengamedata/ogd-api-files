@@ -32,11 +32,11 @@ jobs:
       #  2. The whole expression calls print on arr's last element:
       #     `split` returns the number of results, so we're indexing at last index (awk uses 1-indexing)
       #  3. Then we pipe to echo, where we construct the output string "branch_tag=<result from awk>"
+      - name: Announce step
+        run: echo "Splitting " ${{ github.branch }}
       - name: Get Branch short name
         id: step_branch_tag
-        run: |
-          echo "Splitting ${{ github.branch }}"
-          echo "${{ github.branch }} | awk '{ print(arr[split($0, arr, "/")]) }' | echo "branch_tag=$0" >> "$GITHUB_OUTPUT"
+        run: echo "${{ github.branch }} | awk '{ print(arr[split($0, arr, "/")]) }' | echo "branch_tag=$0" >> "$GITHUB_OUTPUT"
 
   testbed_fileapi_local:
     name: FileAPI Local Testbeds
