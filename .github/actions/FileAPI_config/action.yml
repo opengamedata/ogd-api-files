@@ -9,10 +9,6 @@ inputs:
     description: "The version of the API code."
     required: false
     default: 'Testing'
-  remote_app_path:
-    description: "Remote directory where WSGI app will be deployed, not including the file itself"
-    required: true
-    default: 'var/www/wsgi-bin/apis/files/'
   local_app_path:
     description: "Local path to the folder containing the WSGI app to be deployed"
     required: true
@@ -33,6 +29,3 @@ runs:
     - name: Set API Version
       run: sed -i 's@VERSION_PLACEHOLDER@${{inputs.api_version}}@g'  ${{ inputs.config_path }}/config.py
       shell: bash
-    # - name: Set API Base Path
-    #   run: sed -i 's@placeholder home@${{inputs.remote_app_path}}@g' ${{ inputs.local_app_path }}/app.wsgi
-    #   shell: bash
