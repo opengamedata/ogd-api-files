@@ -2,31 +2,8 @@
 name: Build pyproject - File API
 run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' && github.event.head_commit.message || 'Manual Run') }}
 on:
-  workflow_dispatch:
-    inputs:
-      # image_repository:
-      #   type: string
-      #   description: "The repository in which to place the Docker image."
-      #   required: true
-      image_name:
-        type: string
-        description: "The name of the image."
-        required: true
-      image_tag:
-        type: string
-        description: "The image tag to use."
-        required: true
-      with_caching:
-        type: boolean
-        description: "Whether to cache the build for upload in a later job."
-        required: true
-        default: false
   workflow_call:
     inputs:
-      # image_repository:
-      #   type: string
-      #   description: "The repository in which to place the Docker image."
-      #   required: true
       image_name:
         type: string
         description: "The name of the image."
@@ -40,6 +17,10 @@ on:
         description: "Whether to cache the build for upload in a later job."
         required: true
         default: false
+    secrets:
+      image_repository:
+        required: True
+        description: "Secret indicating the repository of Docker images to use to find the image for deploy."
 
 jobs:
 
