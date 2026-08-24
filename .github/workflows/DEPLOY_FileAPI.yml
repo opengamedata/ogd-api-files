@@ -20,7 +20,7 @@ on:
         default: false
 
 env:
-  # DEPLOY_URL: ${{ github.repository }}-${{ vars.GCLOUD_PROJECT_NUM }}
+  DEPLOY_URL: ${{ github.repository }}test--${{ vars.GCLOUD_PROJECT_NUM }}.${{ vars.GCLOUD_REGION }}.run.app
 
 jobs:
 
