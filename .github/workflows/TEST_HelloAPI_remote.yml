@@ -26,7 +26,7 @@ on:
     - '!requirements.txt'
 
 env:
-  DEPLOY_URL: ${{ github.repository }}-test-${{ vars.GCLOUD_PROJECT_NUM }}.${{ vars.GCLOUD_REGION }}.run.app
+  DEPLOY_URL: ${{ github.event.repository.name }}-test-${{ vars.GCLOUD_PROJECT_NUM }}.${{ vars.GCLOUD_REGION }}.run.app
   LOCAL_TEST_DIR: ./tests/cases/apis/HelloAPISuite
 
 jobs:

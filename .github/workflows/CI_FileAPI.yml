@@ -14,7 +14,7 @@ on:
 
 env:
   REPOSITORY: ${{ secrets.DOCKER_IMAGE_REPO }}
-  IMAGE:      opengamedata/${{ github.repository }}
+  IMAGE:      ${{ github.repository }} # github.repository includes organization as prefix
 
 jobs:
   setup:
@@ -47,7 +47,7 @@ jobs:
     needs: [setup, testbed_fileapi_local]
     uses: ./.github/workflows/BUILD_FileAPI.yml
     with:
-      image_name:       opengamedata/${{ github.repository }}
+      image_name:       ${{ github.repository }} # github.repository includes organization as prefix
       image_tag:        ${{ needs.setup.outputs.branch_tag }}
       with_caching: false
     secrets:
@@ -58,7 +58,7 @@ jobs:
     needs: [build]
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:
-      image: opengamedata/${{ github.repository }}:${{ needs.setup.outputs.branch_tag }}
+      image: ${{ github.repository }}:${{ needs.setup.outputs.branch_tag }}
       remove: false
     secrets: inherit
 
