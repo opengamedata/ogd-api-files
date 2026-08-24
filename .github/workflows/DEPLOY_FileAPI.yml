@@ -50,12 +50,15 @@ jobs:
         project_id: ${{ secrets.GCLOUD_PROJECT_ID }}
         workload_identity_provider: 'projects/${{ vars.GCLOUD_PROJECT_NUM }}/locations/global/workloadIdentityPools/${{ secrets.GCLOUD_ID_POOL }}/providers/${{ secrets.GCLOUD_ID_PROVIDER }}'
         service_account: ${{ secrets.GCLOUD_DEPLOY_USER }}
+    
+    - name: Note the image
 
-    - id: 'deploy'
+    - name: Deploy to Cloud Run Service
+      id: 'deploy'
       uses: 'google-github-actions/deploy-cloudrun@v3'
       with:
         service: 'ogd-api-files-test'
-        image: '${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}'
+        image: ${{ inputs.image }}
 
     # TODO : figure out how to also deploy as 'latest'
 
