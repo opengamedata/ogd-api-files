@@ -4,6 +4,18 @@ run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' &
 on:
   workflow_dispatch:
     inputs:
+      image_repository:
+        type: string
+        description: "The repository in which to place the Docker image."
+        required: true
+      image_name:
+        type: string
+        description: "The name of the image."
+        required: true
+      image_tag:
+        type: string
+        description: "The image tag to use."
+        required: true
       with_caching:
         type: boolean
         description: "Whether to cache the build for upload in a later job."
@@ -11,14 +23,23 @@ on:
         default: false
   workflow_call:
     inputs:
+      image_repository:
+        type: string
+        description: "The repository in which to place the Docker image."
+        required: true
+      image_name:
+        type: string
+        description: "The name of the image."
+        required: true
+      image_tag:
+        type: string
+        description: "The image tag to use."
+        required: true
       with_caching:
         type: boolean
         description: "Whether to cache the build for upload in a later job."
         required: true
         default: false
-
-env:
-  DEPLOY_URL: ${{ vars.OGD_STAGING_HOST }}/${{ vars.API_BASE_URL }}/${{ github.event.repository.name }}/${{ github.ref_name }}/app.wsgi
 
 jobs:
 
@@ -78,7 +99,7 @@ jobs:
     - name: Set up Config File
       uses: ./.github/actions/FileAPI_config
       with:
-        api_version:     ${{ steps.version-tag.outputs.VERSION_TAG }}-${{ github.ref_name }}-${{ github.sha }}
+        api_version: ${{ steps.version-tag.outputs.VERSION_TAG }}-${{ github.ref_name }}-${{ github.sha }}
 
     # 2. Build image
 
@@ -97,6 +118,6 @@ jobs:
       with:
         context: .
         push: true
-        tags: ${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}
+        tags: ${{inputs.image_repository}}/${{ inputs.image_name }}:${{ inputs.image_tag }}
         cache-from: type=gha
         cache-to: type=gha,mode=max

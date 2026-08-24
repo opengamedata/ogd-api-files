@@ -12,26 +12,52 @@ on:
     - 'src/**'
     - 'requirements.txt'
 
+env:
+  REPOSITORY: ${{ secrets.DOCKER_IMAGE_REPO }}
+  IMAGE:      opengamedata/${{ github.repository }}
+
 jobs:
+  setup:
+    name: Get Branch
+    concurrency:
+      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-setup
+      cancel-in-progress: true
+    runs-on: ubuntu-22.04
+    outputs:
+      branch_tag: ${{ steps.step_branch_tag.outputs.branch_tag }}
+    steps:
+      # Kinda gross string processing to get the shortened version of a branch name.
+      # Interpreting the `awk` use:
+      #  1. We call split on "/", storing to arr
+      #  2. The whole expression calls print on arr's last element:
+      #     `split` returns the number of results, so we're indexing at last index (awk uses 1-indexing)
+      #  3. Then we pipe to echo, where we construct the output string "branch_tag=<result from awk>"
+      - name: Get Branch short name
+        id: step_branch_tag
+        run: |
+          echo "Splitting ${{ github.branch }}"
+          echo "${{ github.branch }} | awk '{ print(arr[split($0, arr, "/")]) }' | echo "branch_tag=$0" >> "$GITHUB_OUTPUT"
 
   testbed_fileapi_local:
     name: FileAPI Local Testbeds
     uses: ./.github/workflows/TEST_FileAPI_local.yml
 
   build:
-    name: Build Python Package
-    needs: [testbed_fileapi_local]
+    name: Build Python Package & Image
+    needs: [setup, testbed_fileapi_local]
     uses: ./.github/workflows/BUILD_FileAPI.yml
     with:
+      image_repository: ${{ env.REPOSITORY }}
+      image_name:       ${{ env.IMAGE }}
+      image_tag:        ${{ needs.setup.outputs.branch_tag }}
       with_caching: false
 
-  ci_deploy:
-    name: CI Deploy
+  deploy:
+    name: CI Deploy to GCP
     needs: [build]
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:
-      deploy_host: ${{ vars.OGD_STAGING_HOST }}
-      branch: ${{ github.ref_name }}
+      image: ${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ needs.setup.outputs.branch_tag }}
       remove: false
     secrets: inherit
 
