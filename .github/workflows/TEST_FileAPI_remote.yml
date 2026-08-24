@@ -4,12 +4,6 @@ run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' &
 on:
   workflow_dispatch:
   workflow_call:
-    inputs:
-      host:
-        type: string
-        description: "Which host to run test on"
-        required: false
-        default: ""
   push:
     branches:
       - "**"
@@ -25,9 +19,8 @@ on:
     - '!requirements.txt'
 
 env:
-  DEPLOY_URL:     ${{ inputs.host || vars.OGD_STAGING_HOST }}/${{ vars.API_BASE_URL }}/files/${{ github.ref_name }}/app.wsgi
+  DEPLOY_URL: ${{ github.repository }}-test-${{ vars.GCLOUD_PROJECT_NUM }}.${{ vars.GCLOUD_REGION }}.run.app
   LOCAL_TEST_DIR: ./tests/cases/apis/resources/**/RemoteCase.py
-  PYTHONPATH: "src"
 
 jobs:
   check_deploy:
@@ -63,6 +56,9 @@ jobs:
 
     steps:
 
+    - name: Announce testing
+      run: echo "Testing HelloAPI endpoint at ${{ env.DEPLOY_URL }}"
+
   # 1. Local checkout 
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -91,8 +87,6 @@ jobs:
       run: python -m unittest ${{ env.LOCAL_TEST_DIR }} 
 
   # 4. Cleanup & complete
-    - name: Announce test completed
-      run: echo "Tested FileAPI endpoint at ${{ env.DEPLOY_URL }}"
     - name: Upload logs as artifacts
       uses: actions/upload-artifact@v4
       with:
