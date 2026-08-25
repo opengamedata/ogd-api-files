@@ -17,9 +17,13 @@ on:
     - '!.github/actions/**'
     - '!src/**'
     - '!requirements.txt'
+    inputs:
+      base_url:
+        type: string
+        description: "The base URL of the deploy to test."
+        required: true
 
 env:
-  DEPLOY_URL: ${{ github.event.repository.name }}-test-${{ vars.GCLOUD_PROJECT_NUM }}.${{ vars.GCLOUD_REGION }}.run.app
   LOCAL_TEST_DIR: ./tests/cases/apis/resources/**/RemoteCase.py
 
 jobs:
@@ -78,7 +82,7 @@ jobs:
     - name: Set up Config File
       uses: ./.github/actions/test_config
       with:
-          endpoint: ${{ env.DEPLOY_URL }}
+          endpoint: ${{ inputs.base_url }}
           api_version: ${{ steps.version-tag.outputs.VERSION_TAG }}-${{ github.ref_name }}-${{ steps.version-tag.outputs.SRC_REVISION }}
           verbose_output: "True"
           shell: sh
