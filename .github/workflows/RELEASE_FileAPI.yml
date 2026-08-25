@@ -9,10 +9,6 @@ on:
   release:
     types: [released, prereleased]
 
-env:
-  REPOSITORY: ${{ secrets.DOCKER_IMAGE_REPO }}
-  IMAGE:      ${{ github.repository }} # github.repository includes organization as prefix
-
 jobs:
 
   testbed_fileapi_local:
@@ -24,10 +20,11 @@ jobs:
     needs: [testbed_fileapi_local]
     uses: ./.github/workflows/BUILD_FileAPI.yml
     with:
-      image_repository: ${{ env.REPOSITORY }}
-      image_name:       ${{ env.IMAGE }}
-      image_tag:        ${{ github.ref_name }}
+      image_name:       ${{ github.repository }} # github.repository includes organization as prefix
+      image_tag:        ${{ needs.setup.outputs.branch_tag }}
       with_caching: true
+    secrets:
+      image_repository: ${{ secrets.DOCKER_IMAGE_REPO }}
 
   pypi_release:
     name: Publish Release to PyPI
@@ -76,7 +73,7 @@ jobs:
     needs: [build, pypi_release, wait_for_pypi]
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:
-      image: ${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ needs.setup.outputs.branch_tag }}
+      image: "${{ github.repository }}:${{ needs.setup.outputs.branch_tag }}"
       as_latest: true
       remove: false
     secrets: inherit
