@@ -88,6 +88,7 @@ jobs:
           endpoint: ${{ env.DEPLOY_URL }}
           api_version: ${{ steps.version-tag.outputs.VERSION_TAG }}-${{ github.ref_name }}-${{ github.sha }}
           verbose_output: "True"
+          shell: sh
 
   # 2. Build & configure remote environments
 
