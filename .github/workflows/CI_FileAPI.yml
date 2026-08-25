@@ -32,6 +32,7 @@ jobs:
         run: |
           BRANCH=$(echo "${{ github.ref_name }}" | awk '{ print(arr[split($0, arr, "/")]) }')
           echo "branch_tag=$BRANCH" >> "$GITHUB_OUTPUT"
+          echo "Done. branch=$BRANCH"
 
   testbed_fileapi_local:
     name: FileAPI Local Testbeds
