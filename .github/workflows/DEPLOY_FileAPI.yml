@@ -69,7 +69,7 @@ jobs:
       with:
         service: 'ogd-api-files-test'
         image: "${{ secrets.DOCKER_IMAGE_REPO }}/${{ inputs.image_name }}:${{ inputs.image_tag }}"
-        tag: ${{ inputs.image_tag }}
+        tag: "t${{ inputs.image_tag }}"
         no_traffic: true
 
     # 4. Cleanup & complete
