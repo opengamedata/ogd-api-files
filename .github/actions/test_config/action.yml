@@ -25,21 +25,25 @@ inputs:
     description: "Local path to test config folder"
     required: false
     default: 'tests/config'
+  shell:
+    description: "The shell to use to execute the steps"
+    required: false
+    default: bash
 runs:
   using: "composite"
   steps:
     - name: Set up config
       run: cp ${{ inputs.config_path }}/t_config.py.template ${{ inputs.config_path }}/t_config.py 
-      shell: bash
+      shell: ${{ inputs.shell }}
     - name: Set Endpoint Location
       run: sed -i 's@ENDPOINT_PLACEHOLDER@${{inputs.endpoint}}@g'            ${{ inputs.config_path }}/t_config.py
-      shell: bash
+      shell: ${{ inputs.shell }}
     - name: Set API Version
       run: sed -i 's@VERSION_PLACEHOLDER@${{inputs.api_version}}@g'          ${{ inputs.config_path }}/t_config.py
-      shell: bash
+      shell: ${{ inputs.shell }}
     - name: Set Output Verbosity
       run: sed -i 's@"VERBOSE":False@"VERBOSE":${{inputs.verbose_output}}@g' ${{ inputs.config_path }}/t_config.py
-      shell: bash
+      shell: ${{ inputs.shell }}
     - name: Set HelloAPI test to run or not
       run: sed -i 's@"HELLO":True@"HELLO":${{inputs.with_hello_api}}@g'      ${{ inputs.config_path }}/t_config.py
-      shell: bash
+      shell: ${{ inputs.shell }}

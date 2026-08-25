@@ -17,15 +17,19 @@ inputs:
     description: "Local path to config folder"
     required: false
     default: 'config'
+  shell:
+    description: "The shell to use to execute the steps"
+    required: false
+    default: bash
 runs:
   using: "composite"
   steps:
     - name: Set up src/config
       run: cp ${{ inputs.config_path }}/config.py.template ${{ inputs.config_path }}/config.py 
-      shell: bash
+      shell: ${{ inputs.shell }}
     - name: Set to Non-Local Deploy
       run: sed -i 's@"LOCAL"\s*:\s*True@"LOCAL":False@g' ${{ inputs.config_path }}/config.py
-      shell: bash
+      shell: ${{ inputs.shell }}
     - name: Set API Version
       run: sed -i 's@VERSION_PLACEHOLDER@${{inputs.api_version}}@g'  ${{ inputs.config_path }}/config.py
-      shell: bash
+      shell: ${{ inputs.shell }}
