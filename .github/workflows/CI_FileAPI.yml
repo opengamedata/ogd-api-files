@@ -49,6 +49,13 @@ jobs:
     secrets:
       image_repository: ${{ secrets.DOCKER_IMAGE_REPO }}
 
+  check_setup:
+    name: Check Branch
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Echo Branch
+        run: echo ${{ needs.setup.outputs.branch_tag }}
+
   deploy:
     name: CI Deploy to GCP
     needs: [build]
