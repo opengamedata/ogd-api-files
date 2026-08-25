@@ -13,34 +13,58 @@ on:
     - 'requirements.txt'
 
 jobs:
+  setup:
+    name: Get Branch
+    runs-on: ubuntu-22.04
+    outputs:
+      branch_tag: ${{ steps.get_branch_tag.outputs.branch_tag }}
+    steps:
+      # Kinda gross string processing to get the shortened version of a branch name.
+      # Interpreting the `awk` use:
+      #  1. We call split on "/", storing to arr
+      #  2. The whole expression calls print on arr's last element:
+      #     `split` returns the number of results, so we're indexing at last index (awk uses 1-indexing)
+      #  3. Then we pipe to echo, where we construct the output string "branch_tag=<result from awk>"
+      - name: Announce step
+        run: echo "Splitting " ${{ github.ref_name }}
+      - name: Get Branch short name
+        id: get_branch_tag
+        run: |
+          BRANCH=$(echo "${{ github.ref_name }}" | awk '{ print(substr(arr[split($0, arr, "/")], 1, 10)) }')
+          echo "After split, branch is $BRANCH"
+          echo "branch_tag=$BRANCH" >> "$GITHUB_OUTPUT"
 
   testbed_fileapi_local:
     name: FileAPI Local Testbeds
     uses: ./.github/workflows/TEST_FileAPI_local.yml
 
   build:
-    name: Build Python Package
-    needs: [testbed_fileapi_local]
+    name: Build Python Package & Image
+    needs: [setup, testbed_fileapi_local]
     uses: ./.github/workflows/BUILD_FileAPI.yml
     with:
+      image_name:       ${{ github.repository }} # github.repository includes organization as prefix
+      image_tag:        ${{ needs.setup.outputs.branch_tag }}
       with_caching: false
+    secrets:
+      image_repository: ${{ secrets.DOCKER_IMAGE_REPO }}
 
-  ci_deploy:
-    name: CI Deploy
-    needs: [build]
+  deploy:
+    name: CI Deploy to GCP
+    needs: [setup, build]
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:
-      deploy_host: ${{ vars.OGD_STAGING_HOST }}
-      branch: ${{ github.ref_name }}
+      image_name: ${{ github.repository }} # github.repository includes organization as prefix
+      image_tag:  ${{ needs.setup.outputs.branch_tag }}
       remove: false
     secrets: inherit
 
   testbed_hello_remote:
     name: HelloAPI Remote Testbed
-    needs: [ci_deploy]
+    needs: [deploy]
     uses: ./.github/workflows/TEST_HelloAPI_remote.yml
 
   testbed_fileapi_remote:
     name: FileAPI Remote Testbeds
-    needs: [ci_deploy]
+    needs: [deploy]
     uses: ./.github/workflows/TEST_FileAPI_remote.yml

@@ -20,7 +20,11 @@ jobs:
     needs: [testbed_fileapi_local]
     uses: ./.github/workflows/BUILD_FileAPI.yml
     with:
+      image_name:       ${{ github.repository }} # github.repository includes organization as prefix
+      image_tag:        ${{ github.ref_name }}
       with_caching: true
+    secrets:
+      image_repository: ${{ secrets.DOCKER_IMAGE_REPO }}
 
   pypi_release:
     name: Publish Release to PyPI
@@ -63,28 +67,24 @@ jobs:
       run: echo "Done waiting."
       shell: bash
 
-  release_deploy:
+  deploy:
     name: Release Deploy
     if: github.event.action == 'released'
     needs: [build, pypi_release, wait_for_pypi]
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:
-      deploy_host: ${{ vars.OGD_SERVICES_HOST }}
-      branch: ${{ github.ref_name }}
+      image_name:       ${{ github.repository }} # github.repository includes organization as prefix
+      image_tag:        ${{ github.ref_name }}
       as_latest: true
       remove: false
     secrets: inherit
 
   testbed_hello_remote:
     name: HelloAPI Remote Testbed
-    needs: [release_deploy]
+    needs: [deploy]
     uses: ./.github/workflows/TEST_HelloAPI_remote.yml
-    with:
-      host: ${{ vars.OGD_SERVICES_HOST }}
 
   testbed_fileapi:
     name: FileAPI Testbed
-    needs: [release_deploy]
+    needs: [deploy]
     uses: ./.github/workflows/TEST_FileAPI_remote.yml
-    with:
-      host: ${{ vars.OGD_SERVICES_HOST }}

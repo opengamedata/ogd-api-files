@@ -4,14 +4,13 @@ run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' &
 on:
   workflow_call:
     inputs:
-      deploy_host:
+      image_name:
         type: string
-        description: "The host on which to deploy."
+        description: "The name of the image."
         required: true
-        default: ${{ vars.OGD_STAGING_HOST }}
-      branch:
+      image_tag:
         type: string
-        description: "The specific branch to deploy to/from. This is used because workflow dispatches appear to default to main branch."
+        description: "The image tag to use."
         required: true
       remove:
         type: boolean
@@ -25,76 +24,55 @@ on:
         default: false
 
 env:
-  DEPLOY_HOST: ${{ inputs.deploy_host }}
-  DEPLOY_DIR:                            ${{ vars.API_BASE_PATH }}/files/${{ inputs.branch }}
-  DEPLOY_URL:  ${{ inputs.deploy_host }}/${{ vars.API_BASE_URL  }}/files/${{ inputs.branch }}/app.wsgi
-  DEPLOY_DIR_LATEST:                     ${{ vars.API_BASE_PATH }}/files/latest
+  DEPLOY_URL: ${{ github.event.repository.name }}-test-${{ vars.GCLOUD_PROJECT_NUM }}.${{ vars.GCLOUD_REGION }}.run.app
 
 jobs:
-  deploy_fileapi:
-    name: Deploy File API
+
+  deploy_image:
+    name: Deploy Image to Google Cloud
     if: inputs.remove == false
     runs-on: ubuntu-22.04
     concurrency:
       group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-deploy
       cancel-in-progress: true
+    permissions:
+      contents: 'read'
+      id-token: 'write'
 
     steps:
 
-    - name: Announce deploy
-      run: echo "Deploying to ${{ env.DEPLOY_URL }}"
-
-    # 1. Local checkout & config
+    # Need checkout in order to have authentication step apply to deploy step.
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-    - name: Get current version tag
-      id: version-tag
-      run: |
-        echo "VERSION_TAG=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
-    - name: Set up Config File
-      uses: ./.github/actions/FileAPI_config
-      with:
-          remote_app_path: ${{ env.DEPLOY_DIR }}
-          api_version:     ${{ steps.version-tag.outputs.VERSION_TAG }}-${{ github.ref_name }}-${{ github.sha }}
 
-    # 2. Build 
-
-    # 3. Remote config & deploy
-    - name: Connect to VPN
-      uses: opengamedata/actions-openconnect-vpn@v1.1
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v3
       with:
-        username: ${{ secrets.VPN_USER }}
-        password: ${{ secrets.VPN_PASS }}
-        endpoint: "soe.vpn.wisc.edu"
-
-    - name: Deploy to Server
-      uses: opengamedata/actions-deploy-project@v1.3
+        project_id: ${{ secrets.GCLOUD_PROJECT_ID }}
+        workload_identity_provider: 'projects/${{ vars.GCLOUD_PROJECT_NUM }}/locations/global/workloadIdentityPools/${{ secrets.GCLOUD_ID_POOL }}/providers/${{ secrets.GCLOUD_ID_PROVIDER }}'
+        service_account: ${{ secrets.GCLOUD_DEPLOY_USER }}
+    
+    - name: Check as_latest value
+      run: echo ${{ inputs.as_latest }}
+    - name: Deploy to Cloud Run Service as latest
+      if: ${{ inputs.as_latest == 'true' }}
+      uses: 'google-github-actions/deploy-cloudrun@v3'
       with:
-        local_path: ./src
-        remote_path: ${{ env.DEPLOY_DIR }}
-        remote_host: ${{ env.DEPLOY_HOST }}
-        remote_user: ${{ secrets.DEPLOY_USER }}
-        remote_key:  ${{ secrets.DEPLOY_KEY }}
-        with_venv: true
-        with_reqs_file: "./requirements.txt"
-
-    - name: Deploy as Latest
-      if: ${{ inputs.as_latest }}
-      uses: opengamedata/actions-deploy-project@v1.3
+        service: 'ogd-api-files-test'
+        image: "${{ secrets.DOCKER_IMAGE_REPO }}/${{ inputs.image_name }}:${{ inputs.image_tag }}"
+        tag: latest
+    - name: Deploy to Cloud Run Service
+      if: ${{ inputs.as_latest != 'true' }}
+      uses: 'google-github-actions/deploy-cloudrun@v3'
       with:
-        local_path: ./src
-        remote_path: ${{ env.DEPLOY_DIR_LATEST }}
-        remote_host: ${{ env.DEPLOY_HOST }}
-        remote_user: ${{ secrets.DEPLOY_USER }}
-        remote_key:  ${{ secrets.DEPLOY_KEY }}
-        with_venv: true
-        with_reqs_file: "./requirements.txt"
+        service: 'ogd-api-files-test'
+        image: "${{ secrets.DOCKER_IMAGE_REPO }}/${{ inputs.image_name }}:${{ inputs.image_tag }}"
+        tag: "t${{ inputs.image_tag }}"
+        no_traffic: true
 
     # 4. Cleanup & complete
-    - name: Restart httpd via ssh
-      run: ssh -o StrictHostKeyChecking=no -o ConnectTimeout=30 -T -i ./key.txt ${{ secrets.DEPLOY_USER }}@${{ env.DEPLOY_HOST }} "sudo systemctl restart apache2"
 
   branch_delete:
     name: Remove FileAPI Deploy
@@ -106,33 +84,13 @@ jobs:
     
     steps:
     
-    - name: Announce cleanup
-      run: echo "Removing branch deploy at ${{ env.DEPLOY_URL }}"
-
-    # 1. Local checkout & config
-    
-    # 2. Build 
-
-    # 3. Remote config & clean
-    - name: Connect to VPN
-      uses: opengamedata/actions-openconnect-vpn@v1.1
+    # 1. Remove Image from GitHub
+    - name: Remove Image from Repo
+      uses: dataaxiom/ghcr-cleanup-action@v1
       with:
-        username: ${{ secrets.VPN_USER }}
-        password: ${{ secrets.VPN_PASS }}
-        endpoint: "soe.vpn.wisc.edu"
+        delete-tags: ${{ env.IMAGE_NAME }}
 
-    - name: Setup Access Key
-      run: |
-        mkdir -p ~/.ssh
-        echo '${{secrets.CLEAN_KEY}}' >> ./key.txt
-        chmod 600 ./key.txt
-
-    - name: Remove branch folder
-      run: ssh -o StrictHostKeyChecking=no -T -i ./key.txt ${{ secrets.CLEAN_USER }}@${{ env.DEPLOY_HOST }} "rm -r ${{ env.DEPLOY_DIR }}"
-    # This allows us to yank down a recent release, if needed. Generally don't intend to do this.
-    - name: Remove 'latest' folder
-      if: ${{ inputs.as_latest }}
-      run: ssh -o StrictHostKeyChecking=no -T -i ./key.txt ${{ secrets.CLEAN_USER }}@${{ env.DEPLOY_HOST }} "rm -r ${{ env.DEPLOY_DIR_LATEST }}"
+    # 2. Remove from GCP
 
     - name: Upload logs as artifacts
       uses: actions/upload-artifact@v4
