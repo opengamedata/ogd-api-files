@@ -4,9 +4,13 @@ run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' &
 on:
   workflow_call:
     inputs:
-      image:
+      image_name:
         type: string
-        description: "The full location of the image to deploy."
+        description: "The name of the image."
+        required: true
+      image_tag:
+        type: string
+        description: "The image tag to use."
         required: true
       remove:
         type: boolean
@@ -56,7 +60,7 @@ jobs:
       uses: 'google-github-actions/deploy-cloudrun@v3'
       with:
         service: 'ogd-api-files-test'
-        image: ${{ secrets.DOCKER_IMAGE_REPO }}/${{ inputs.image }}
+        image: ${{ secrets.DOCKER_IMAGE_REPO }}/${{ inputs.image_name }}:${{ inputs.image_tag }}
 
     # TODO : figure out how to also deploy as 'latest'
 
