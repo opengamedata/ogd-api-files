@@ -55,7 +55,6 @@ jobs:
     
     - name: Deploy to Cloud Run Service as latest
       if: ${{ inputs.as_latest == 'true' }}
-      id: 'deploy'
       uses: 'google-github-actions/deploy-cloudrun@v3'
       with:
         service: 'ogd-api-files-test'
@@ -63,15 +62,12 @@ jobs:
         tag: latest
     - name: Deploy to Cloud Run Service
       if: ${{ inputs.as_latest == 'false' }}
-      id: 'deploy'
       uses: 'google-github-actions/deploy-cloudrun@v3'
       with:
         service: 'ogd-api-files-test'
         image: "${{ secrets.DOCKER_IMAGE_REPO }}/${{ inputs.image_name }}:${{ inputs.image_tag }}"
         tag: ${{ inputs.image_tag }}
         no_traffic: true
-
-    # TODO : figure out how to also deploy as 'latest'
 
     # 4. Cleanup & complete
 
