@@ -30,7 +30,7 @@ jobs:
       - name: Get Branch short name
         id: get_branch_tag
         run: |
-          BRANCH=$(echo "${{ github.ref_name }}" | awk '{ print(arr[split($0, arr, "/")]) }')
+          BRANCH=$(echo "${{ github.ref_name }}" | awk '{ print(substr(arr[split($0, arr, "/")], 1, 10)) }')
           echo "After split, branch is $BRANCH"
           echo "branch_tag=$BRANCH" >> "$GITHUB_OUTPUT"
 
