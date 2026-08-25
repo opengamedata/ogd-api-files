@@ -26,10 +26,11 @@ jobs:
 
   build_package:
     name: Build Python Package
+    runs-on: ubuntu-22.04
+    container: python:${{ vars.OGD_PYTHON_VERSION }}-alpine
     concurrency:
       group: ${{ github.event.repository.name }}-${{ github.ref }}-${{ github.workflow }}-build
       cancel-in-progress: true
-    runs-on: ubuntu-22.04
 
     steps:
 
