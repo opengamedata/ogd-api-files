@@ -57,6 +57,7 @@ jobs:
     needs: [check_deploy]
     if: always() && (needs.check_deploy.result == 'success' || needs.deploy_if_needed.result == 'success')
     runs-on: ubuntu-22.04
+    container: python:${{ vars.OGD_PYTHON_VERSION }}-alpine
     concurrency:
       group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-hello
       cancel-in-progress: false
@@ -72,9 +73,7 @@ jobs:
       with:
         fetch-depth: 0
     - name: Get Dependencies
-      uses: opengamedata/actions-setup-ogd-py-dependencies@v1.0
-      with:
-        python_version: ${{ vars.OGD_PYTHON_VERSION }}
+      run: python -m pip install -r requirements.txt
     - name: Get current version tag
       id: version-tag
       run: |
