@@ -99,6 +99,6 @@ jobs:
       with:
         context: .
         push: true
-        tags: ${{ secrets.image_repository }}/${{ inputs.image_name }}:${{ inputs.image_tag }}
+        tags: "${{ secrets.image_repository }}/${{ inputs.image_name }}:${{ inputs.image_tag }}"
         cache-from: type=gha
         cache-to: type=gha,mode=max
