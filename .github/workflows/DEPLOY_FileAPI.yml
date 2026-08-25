@@ -59,6 +59,7 @@ jobs:
       with:
         service: 'ogd-api-files-test'
         image: "${{ secrets.DOCKER_IMAGE_REPO }}/${{ inputs.image_name }}:${{ inputs.image_tag }}"
+        tag: ${{ inputs.image_tag }}
 
     # TODO : figure out how to also deploy as 'latest'
 
