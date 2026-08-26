@@ -35,8 +35,11 @@ jobs:
     concurrency:
       group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-hello
       cancel-in-progress: false
+    env:
+      DEPLOY_URL: ${{ case(github.event_name == 'workflow_call', inputs.base_url, env.DEFAULT_URL) }}
     
     steps:
+
     - name: cURL Check Hello Endpoint
       run: curl -Is --fail-with-body https://${{ env.DEPLOY_URL }}/hello
 
@@ -57,12 +60,14 @@ jobs:
     if: always() && (needs.check_deploy.result == 'success' || needs.deploy_if_needed.result == 'success')
     runs-on: ubuntu-22.04
     container: python:${{ vars.OGD_PYTHON_VERSION }}-alpine
-    defaults:
-      run:
-        shell: sh
     concurrency:
       group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-hello
       cancel-in-progress: false
+    defaults:
+      run:
+        shell: sh
+    env:
+      DEPLOY_URL: ${{ case(github.event_name == 'workflow_call', inputs.base_url, env.DEFAULT_URL) }}
 
     steps:
 
@@ -84,7 +89,7 @@ jobs:
     - name: Set up Config File
       uses: ./.github/actions/test_config
       with:
-          endpoint: ${{ case(github.event_name == 'workflow_call', inputs.base_url, env.DEFAULT_URL) }}
+          endpoint: ${{ env.DEPLOY_URL }}
           api_version: ${{ steps.version-tag.outputs.VERSION_TAG }}-${{ github.ref_name }}-${{ github.sha }}
           verbose_output: "True"
           shell: sh
