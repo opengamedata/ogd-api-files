@@ -24,7 +24,7 @@ on:
     - '!requirements.txt'
 
 env:
-  DEFAULT_URL: ${{ format("{0}-test-{1}.{2}.run.app", github.event.repository.name, vars.GCLOUD_PROJECT_NUM, vars.GCLOUD_REGION) }}
+  DEFAULT_URL: ${{ format('{0}-test-{1}.{2}.run.app', github.event.repository.name, vars.GCLOUD_PROJECT_NUM, vars.GCLOUD_REGION) }}
   LOCAL_TEST_DIR: ./tests/cases/apis/resources/**/RemoteCase.py
 
 jobs:
