@@ -24,6 +24,7 @@ on:
     - '!requirements.txt'
 
 env:
+  DEFAULT_URL: ${{ format("{0}-test-{1}.{2}.run.app", github.event.repository.name, vars.GCLOUD_PROJECT_NUM, vars.GCLOUD_REGION) }}
   LOCAL_TEST_DIR: ./tests/cases/apis/resources/**/RemoteCase.py
 
 jobs:
@@ -82,7 +83,7 @@ jobs:
     - name: Set up Config File
       uses: ./.github/actions/test_config
       with:
-          endpoint: ${{ inputs.base_url }}
+          endpoint: ${{ case(github.event_name == 'workflow_call', inputs.base_url, env.DEFAULT_URL }}
           api_version: ${{ steps.version-tag.outputs.VERSION_TAG }}-${{ github.ref_name }}-${{ steps.version-tag.outputs.SRC_REVISION }}
           verbose_output: "True"
           shell: sh
