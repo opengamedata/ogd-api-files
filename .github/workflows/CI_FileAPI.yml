@@ -61,10 +61,14 @@ jobs:
 
   testbed_hello_remote:
     name: HelloAPI Remote Testbed
-    needs: [deploy]
+    needs: [setup, deploy]
     uses: ./.github/workflows/TEST_HelloAPI_remote.yml
+    with:
+      base_url: "${{ needs.setup.outputs.branch_tag }}---${{ github.event.repository.name }}-test-${{ vars.API_FILES_TEST_ID }}.a.run.app"
 
   testbed_fileapi_remote:
     name: FileAPI Remote Testbeds
-    needs: [deploy]
+    needs: [setup, deploy]
     uses: ./.github/workflows/TEST_FileAPI_remote.yml
+    with:
+      base_url: "${{ needs.setup.outputs.branch_tag }}---${{ github.event.repository.name }}-test-${{ vars.API_FILES_TEST_ID }}.a.run.app"

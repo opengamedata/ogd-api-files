@@ -83,8 +83,12 @@ jobs:
     name: HelloAPI Remote Testbed
     needs: [deploy]
     uses: ./.github/workflows/TEST_HelloAPI_remote.yml
+    with:
+      base_url: ${{ github.event.repository.name }}-test-${{ vars.GCLOUD_PROJECT_NUM }}.${{ vars.GCLOUD_REGION }}.run.app
 
   testbed_fileapi:
     name: FileAPI Testbed
     needs: [deploy]
     uses: ./.github/workflows/TEST_FileAPI_remote.yml
+    with:
+      base_url: ${{ github.event.repository.name }}-test-${{ vars.GCLOUD_PROJECT_NUM }}.${{ vars.GCLOUD_REGION }}.run.app

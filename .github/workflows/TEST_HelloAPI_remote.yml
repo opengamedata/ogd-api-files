@@ -5,11 +5,10 @@ on:
   workflow_dispatch:
   workflow_call:
     inputs:
-      host:
+      base_url:
         type: string
-        description: "Which host to run test on"
-        required: false
-        default: ""
+        description: "The base URL of the deploy to test."
+        required: true
   push:
     branches:
       - "**"
@@ -26,7 +25,7 @@ on:
     - '!requirements.txt'
 
 env:
-  DEPLOY_URL: ${{ github.event.repository.name }}-test-${{ vars.GCLOUD_PROJECT_NUM }}.${{ vars.GCLOUD_REGION }}.run.app
+  DEFAULT_URL: ${{ github.event.repository.name }}-test-${{ vars.GCLOUD_PROJECT_NUM }}.${{ vars.GCLOUD_REGION }}.run.app
   LOCAL_TEST_DIR: ./tests/cases/apis/HelloAPISuite
 
 jobs:
@@ -38,8 +37,9 @@ jobs:
       cancel-in-progress: false
     
     steps:
+
     - name: cURL Check Hello Endpoint
-      run: curl -Is --fail-with-body https://${{ env.DEPLOY_URL }}/hello
+      run: curl -Is --fail-with-body https://${{ case(github.event_name == 'workflow_call', inputs.base_url, env.DEFAULT_URL) }}/hello
 
   # deploy_if_needed:
   #   name: FileAPI Deploy (If Needed)
@@ -57,14 +57,18 @@ jobs:
     needs: [check_deploy]
     if: always() && (needs.check_deploy.result == 'success' || needs.deploy_if_needed.result == 'success')
     runs-on: ubuntu-22.04
+    container: python:${{ vars.OGD_PYTHON_VERSION }}-alpine
     concurrency:
       group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-hello
       cancel-in-progress: false
+    defaults:
+      run:
+        shell: sh
 
     steps:
 
     - name: Announce testing
-      run: echo "Testing HelloAPI endpoint at ${{ env.DEPLOY_URL }}"
+      run: echo "Testing HelloAPI endpoint at ${{ case(github.event_name == 'workflow_call', inputs.base_url, env.DEFAULT_URL) }}"
 
   # 1. Local checkout 
     - name: Checkout repository
@@ -72,9 +76,7 @@ jobs:
       with:
         fetch-depth: 0
     - name: Get Dependencies
-      uses: opengamedata/actions-setup-ogd-py-dependencies@v1.0
-      with:
-        python_version: ${{ vars.OGD_PYTHON_VERSION }}
+      run: python -m pip install -r requirements.txt
     - name: Get current version tag
       id: version-tag
       run: |
@@ -83,9 +85,10 @@ jobs:
     - name: Set up Config File
       uses: ./.github/actions/test_config
       with:
-          endpoint: ${{ env.DEPLOY_URL }}
+          endpoint: ${{ case(github.event_name == 'workflow_call', inputs.base_url, env.DEFAULT_URL) }}
           api_version: ${{ steps.version-tag.outputs.VERSION_TAG }}-${{ github.ref_name }}-${{ github.sha }}
           verbose_output: "True"
+          shell: sh
 
   # 2. Build & configure remote environments
 

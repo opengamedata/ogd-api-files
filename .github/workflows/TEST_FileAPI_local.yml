@@ -19,7 +19,7 @@ on:
     - '!requirements.txt'
 
 env:
-  DEPLOY_URL:     ${{ vars.OGD_STAGING_HOST }}/${{ vars.API_BASE_URL }}/files/${{ github.ref_name }}/app.wsgi
+  DEPLOY_URL:     ${{ github.event.repository.name }}-test-${{ vars.GCLOUD_PROJECT_NUM }}.${{ vars.GCLOUD_REGION }}.run.app
   LOCAL_TEST_DIR: ./tests/cases/apis/resources/**/LocalCase.py
   PYTHONPATH: "src"
 
@@ -27,6 +27,10 @@ jobs:
   run_testbed_files:
     name: Run FileAPI Testbed
     runs-on: ubuntu-22.04
+    container: python:${{ vars.OGD_PYTHON_VERSION }}-alpine
+    defaults:
+      run:
+        shell: sh
     concurrency:
       group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-file
       cancel-in-progress: false
@@ -39,9 +43,7 @@ jobs:
       with:
         fetch-depth: 0
     - name: Get Dependencies
-      uses: opengamedata/actions-setup-ogd-py-dependencies@v1.0
-      with:
-        python_version: ${{ vars.OGD_PYTHON_VERSION }}
+      run: python -m pip install -r requirements.txt
     - name: Local package install
       run: python -m pip install ./
     - name: Get current version tag
@@ -55,6 +57,7 @@ jobs:
           endpoint: ${{ env.DEPLOY_URL }}
           api_version: ${{ steps.version-tag.outputs.VERSION_TAG }}-${{ github.ref_name }}-${{ steps.version-tag.outputs.SRC_REVISION }}
           verbose_output: "True"
+          shell: sh
 
   # 2. Build & configure remote environments
 

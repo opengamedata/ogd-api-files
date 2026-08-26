@@ -26,22 +26,23 @@ jobs:
 
   build_package:
     name: Build Python Package
-    concurrency:
-      group: ${{ github.event.repository.name }}-${{ github.ref }}-${{ github.workflow }}-build
-      cancel-in-progress: true
     runs-on: ubuntu-22.04
+    container: python:${{ vars.OGD_PYTHON_VERSION }}-alpine
+    defaults:
+      run:
+        shell: sh
+    concurrency:
+      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-package
+      cancel-in-progress: true
 
     steps:
 
     # 1. Local checkout & config
     - uses: actions/checkout@v4
     - name: Get Dependencies
-      uses: opengamedata/actions-setup-ogd-py-dependencies@v1.3
-      with:
-        python_version: ${{ vars.OGD_PYTHON_VERSION }}
-        package_dir: "./"
+      run: python -m pip install -r requirements.txt
     - name: Get Build Dependencies
-      uses: opengamedata/setup-ogd-py-build@v2.0
+      run: python -m pip install -r requirements-build.txt
 
     # 2. Build 
     - name: Build Package
@@ -63,7 +64,7 @@ jobs:
     name: Build Docker Image
     runs-on: ubuntu-22.04
     concurrency:
-      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-deploy
+      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-image
       cancel-in-progress: true
 
     steps:
