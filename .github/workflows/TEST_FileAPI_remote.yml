@@ -4,6 +4,11 @@ run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' &
 on:
   workflow_dispatch:
   workflow_call:
+    inputs:
+      base_url:
+        type: string
+        description: "The base URL of the deploy to test."
+        required: true
   push:
     branches:
       - "**"
@@ -17,11 +22,6 @@ on:
     - '!.github/actions/**'
     - '!src/**'
     - '!requirements.txt'
-    inputs:
-      base_url:
-        type: string
-        description: "The base URL of the deploy to test."
-        required: true
 
 env:
   LOCAL_TEST_DIR: ./tests/cases/apis/resources/**/RemoteCase.py
