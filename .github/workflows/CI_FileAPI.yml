@@ -17,22 +17,11 @@ jobs:
     name: Get Branch
     runs-on: ubuntu-22.04
     outputs:
-      branch_tag: ${{ steps.get_branch_tag.outputs.branch_tag }}
+      branch-tag: ${{ steps.get-branch.outputs.branch-name }}
     steps:
-      # Kinda gross string processing to get the shortened version of a branch name.
-      # Interpreting the `awk` use:
-      #  1. We call split on "/", storing to arr
-      #  2. The whole expression calls print on arr's last element:
-      #     `split` returns the number of results, so we're indexing at last index (awk uses 1-indexing)
-      #  3. Then we pipe to echo, where we construct the output string "branch_tag=<result from awk>"
-      - name: Announce step
-        run: echo "Splitting " ${{ github.ref_name }}
-      - name: Get Branch short name
-        id: get_branch_tag
-        run: |
-          BRANCH=$(echo "${{ github.ref_name }}" | awk '{ print(substr(arr[split($0, arr, "/")], 1, 10)) }')
-          echo "After split, branch is $BRANCH"
-          echo "branch_tag=$BRANCH" >> "$GITHUB_OUTPUT"
+      - name: Get Branch
+        id: get-branch
+        uses: opengamedata/actions-get-branch@v1.0
 
   testbed_fileapi_local:
     name: FileAPI Local Testbeds
@@ -55,7 +44,7 @@ jobs:
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:
       image_name: ${{ github.repository }} # github.repository includes organization as prefix
-      image_tag:  ${{ needs.setup.outputs.branch_tag }}
+      image_tag:  ${{ needs.setup.outputs.branch-tag }}
       remove: false
     secrets: inherit
 
@@ -64,11 +53,11 @@ jobs:
     needs: [setup, deploy]
     uses: ./.github/workflows/TEST_HelloAPI_remote.yml
     with:
-      base_url: "${{ needs.setup.outputs.branch_tag }}---${{ github.event.repository.name }}-test-${{ vars.API_FILES_TEST_ID }}.a.run.app"
+      base_url: "${{ needs.setup.outputs.branch-tag }}---${{ github.event.repository.name }}-test-${{ vars.API_FILES_TEST_ID }}.a.run.app"
 
   testbed_fileapi_remote:
     name: FileAPI Remote Testbeds
     needs: [setup, deploy]
     uses: ./.github/workflows/TEST_FileAPI_remote.yml
     with:
-      base_url: "${{ needs.setup.outputs.branch_tag }}---${{ github.event.repository.name }}-test-${{ vars.API_FILES_TEST_ID }}.a.run.app"
+      base_url: "${{ needs.setup.outputs.branch-tag }}---${{ github.event.repository.name }}-test-${{ vars.API_FILES_TEST_ID }}.a.run.app"
