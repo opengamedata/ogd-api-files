@@ -86,7 +86,7 @@ jobs:
     
     # 1. Remove Image from GitHub
     - name: Remove Image from Repo
-      uses: dataaxiom/ghcr-cleanup-action@v1
+      uses: dataaxiom/ghcr-cleanup-action@v1.2.2
       with:
         delete-tags: "${{ inputs.image_name }}:${{ inputs.image_tag }}"
 
