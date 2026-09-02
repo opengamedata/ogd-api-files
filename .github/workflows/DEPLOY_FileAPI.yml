@@ -42,6 +42,9 @@ jobs:
 
     steps:
 
+    - name: Announce deploy
+      run: echo "Deploying ${{ github.ref }} to ${{ env.DEPLOY_URL }}"
+
     # Need checkout in order to have authentication step apply to deploy step.
     - name: Checkout repository
       uses: actions/checkout@v7.0.1
@@ -84,6 +87,9 @@ jobs:
       cancel-in-progress: false
     
     steps:
+
+    - name: Announce cleanup
+      run: echo "Removing branch deploy at ${{ env.DEPLOY_URL }}"
     
     # 1. Remove Image from GitHub
     - name: Remove Image from Repo
