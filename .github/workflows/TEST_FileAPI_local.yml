@@ -69,6 +69,6 @@ jobs:
     - name: Announce test completed
       run: echo "Tested FileAPI endpoint at ${{ env.DEPLOY_URL }}"
     - name: Upload logs as artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7.0.1
       with:
         path: ./*.log
