@@ -30,7 +30,7 @@ env:
 jobs:
   check_deploy:
     name: Check for Existing Deploy
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     concurrency:
       group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-file
       cancel-in-progress: false
@@ -55,7 +55,7 @@ jobs:
     name: Run FileAPI Testbed
     needs: [check_deploy]
     if: always() && (needs.check_deploy.result == 'success' || needs.deploy_if_needed.result == 'success')
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     container: python:${{ vars.OGD_PYTHON_VERSION }}-alpine
     concurrency:
       group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-file

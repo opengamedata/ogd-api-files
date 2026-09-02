@@ -26,7 +26,7 @@ jobs:
 
   build_package:
     name: Build Python Package
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     container: python:${{ vars.OGD_PYTHON_VERSION }}-alpine
     defaults:
       run:
@@ -62,7 +62,7 @@ jobs:
 
   build_image:
     name: Build Docker Image
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     concurrency:
       group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-image
       cancel-in-progress: true
