@@ -26,7 +26,7 @@ env:
 jobs:
   run_testbed_files:
     name: Run FileAPI Testbed
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     container: python:${{ vars.OGD_PYTHON_VERSION }}-alpine
     defaults:
       run:
@@ -39,7 +39,7 @@ jobs:
 
   # 1. Local checkout 
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7.0.1
       with:
         fetch-depth: 0
     - name: Get Dependencies
@@ -69,6 +69,6 @@ jobs:
     - name: Announce test completed
       run: echo "Tested FileAPI endpoint at ${{ env.DEPLOY_URL }}"
     - name: Upload logs as artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7.0.1
       with:
         path: ./*.log
