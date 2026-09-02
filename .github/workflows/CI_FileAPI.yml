@@ -15,7 +15,7 @@ on:
 jobs:
   setup:
     name: Get Branch
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       branch-tag: ${{ steps.get-branch.outputs.branch-name }}
     steps:

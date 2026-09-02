@@ -31,7 +31,7 @@ jobs:
   deploy_image:
     name: Deploy Image to Google Cloud
     if: inputs.remove == false
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     concurrency:
       group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-deploy
       cancel-in-progress: true
@@ -43,12 +43,12 @@ jobs:
 
     # Need checkout in order to have authentication step apply to deploy step.
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7.0.1
       with:
         fetch-depth: 0
 
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v3
+      uses: google-github-actions/auth@v3.0.0
       with:
         project_id: ${{ secrets.GCLOUD_PROJECT_ID }}
         workload_identity_provider: 'projects/${{ vars.GCLOUD_PROJECT_NUM }}/locations/global/workloadIdentityPools/${{ secrets.GCLOUD_ID_POOL }}/providers/${{ secrets.GCLOUD_ID_PROVIDER }}'
@@ -58,14 +58,14 @@ jobs:
       run: echo ${{ inputs.as_latest }}
     - name: Deploy to Cloud Run Service as latest
       if: ${{ inputs.as_latest == 'true' }}
-      uses: 'google-github-actions/deploy-cloudrun@v3'
+      uses: 'google-github-actions/deploy-cloudrun@v3.0.1'
       with:
         service: 'ogd-api-files-test'
         image: "${{ secrets.DOCKER_IMAGE_REPO }}/${{ inputs.image_name }}:${{ inputs.image_tag }}"
         tag: latest
     - name: Deploy to Cloud Run Service
       if: ${{ inputs.as_latest != 'true' }}
-      uses: 'google-github-actions/deploy-cloudrun@v3'
+      uses: 'google-github-actions/deploy-cloudrun@v3.0.1'
       with:
         service: 'ogd-api-files-test'
         image: "${{ secrets.DOCKER_IMAGE_REPO }}/${{ inputs.image_name }}:${{ inputs.image_tag }}"
@@ -77,7 +77,7 @@ jobs:
   branch_delete:
     name: Remove FileAPI Deploy
     if: inputs.remove == true
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     concurrency:
       group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}
       cancel-in-progress: false
@@ -86,13 +86,13 @@ jobs:
     
     # 1. Remove Image from GitHub
     - name: Remove Image from Repo
-      uses: dataaxiom/ghcr-cleanup-action@v1
+      uses: dataaxiom/ghcr-cleanup-action@v1.2.2
       with:
         delete-tags: "${{ inputs.image_name }}:${{ inputs.image_tag }}"
 
     # 2. Remove from GCP
 
     - name: Upload logs as artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7.0.1
       with:
         path: ./*.log

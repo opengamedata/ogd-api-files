@@ -29,7 +29,7 @@ jobs:
   pypi_release:
     name: Publish Release to PyPI
     needs: [build]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     environment:
       name: pypi_release
       url: https://pypi.org/manage/project/opengamedata-api-files/
@@ -40,7 +40,7 @@ jobs:
     # 1. Local checkout & config
     - name: Restore Cached Build
       id: cached-build
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@v6.1.0
       with:
         key: opengamedata-api-files-build-${{ github.run_id }}-${{ github.run_attempt }}
         path: dist/
@@ -61,7 +61,7 @@ jobs:
     name: Wait for PyPI to Update
     needs: [build, pypi_release]
     environment: release-wait-deploy # use environment to force waiting a few minutes after the PyPI release.
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
     - name: Done Waiting
       run: echo "Done waiting."
