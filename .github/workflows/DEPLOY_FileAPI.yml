@@ -43,7 +43,7 @@ jobs:
 
     # Need checkout in order to have authentication step apply to deploy step.
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7.0.1
       with:
         fetch-depth: 0
 
