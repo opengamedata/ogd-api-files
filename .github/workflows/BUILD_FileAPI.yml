@@ -53,7 +53,7 @@ jobs:
     - name: Cache Build for Publishing
       if: inputs.with_caching == true
       id: cache-build
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@v6.1.0
       with:
         key: opengamedata-api-files-build-${{ github.run_id }}-${{ github.run_attempt }}
         path: dist/

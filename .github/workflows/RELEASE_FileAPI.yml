@@ -40,7 +40,7 @@ jobs:
     # 1. Local checkout & config
     - name: Restore Cached Build
       id: cached-build
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@v6.1.0
       with:
         key: opengamedata-api-files-build-${{ github.run_id }}-${{ github.run_attempt }}
         path: dist/
