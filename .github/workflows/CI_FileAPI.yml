@@ -33,7 +33,7 @@ jobs:
     uses: ./.github/workflows/BUILD_FileAPI.yml
     with:
       image_name:       ${{ github.repository }} # github.repository includes organization as prefix
-      image_tag:        ${{ needs.setup.outputs.branch_tag }}
+      image_tag:        ${{ needs.setup.outputs.branch-tag }}
       with_caching: false
     secrets:
       image_repository: ${{ secrets.DOCKER_IMAGE_REPO }}
