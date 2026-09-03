@@ -51,7 +51,7 @@ jobs:
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:
       image-name: ${{ needs.build.outputs.image-name }} # github.repository includes organization as prefix
-      revision-tag: ${{ steps.get-branch.outputs.branch-name }}
+      revision-tag: ${{ needs.setup.outputs.branch-tag }}
       remove: false
     secrets: inherit
 

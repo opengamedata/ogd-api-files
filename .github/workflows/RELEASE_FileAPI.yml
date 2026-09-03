@@ -80,7 +80,7 @@ jobs:
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:
       image_tag: ${{ github.ref_name }}
-      revision-tag: ${{ steps.get-branch.outputs.branch-name }}
+      revision-tag: "latest"
       as_latest: true
     secrets: inherit
 
