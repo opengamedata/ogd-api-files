@@ -4,19 +4,11 @@ run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' &
 on:
   workflow_call:
     inputs:
-      image_name:
-        type: string
-        description: "The name of the image."
-        required: true
       image_tag:
         type: string
         description: "The image tag to use."
-        required: true
-      with_caching:
-        type: boolean
-        description: "Whether to cache the build for upload in a later job."
-        required: true
-        default: false
+        required: false
+        default: "untagged"
     secrets:
       image_repository:
         required: True
@@ -24,46 +16,12 @@ on:
 
 jobs:
 
-  build_package:
-    name: Build Python Package
-    runs-on: ubuntu-24.04
-    container: python:${{ vars.OGD_PYTHON_VERSION }}-alpine
-    defaults:
-      run:
-        shell: sh
-    concurrency:
-      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-package
-      cancel-in-progress: true
-
-    steps:
-
-    # 1. Local checkout & config
-    - name: Checkout repository
-      uses: actions/checkout@v7.0.1
-    - name: Get Dependencies
-      run: python -m pip install -r requirements.txt
-    - name: Get Build Dependencies
-      run: python -m pip install -r requirements-build.txt
-
-    # 2. Build 
-    - name: Build Package
-      run: python -m build
-
-    # 3. Cache for use by others
-    - name: Cache Build for Publishing
-      if: inputs.with_caching == true
-      id: cache-build
-      uses: actions/cache/save@v6.1.0
-      with:
-        key: opengamedata-api-files-build-${{ github.run_id }}-${{ github.run_attempt }}
-        path: dist/
-    - name: Non-Cached Build
-      if: inputs.with_caching != true
-      run: echo "No build cached"
-
   build_image:
     name: Build Docker Image
+    if: inputs.build_image == 'true'
     runs-on: ubuntu-24.04
+    outputs:
+      image-name: ${{ steps.get-image-name.outputs.image_name }}
     concurrency:
       group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-image
       cancel-in-progress: true
@@ -96,11 +54,15 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Get Image Name
+      id: get-image-name
+      run: echo "image_name=${{ secrets.image_repository }}/${{ github.repository }}:${{ inputs.image_tag }}" >> "$GITHUB_OUTPUT"
+
     - name: Build and Push to GHCR
       uses: docker/build-push-action@v7.3.0
       with:
         context: .
         push: true
-        tags: "${{ secrets.image_repository }}/${{ inputs.image_name }}:${{ inputs.image_tag }}"
+        tags: ${{ steps.get-image-name.outputs.image_name }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
