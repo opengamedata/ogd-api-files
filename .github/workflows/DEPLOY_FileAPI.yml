@@ -95,7 +95,7 @@ jobs:
     - name: Remove Image from Repo
       uses: dataaxiom/ghcr-cleanup-action@v1.2.2
       with:
-        delete-tags: ${{ inputs.image-name }}
+        delete-tags: ${{ inputs.revision-tag }}
 
     # 2. Remove from GCP
 
