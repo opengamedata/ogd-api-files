@@ -13,7 +13,6 @@ jobs:
 
   build_package:
     name: Build Python Package
-    if: inputs.build_package == 'true'
     runs-on: ubuntu-24.04
     container: python:${{ vars.OGD_PYTHON_VERSION }}-alpine
     defaults:

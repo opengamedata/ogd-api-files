@@ -18,7 +18,6 @@ jobs:
 
   build_image:
     name: Build Docker Image
-    if: inputs.build_image == 'true'
     runs-on: ubuntu-24.04
     outputs:
       image-name: ${{ steps.get-image-name.outputs.image_name }}
