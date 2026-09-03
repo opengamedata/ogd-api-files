@@ -15,16 +15,12 @@ jobs:
     name: FileAPI Local Testbeds
     uses: ./.github/workflows/TEST_FileAPI_local.yml
 
-  build:
+  package:
     name: Build Python Package
     needs: [testbed_fileapi_local]
-    uses: ./.github/workflows/BUILD_FileAPI.yml
+    uses: ./.github/workflows/PACKAGE_FileAPI.yml
     with:
-      image_name:   ${{ github.repository }} # github.repository includes organization as prefix
-      image_tag:    ${{ github.ref_name }}
       with_caching: true
-    secrets:
-      image_repository: ${{ secrets.DOCKER_IMAGE_REPO }}
 
   pypi_release:
     name: Publish Release to PyPI
@@ -67,10 +63,20 @@ jobs:
       run: echo "Done waiting."
       shell: bash
 
+  build:
+    name: Build Docker Image for Deploy
+    needs: [wait_for_pypi]
+    uses: ./.github/workflows/BUILD_FileAPI.yml
+    with:
+      image_name:   ${{ github.repository }} # github.repository includes organization as prefix
+      image_tag:    ${{ github.ref_name }}
+    secrets:
+      image_repository: ${{ secrets.DOCKER_IMAGE_REPO }}
+
   deploy:
     name: Release Deploy
     if: github.event.action == 'released'
-    needs: [build, pypi_release, wait_for_pypi]
+    needs: [build]
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:
       image_name:       ${{ github.repository }} # github.repository includes organization as prefix
