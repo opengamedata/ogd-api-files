@@ -15,20 +15,16 @@ jobs:
     name: FileAPI Local Testbeds
     uses: ./.github/workflows/TEST_FileAPI_local.yml
 
-  build:
+  package:
     name: Build Python Package
     needs: [testbed_fileapi_local]
-    uses: ./.github/workflows/BUILD_FileAPI.yml
+    uses: ./.github/workflows/PACKAGE_FileAPI.yml
     with:
-      image_name:   ${{ github.repository }} # github.repository includes organization as prefix
-      image_tag:    ${{ github.ref_name }}
       with_caching: true
-    secrets:
-      image_repository: ${{ secrets.DOCKER_IMAGE_REPO }}
 
   pypi_release:
     name: Publish Release to PyPI
-    needs: [build]
+    needs: [package]
     runs-on: ubuntu-24.04
     environment:
       name: pypi_release
@@ -59,7 +55,7 @@ jobs:
 
   wait_for_pypi:
     name: Wait for PyPI to Update
-    needs: [build, pypi_release]
+    needs: [package, pypi_release]
     environment: release-wait-deploy # use environment to force waiting a few minutes after the PyPI release.
     runs-on: ubuntu-24.04
     steps:
@@ -67,16 +63,25 @@ jobs:
       run: echo "Done waiting."
       shell: bash
 
+  build:
+    name: Build Docker Image for Deploy
+    needs: [wait_for_pypi]
+    uses: ./.github/workflows/BUILD_FileAPI.yml
+    with:
+      image_name: ${{ github.repository }} # github.repository includes organization as prefix
+      image_tag:  ${{ github.ref_name }}
+    secrets:
+      image_repository: ${{ secrets.DOCKER_IMAGE_REPO }}
+
   deploy:
     name: Release Deploy
     if: github.event.action == 'released'
-    needs: [build, pypi_release, wait_for_pypi]
+    needs: [build]
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:
-      image_name:       ${{ github.repository }} # github.repository includes organization as prefix
-      image_tag:        ${{ github.ref_name }}
+      image_tag: ${{ github.ref_name }}
+      revision-tag: "latest"
       as_latest: true
-      remove: false
     secrets: inherit
 
   testbed_hello_remote:
@@ -84,11 +89,11 @@ jobs:
     needs: [deploy]
     uses: ./.github/workflows/TEST_HelloAPI_remote.yml
     with:
-      base_url: ${{ github.event.repository.name }}-test-${{ vars.GCLOUD_PROJECT_NUM }}.${{ vars.GCLOUD_REGION }}.run.app
+      base_url: "file.api.opengamedata.io"
 
   testbed_fileapi:
-    name: FileAPI Testbed
+    name: FileAPI Remote Testbed
     needs: [deploy]
     uses: ./.github/workflows/TEST_FileAPI_remote.yml
     with:
-      base_url: ${{ github.event.repository.name }}-test-${{ vars.GCLOUD_PROJECT_NUM }}.${{ vars.GCLOUD_REGION }}.run.app
+      base_url: "file.api.opengamedata.io"
