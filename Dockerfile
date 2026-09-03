@@ -3,7 +3,7 @@ FROM python:3.12-alpine
 
 # Set up environment
 ENV PYTHONPATH=src
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # Copy over necessary files
 COPY src/ .
