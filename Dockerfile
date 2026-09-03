@@ -2,9 +2,10 @@
 FROM python:3.12-alpine
 
 ENV PYTHONPATH=src
-COPY requirements.txt /
-COPY src/ /
-COPY config/config.py /src/config.py
+WORKDIR /usr/src/app
+COPY requirements.txt .
+COPY src/ .
+COPY config/config.py ./src/config.py
 
 RUN pip install -r requirements.txt
 RUN pip install .
