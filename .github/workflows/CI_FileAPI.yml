@@ -61,11 +61,11 @@ jobs:
     needs: [setup, deploy]
     uses: ./.github/workflows/TEST_HelloAPI_remote.yml
     with:
-      base_url: "${{ needs.setup.outputs.branch-tag }}---${{ github.event.repository.name }}-test-${{ vars.GCLOUD_REVISION_HASH }}.a.run.app"
+      base_url: ${{ needs.deploy.outputs.url }}
 
   testbed_fileapi_remote:
     name: FileAPI Remote Testbeds
     needs: [setup, deploy]
     uses: ./.github/workflows/TEST_FileAPI_remote.yml
     with:
-      base_url: "${{ needs.setup.outputs.branch-tag }}---${{ github.event.repository.name }}-test-${{ vars.GCLOUD_REVISION_HASH }}.a.run.app"
+      base_url: ${{ needs.deploy.outputs.url }}
