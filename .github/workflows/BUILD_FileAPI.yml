@@ -9,6 +9,8 @@ on:
         description: "The image tag to use."
         required: false
         default: "untagged"
+    outputs:
+      image-name: ${{ jobs.build_image.outputs.image-name }}
     secrets:
       image-repository:
         required: True
