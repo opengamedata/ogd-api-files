@@ -9,19 +9,6 @@ on:
         type: string
         description: "The base URL of the deploy to test."
         required: true
-  push:
-    branches:
-      - "**"
-    paths:
-    - '.github/workflows/TEST_FileAPI_remote.yml'
-    - '.github/actions/test_config/**'
-    - 'tests/cases/apis/resources/**'
-    - 'tests/config/**'
-    - 'tests/FileAPITestConfig.py'
-    - '!.github/workflows/CI_FileAPI.yml'
-    - '!.github/actions/**'
-    - '!src/**'
-    - '!requirements.txt'
 
 env:
   DEFAULT_URL: ${{ github.event.repository.name }}-test-${{ vars.GCLOUD_PROJECT_NUM }}.${{ vars.GCLOUD_REGION }}.run.app
