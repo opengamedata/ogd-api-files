@@ -102,4 +102,5 @@ jobs:
     - name: Upload logs as artifacts
       uses: actions/upload-artifact@v7.0.1
       with:
+        name: "cleanup-log"
         path: ./*.log
