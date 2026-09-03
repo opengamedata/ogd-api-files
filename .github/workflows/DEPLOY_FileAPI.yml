@@ -44,15 +44,15 @@ jobs:
     steps:
       - name: Release Case
         if: inputs.as-latest == 'true'
-        run: URL=$(echo "${{ env.SERVICE_URL }}")
+        run: echo "DEPLOY_URL=${{ env.SERVICE_URL }}" >> $GITHUB_ENV
       - name: Testing Case
         if: inputs.as-latest != 'true'
-        run: URL=$(echo "${{ env.TEST_URL }}")
+        run: echo "DEPLOY_URL=${{ env.TEST_URL }}" >> $GITHUB_ENV
       - name: Check URL
-        run: echo "$URL"
+        run: echo "$DEPLOY_URL"
       - name: Get URL
         id: set-url
-        run: echo "url=$URL" >> "$GITHUB_OUTPUT"
+        run: echo "url=$DEPLOY_URL" >> "$GITHUB_OUTPUT"
 
   deploy_image:
     name: Deploy Image to Google Cloud
