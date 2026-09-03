@@ -3,6 +3,11 @@ name: Remote Testbed - FileAPI
 run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' && github.event.head_commit.message || 'Manual Run') }}
 on:
   workflow_dispatch:
+    inputs:
+      base_url:
+        type: string
+        description: "The base URL of the deploy to test."
+        required: true
   workflow_call:
     inputs:
       base_url:
@@ -11,7 +16,6 @@ on:
         required: true
 
 env:
-  DEFAULT_URL: ${{ github.event.repository.name }}-test-${{ vars.GCLOUD_PROJECT_NUM }}.${{ vars.GCLOUD_REGION }}.run.app
   LOCAL_TEST_DIR: ./tests/cases/apis/resources/**/RemoteCase.py
 
 jobs:
@@ -27,9 +31,6 @@ jobs:
     - name: cURL Check Hello Endpoint
       if: github.event_name == 'workflow_call'
       run: curl -Is --fail-with-body https://${{ inputs.base_url }}/hello
-    - name: cURL Check Hello Endpoint (Manual Run)
-      if: github.event_name != 'workflow_call'
-      run: curl -Is --fail-with-body https://${{ env.DEFAULT_URL }}/hello
 
   # deploy_if_needed:
   #   name: FileAPI Deploy (If Needed)
