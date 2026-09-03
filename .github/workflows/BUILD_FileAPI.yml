@@ -4,13 +4,13 @@ run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' &
 on:
   workflow_call:
     inputs:
-      image_tag:
+      image-tag:
         type: string
         description: "The image tag to use."
         required: false
         default: "untagged"
     secrets:
-      image_repository:
+      image-repository:
         required: True
         description: "Secret indicating the repository of Docker images to use to find the image for deploy."
 
@@ -56,13 +56,13 @@ jobs:
 
     - name: Get Image Name
       id: get-image-name
-      run: echo "image_name=${{ secrets.image_repository }}/${{ github.repository }}:${{ inputs.image_tag }}" >> "$GITHUB_OUTPUT"
+      run: echo "image_name=${{ github.repository }}:${{ inputs.image_tag }}" >> "$GITHUB_OUTPUT"
 
-    - name: Build and Push to GHCR
+    - name: Build and Push to Repository
       uses: docker/build-push-action@v7.3.0
       with:
         context: .
         push: true
-        tags: ${{ steps.get-image-name.outputs.image_name }}
+        tags: "${{ secrets.image_repository }}/${{ steps.get-image-name.outputs.image_name }}"
         cache-from: type=gha
         cache-to: type=gha,mode=max

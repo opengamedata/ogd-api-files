@@ -22,6 +22,8 @@ jobs:
       - name: Get Branch
         id: get-branch
         uses: opengamedata/actions-get-branch@v1.0
+        with:
+          n: 14
 
   testbed_fileapi_local:
     name: FileAPI Local Testbeds
@@ -39,17 +41,16 @@ jobs:
     needs: [setup, package]
     uses: ./.github/workflows/BUILD_FileAPI.yml
     with:
-      image_tag: ${{ needs.setup.outputs.branch-tag }}
+      image-tag: ${{ needs.setup.outputs.branch-tag }}
     secrets:
-      image_repository: ${{ secrets.DOCKER_IMAGE_REPO }}
+      image-repository: ${{ secrets.DOCKER_IMAGE_REPO }}
 
   deploy:
     name: CI Deploy to GCP
-    needs: [setup, build]
+    needs: [build]
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:
-      image_name: ${{ github.repository }} # github.repository includes organization as prefix
-      image_tag:  ${{ needs.setup.outputs.branch-tag }}
+      image-location: ${{ needs.build.outputs.image-location }} # github.repository includes organization as prefix
       remove: false
     secrets: inherit
 
