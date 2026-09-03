@@ -50,7 +50,7 @@ jobs:
     needs: [build]
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:
-      image-location: ${{ needs.build.outputs.image-location }} # github.repository includes organization as prefix
+      image-name: ${{ needs.build.outputs.image-name }} # github.repository includes organization as prefix
       remove: false
     secrets: inherit
 
