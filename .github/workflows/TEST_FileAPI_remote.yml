@@ -29,7 +29,6 @@ jobs:
     steps:
 
     - name: cURL Check Hello Endpoint
-      if: github.event_name == 'workflow_call'
       run: curl -Is --fail-with-body https://${{ inputs.base_url }}/hello
 
   # deploy_if_needed:
