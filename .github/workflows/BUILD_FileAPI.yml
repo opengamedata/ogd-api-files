@@ -55,7 +55,7 @@ jobs:
 
     - name: Get Image Name
       id: get-image-name
-      run: echo "image_name=${{ github.repository }}:${{ inputs.image_tag }}" >> "$GITHUB_OUTPUT"
+      run: echo "image_name=${{ github.repository }}:${{ inputs.image-tag }}" >> "$GITHUB_OUTPUT"
 
     - name: Build and Push to Repository
       uses: docker/build-push-action@v7.3.0
