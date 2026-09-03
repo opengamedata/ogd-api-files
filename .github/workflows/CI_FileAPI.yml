@@ -58,14 +58,14 @@ jobs:
 
   testbed_hello_remote:
     name: HelloAPI Remote Testbed
-    needs: [setup, deploy]
+    needs: [deploy]
     uses: ./.github/workflows/TEST_HelloAPI_remote.yml
     with:
       base_url: ${{ needs.deploy.outputs.url }}
 
   testbed_fileapi_remote:
     name: FileAPI Remote Testbeds
-    needs: [setup, deploy]
+    needs: [deploy]
     uses: ./.github/workflows/TEST_FileAPI_remote.yml
     with:
       base_url: ${{ needs.deploy.outputs.url }}
