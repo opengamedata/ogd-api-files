@@ -68,8 +68,8 @@ jobs:
     needs: [wait_for_pypi]
     uses: ./.github/workflows/BUILD_FileAPI.yml
     with:
-      image_name:   ${{ github.repository }} # github.repository includes organization as prefix
-      image_tag:    ${{ github.ref_name }}
+      image_name: ${{ github.repository }} # github.repository includes organization as prefix
+      image_tag:  ${{ github.ref_name }}
     secrets:
       image_repository: ${{ secrets.DOCKER_IMAGE_REPO }}
 
@@ -79,10 +79,8 @@ jobs:
     needs: [build]
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:
-      image_name:       ${{ github.repository }} # github.repository includes organization as prefix
-      image_tag:        ${{ github.ref_name }}
+      image_tag: ${{ github.ref_name }}
       as_latest: true
-      remove: false
     secrets: inherit
 
   testbed_hello_remote:
