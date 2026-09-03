@@ -47,10 +47,10 @@ jobs:
 
   deploy:
     name: CI Deploy to GCP
-    needs: [build]
+    needs: [setup, build]
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:
-      image-name: ${{ needs.build.outputs.image-name }} # github.repository includes organization as prefix
+      image-name: ${{ needs.build.outputs.image-name }}
       revision-tag: ${{ needs.setup.outputs.branch-tag }}
       remove: false
     secrets: inherit
