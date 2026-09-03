@@ -24,7 +24,7 @@ jobs:
 
   pypi_release:
     name: Publish Release to PyPI
-    needs: [build]
+    needs: [package]
     runs-on: ubuntu-24.04
     environment:
       name: pypi_release
@@ -55,7 +55,7 @@ jobs:
 
   wait_for_pypi:
     name: Wait for PyPI to Update
-    needs: [build, pypi_release]
+    needs: [package, pypi_release]
     environment: release-wait-deploy # use environment to force waiting a few minutes after the PyPI release.
     runs-on: ubuntu-24.04
     steps:
