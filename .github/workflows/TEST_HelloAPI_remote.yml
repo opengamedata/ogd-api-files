@@ -75,7 +75,7 @@ jobs:
     - name: Set up Config File
       uses: ./.github/actions/test_config
       with:
-          endpoint: ${{ case(github.event_name == 'workflow_call', inputs.base_url, env.DEFAULT_URL) }}
+          endpoint: inputs.base_url
           api_version: ${{ steps.version-tag.outputs.VERSION_TAG }}-${{ github.ref_name }}-${{ github.sha }}
           verbose_output: "True"
           shell: sh
