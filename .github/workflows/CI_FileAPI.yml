@@ -10,6 +10,7 @@ on:
     - '.github/actions/FileAPI_config/**'
     - 'package/**'
     - 'src/**'
+    - 'Dockerfile'
     - 'requirements.txt'
 
 jobs:
