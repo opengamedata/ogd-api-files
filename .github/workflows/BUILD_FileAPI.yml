@@ -62,6 +62,6 @@ jobs:
       with:
         context: .
         push: true
-        tags: "${{ secrets.image_repository }}/${{ steps.get-image-name.outputs.image_name }}"
+        tags: "${{ secrets.image-repository }}/${{ steps.get-image-name.outputs.image_name }}"
         cache-from: type=gha
         cache-to: type=gha,mode=max
