@@ -52,7 +52,7 @@ jobs:
     with:
       service-name: "ogd-api-files-test"
       image-name: ${{ needs.build.outputs.image-name }}
-      revision-tag: ${{ needs.setup.outputs.branch-tag }}
+      revision-tag: "t-${{ needs.setup.outputs.branch-tag }}"
       remove: false
     secrets: inherit
 

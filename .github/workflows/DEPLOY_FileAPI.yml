@@ -97,7 +97,7 @@ jobs:
       with:
         service: ${{ inputs.service-name }}
         image:   "${{ secrets.DOCKER_IMAGE_REPO }}/${{ inputs.image-name }}"
-        tag:     "t-${{ inputs.revision-tag }}"
+        tag:     ${{ inputs.revision-tag }}
         no_traffic: true
 
     # 4. Cleanup & complete
