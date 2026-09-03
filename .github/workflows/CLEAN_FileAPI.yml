@@ -23,6 +23,7 @@ jobs:
     needs: [setup]
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:
-      image_tag: ${{ needs.setup.outputs.branch-tag }}
+      image-name: "N/A"
+      branch-tag: ${{ needs.setup.outputs.branch-tag }}
       remove: true
     secrets: inherit
