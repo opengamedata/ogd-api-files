@@ -7,6 +7,7 @@ COPY src/ /
 COPY config/config.py /src/config.py
 
 RUN pip install -r requirements.txt
+RUN pip install .
 RUN pip install waitress
 
 EXPOSE 5000
