@@ -48,6 +48,8 @@ jobs:
       - name: Testing Case
         if: inputs.as-latest != 'true'
         run: URL=$(echo "${{ env.TEST_URL }}")
+      - name: Check URL
+        run: echo "$URL"
       - name: Get URL
         id: set-url
         run: echo "url=$URL" >> "$GITHUB_OUTPUT"
