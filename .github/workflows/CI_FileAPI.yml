@@ -50,6 +50,7 @@ jobs:
     needs: [setup, build]
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:
+      service-name: "ogd-api-files-test"
       image-name: ${{ needs.build.outputs.image-name }}
       revision-tag: ${{ needs.setup.outputs.branch-tag }}
       remove: false
@@ -60,11 +61,11 @@ jobs:
     needs: [setup, deploy]
     uses: ./.github/workflows/TEST_HelloAPI_remote.yml
     with:
-      base_url: "${{ needs.setup.outputs.branch-tag }}---${{ github.event.repository.name }}-test-${{ vars.API_FILES_TEST_ID }}.a.run.app"
+      base_url: "${{ needs.setup.outputs.branch-tag }}---${{ github.event.repository.name }}-test-${{ vars.GCLOUD_REVISION_HASH }}.a.run.app"
 
   testbed_fileapi_remote:
     name: FileAPI Remote Testbeds
     needs: [setup, deploy]
     uses: ./.github/workflows/TEST_FileAPI_remote.yml
     with:
-      base_url: "${{ needs.setup.outputs.branch-tag }}---${{ github.event.repository.name }}-test-${{ vars.API_FILES_TEST_ID }}.a.run.app"
+      base_url: "${{ needs.setup.outputs.branch-tag }}---${{ github.event.repository.name }}-test-${{ vars.GCLOUD_REVISION_HASH }}.a.run.app"
