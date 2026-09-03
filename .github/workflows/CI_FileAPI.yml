@@ -27,14 +27,19 @@ jobs:
     name: FileAPI Local Testbeds
     uses: ./.github/workflows/TEST_FileAPI_local.yml
 
-  build:
-    name: Build Python Package & Image
+  package:
+    name: Test-Build Python Package
     needs: [setup, testbed_fileapi_local]
+    uses: ./.github/workflows/PACKAGE_FileAPI.yml
+    with:
+      with_caching: false
+
+  build:
+    name: Build Docker Image
+    needs: [setup, package]
     uses: ./.github/workflows/BUILD_FileAPI.yml
     with:
-      image_name:       ${{ github.repository }} # github.repository includes organization as prefix
-      image_tag:        ${{ needs.setup.outputs.branch-tag }}
-      with_caching: false
+      image_tag: ${{ needs.setup.outputs.branch-tag }}
     secrets:
       image_repository: ${{ secrets.DOCKER_IMAGE_REPO }}
 
