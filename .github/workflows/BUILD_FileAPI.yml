@@ -4,17 +4,17 @@ run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' &
 on:
   workflow_call:
     inputs:
-      image-tag:
+      image_tag:
         type: string
         description: "The image tag to use."
         required: false
         default: "untagged"
     outputs:
-      image-name:
+      image_name:
         description: "The full name of the image that was built and uploaded to a repository."
-        value: ${{ jobs.build_image.outputs.image-name }}
+        value: ${{ jobs.build_image.outputs.image_name }}
     secrets:
-      image-repository:
+      image_repository:
         required: True
         description: "Secret indicating the repository of Docker images to use to find the image for deploy."
 
@@ -24,7 +24,7 @@ jobs:
     name: Build Docker Image
     runs-on: ubuntu-24.04
     outputs:
-      image-name: ${{ steps.get-image-name.outputs.image_name }}
+      image-name: ${{ steps.get_image_name.outputs.image_name }}
     concurrency:
       group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-image
       cancel-in-progress: true
@@ -37,13 +37,13 @@ jobs:
       with:
         fetch-depth: 0
     - name: Get current version tag
-      id: version-tag
+      id: version_tag
       run: |
         echo "VERSION_TAG=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
     - name: Set up Config File
       uses: ./.github/actions/FileAPI_config
       with:
-        api_version: ${{ steps.version-tag.outputs.VERSION_TAG }}-${{ github.ref_name }}-${{ github.sha }}
+        api_version: ${{ steps.version_tag.outputs.VERSION_TAG }}-${{ github.ref_name }}-${{ github.sha }}
 
     # 2. Build image
 
@@ -58,14 +58,14 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Get Image Name
-      id: get-image-name
-      run: echo "image_name=${{ github.repository }}:${{ inputs.image-tag }}" >> "$GITHUB_OUTPUT"
+      id: get_image_name
+      run: echo "image_name=${{ github.repository }}:${{ inputs.image_tag }}" >> "$GITHUB_OUTPUT"
 
     - name: Build and Push to Repository
       uses: docker/build-push-action@v7.3.0
       with:
         context: .
         push: true
-        tags: "${{ secrets.image-repository }}/${{ steps.get-image-name.outputs.image_name }}"
+        tags: "${{ secrets.image_repository }}/${{ steps.get_image_name.outputs.image_name }}"
         cache-from: type=gha
         cache-to: type=gha,mode=max

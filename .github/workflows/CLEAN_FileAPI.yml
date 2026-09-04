@@ -11,10 +11,10 @@ jobs:
     name: Get Branch
     runs-on: ubuntu-24.04
     outputs:
-      branch-tag: ${{ steps.get-branch.outputs.branch-name }}
+      branch_tag: ${{ steps.get_branch.outputs.branch-name }}
     steps:
       - name: Get Branch
-        id: get-branch
+        id: get_branch
         uses: opengamedata/actions-get-branch@v1.0
 
   branch_delete:
@@ -25,6 +25,6 @@ jobs:
     with:
       service-name: "ogd-api-files-test"
       image-name: "N/A"
-      branch-tag: ${{ needs.setup.outputs.branch-tag }}
+      branch-tag: ${{ needs.setup.outputs.branch_tag }}
       remove: true
     secrets: inherit

@@ -4,15 +4,15 @@ run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' &
 on:
   workflow_call:
     inputs:
-      service-name:
+      service_name:
         type: string
         description: "The service to which the image should be deployed"
         required: true
-      image-name:
+      image_name:
         type: string
         description: "The full name of the image, including the tag."
         required: true
-      revision-tag:
+      revision_tag:
         type: string
         description: "The name of the revision to use for the deploy. Typically the same as the image tag."
         required: true
@@ -21,7 +21,7 @@ on:
         description: "Whether to remove the deploy for the current branch."
         required: true
         default: false
-      as-latest:
+      as_latest:
         type: boolean
         description: "Whether to also deploy/remove as the 'latest' version of API"
         required: false
@@ -33,7 +33,7 @@ on:
 
 env:
   SERVICE_URL: "file.api.opengamedata.io"
-  TEST_URL: ${{ inputs.revision-tag }}---${{ inputs.service-name }}-${{ vars.GCLOUD_REVISION_HASH }}.a.run.app
+  TEST_URL: ${{ inputs.revision_tag }}---${{ inputs.service_name }}-${{ vars.GCLOUD_REVISION_HASH }}.a.run.app
 
 jobs:
   derive_url:
@@ -43,10 +43,10 @@ jobs:
       url: ${{ steps.set-url.outputs.url }}
     steps:
       - name: Release Case
-        if: inputs.as-latest == 'true'
+        if: inputs.as_latest == 'true'
         run: echo "DEPLOY_URL=${{ env.SERVICE_URL }}" >> $GITHUB_ENV
       - name: Testing Case
-        if: inputs.as-latest != 'true'
+        if: inputs.as_latest != 'true'
         run: echo "DEPLOY_URL=${{ env.TEST_URL }}" >> $GITHUB_ENV
       - name: Check URL
         run: echo "$DEPLOY_URL"
@@ -85,19 +85,19 @@ jobs:
         service_account: ${{ secrets.GCLOUD_DEPLOY_USER }}
     
     - name: Deploy as Latest
-      if: ${{ inputs.as-latest == 'true' }}
+      if: ${{ inputs.as_latest == 'true' }}
       uses: 'google-github-actions/deploy-cloudrun@v3.0.1'
       with:
-        service: ${{ inputs.service-name }}
-        image:   "${{ secrets.DOCKER_IMAGE_REPO }}/${{ inputs.image-name }}"
+        service: ${{ inputs.service_name }}
+        image:   "${{ secrets.DOCKER_IMAGE_REPO }}/${{ inputs.image_name }}"
 
     - name: Deploy as Test
       if: ${{ inputs.as-latest != 'true' }}
       uses: 'google-github-actions/deploy-cloudrun@v3.0.1'
       with:
-        service: ${{ inputs.service-name }}
-        image:   "${{ secrets.DOCKER_IMAGE_REPO }}/${{ inputs.image-name }}"
-        tag:     ${{ inputs.revision-tag }}
+        service: ${{ inputs.service_name }}
+        image:   "${{ secrets.DOCKER_IMAGE_REPO }}/${{ inputs.image_name }}"
+        tag:     ${{ inputs.revision_tag }}
         no_traffic: true
 
     # 4. Cleanup & complete

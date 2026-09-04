@@ -79,9 +79,9 @@ jobs:
     needs: [build]
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:
-      service-name: "ogd-api-files"
+      service_name: "ogd-api-files"
       image_tag: ${{ github.ref_name }}
-      revision-tag: "latest"
+      revision_tag: "latest"
       as_latest: true
     secrets: inherit
 
