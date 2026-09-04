@@ -24,7 +24,7 @@ jobs:
     name: Build Docker Image
     runs-on: ubuntu-24.04
     outputs:
-      image-name: ${{ steps.get_image_name.outputs.image_name }}
+      image_name: ${{ steps.get_image_name.outputs.image_name }}
     concurrency:
       group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-image
       cancel-in-progress: true

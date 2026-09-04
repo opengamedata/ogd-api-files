@@ -92,7 +92,7 @@ jobs:
         image:   "${{ secrets.DOCKER_IMAGE_REPO }}/${{ inputs.image_name }}"
 
     - name: Deploy as Test
-      if: ${{ inputs.as-latest != 'true' }}
+      if: ${{ inputs.as_latest != 'true' }}
       uses: 'google-github-actions/deploy-cloudrun@v3.0.1'
       with:
         service: ${{ inputs.service_name }}
@@ -121,7 +121,7 @@ jobs:
     - name: Remove Image from Repo
       uses: dataaxiom/ghcr-cleanup-action@v1.2.2
       with:
-        delete-tags: ${{ inputs.revision-tag }}
+        delete-tags: ${{ inputs.revision_tag }}
 
     # 2. Remove from GCP
     # TODO

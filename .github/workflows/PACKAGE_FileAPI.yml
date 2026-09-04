@@ -1,4 +1,4 @@
-# Workflow to test building the File API project
+# Workflow to package up the File API project
 name: Build pyproject - File API
 run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' && github.event.head_commit.message || 'Manual Run') }}
 on:

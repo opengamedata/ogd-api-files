@@ -23,8 +23,8 @@ jobs:
     needs: [setup]
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:
-      service-name: "ogd-api-files-test"
-      image-name: "N/A"
-      branch-tag: ${{ needs.setup.outputs.branch_tag }}
+      service_name: "ogd-api-files-test"
+      image_name: "N/A"
+      branch_tag: ${{ needs.setup.outputs.branch_tag }}
       remove: true
     secrets: inherit

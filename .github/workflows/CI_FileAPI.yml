@@ -42,7 +42,7 @@ jobs:
     needs: [setup, package]
     uses: ./.github/workflows/BUILD_FileAPI.yml
     with:
-      image_tag: ${{ needs.setup.outputs.branch-tag }}
+      image_tag: ${{ needs.setup.outputs.branch_tag }}
     secrets:
       image_repository: ${{ secrets.DOCKER_IMAGE_REPO }}
 
