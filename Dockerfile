@@ -11,8 +11,12 @@ RUN which pip
 
 # 2. Install reqs and the API package into venv
 #   Mount, rather than copy, reqs file for installing
+RUN --mount=type=bind,source=requirements-build.txt,target=requirements-build.txt \
+    pip install -r requirements-build.txt
 RUN --mount=type=bind,source=requirements.txt,target=requirements.txt \
     pip install -r requirements.txt
+RUN --mount=type=bind,source=requirements-production.txt,target=requirements-production.txt \
+    pip install -r requirements-production.txt
 COPY src/ogd /app/src/ogd
 COPY pyproject.toml /app/pyproject.toml
 RUN pip install /app
