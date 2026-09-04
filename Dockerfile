@@ -40,7 +40,7 @@ COPY config/config.py ./config.py
 RUN ls /app/.venv/lib/python3.12/site-packages/
 
 CMD ["gunicorn", \
-     "--bind",    ":$PORT", \
+     "--bind",    ":8080", \
      "--workers", "1", "\
      --threads",  "8", \
      "--timeout", "0", \
