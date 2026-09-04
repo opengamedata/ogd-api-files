@@ -58,7 +58,7 @@ jobs:
     steps:
 
     - name: Announce testing
-      run: echo "Testing HelloAPI endpoint at ${{ case(github.event_name == 'workflow_call', inputs.base_url, env.DEFAULT_URL) }}"
+      run: echo "Testing HelloAPI endpoint at ${{ inputs.base_url }}"
 
   # 1. Local checkout 
     - name: Checkout repository
