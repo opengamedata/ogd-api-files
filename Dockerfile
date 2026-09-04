@@ -1,20 +1,40 @@
 # syntax=docker/dockerfile:1
-FROM python:3.12-alpine
 
-# Set up environment
-ENV PYTHONPATH=src
+# STAGE 1: setup dependencies
+FROM python:3.12-alpine as setup
+
+# 1. Set up a venv for easy copying
+RUN python -m venv /app/.venv
+ENV PATH="/app/.venv/bin:$PATH"
+RUN which python
+RUN which pip
+
+# 2. Install reqs and the API package into venv
+#   Mount, rather than copy, reqs file for installing
+RUN --mount=type=bind,source=requirements.txt,target=requirements.txt \
+    pip install -r requirements.txt
+COPY src/ogd /app/src/ogd
+COPY pyproject.toml /app/pyproject.toml
+RUN pip install /app
+# 3. Install waitress, for production use
+RUN pip install waitress
+RUN ls /app/.venv/lib/python3.12/site-packages/
+
+# STAGE 2: Create final image
+FROM python:3.12-alpine
 WORKDIR /app
 
-# Copy over necessary files
-COPY src/ .
-COPY pyproject.toml .
-COPY requirements.txt .
-COPY config/config.py ./src/config.py
+# 1. Copy venv from setup stage
+COPY --from=setup /app/.venv ./.venv
 
-# Run installation of packages
-RUN pip install -r requirements.txt
-RUN pip install .
-RUN pip install waitress
+ENV PATH="/app/.venv/bin:$PATH"
+# ENV PYTHONPATH='src'
+
+COPY src/ ./
+# Remove redundant copy of the package code
+RUN rm -r ./ogd
+COPY config/config.py ./config.py
+RUN ls /app/.venv/lib/python3.12/site-packages/
 
 EXPOSE 5000
-CMD ["waitress-serve", "app:application"]
+CMD ["waitress-serve", "--port=5000", "app:application"]
