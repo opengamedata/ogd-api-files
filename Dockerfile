@@ -38,7 +38,7 @@ COPY config/config.py ./config.py
 CMD ["gunicorn", \
      "--bind",    ":8080", \
      "--workers", "1", \
-     "--threads",  "8", \
+     "--threads", "8", \
      "--timeout", "0", \
      "app:application" \
 ]
