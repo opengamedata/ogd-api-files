@@ -10,6 +10,7 @@ on:
     - '.github/actions/FileAPI_config/**'
     - 'package/**'
     - 'src/**'
+    - 'Dockerfile'
     - 'requirements.txt'
 
 jobs:
@@ -50,21 +51,22 @@ jobs:
     needs: [setup, build]
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:
+      service-name: "ogd-api-files-test"
       image-name: ${{ needs.build.outputs.image-name }}
-      revision-tag: ${{ needs.setup.outputs.branch-tag }}
+      revision-tag: "t-${{ needs.setup.outputs.branch-tag }}"
       remove: false
     secrets: inherit
 
   testbed_hello_remote:
     name: HelloAPI Remote Testbed
-    needs: [setup, deploy]
+    needs: [deploy]
     uses: ./.github/workflows/TEST_HelloAPI_remote.yml
     with:
-      base_url: "${{ needs.setup.outputs.branch-tag }}---${{ github.event.repository.name }}-test-${{ vars.API_FILES_TEST_ID }}.a.run.app"
+      base_url: ${{ needs.deploy.outputs.url }}
 
   testbed_fileapi_remote:
     name: FileAPI Remote Testbeds
-    needs: [setup, deploy]
+    needs: [deploy]
     uses: ./.github/workflows/TEST_FileAPI_remote.yml
     with:
-      base_url: "${{ needs.setup.outputs.branch-tag }}---${{ github.event.repository.name }}-test-${{ vars.API_FILES_TEST_ID }}.a.run.app"
+      base_url: ${{ needs.deploy.outputs.url }}

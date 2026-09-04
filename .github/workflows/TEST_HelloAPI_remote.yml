@@ -3,29 +3,19 @@ name: Remote Testbed - HelloAPI check
 run-name: ${{ format('{0} - {1}', github.workflow, github.event_name == 'push' && github.event.head_commit.message || 'Manual Run') }}
 on:
   workflow_dispatch:
+    inputs:
+      base_url:
+        type: string
+        description: "The base URL of the deploy to test."
+        required: true
   workflow_call:
     inputs:
       base_url:
         type: string
         description: "The base URL of the deploy to test."
         required: true
-  push:
-    branches:
-      - "**"
-    paths:
-    - '.github/workflows/TEST_HelloAPI_remote.yml'
-    - '.github/actions/test_config/**'
-    - 'tests/cases/apis/HelloAPISuite/**'
-    - 'tests/config/**'
-    - 'tests/FileAPITestConfig.py'
-    - 'requirements.txt'
-    - '!.github/workflows/CI_FileAPI.yml'
-    - '!.github/actions/**'
-    - '!src/**'
-    - '!requirements.txt'
 
 env:
-  DEFAULT_URL: ${{ github.event.repository.name }}-test-${{ vars.GCLOUD_PROJECT_NUM }}.${{ vars.GCLOUD_REGION }}.run.app
   LOCAL_TEST_DIR: ./tests/cases/apis/HelloAPISuite
 
 jobs:
@@ -39,7 +29,7 @@ jobs:
     steps:
 
     - name: cURL Check Hello Endpoint
-      run: curl -Is --fail-with-body https://${{ case(github.event_name == 'workflow_call', inputs.base_url, env.DEFAULT_URL) }}/hello
+      run: curl -Is --fail-with-body https://${{ inputs.base_url }}/hello
 
   # deploy_if_needed:
   #   name: FileAPI Deploy (If Needed)
@@ -85,7 +75,7 @@ jobs:
     - name: Set up Config File
       uses: ./.github/actions/test_config
       with:
-          endpoint: ${{ case(github.event_name == 'workflow_call', inputs.base_url, env.DEFAULT_URL) }}
+          endpoint: ${{ inputs.base_url }}
           api_version: ${{ steps.version-tag.outputs.VERSION_TAG }}-${{ github.ref_name }}-${{ github.sha }}
           verbose_output: "True"
           shell: sh
