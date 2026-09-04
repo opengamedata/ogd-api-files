@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # STAGE 1: setup dependencies
-FROM python:3.12-alpine as setup
+FROM python:3.12-alpine AS setup
 
 # 1. Set up a venv for easy copying
 RUN python -m venv /app/.venv
