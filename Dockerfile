@@ -6,8 +6,6 @@ FROM python:3.12-alpine AS setup
 # 1. Set up a venv for easy copying
 RUN python -m venv /app/.venv
 ENV PATH="/app/.venv/bin:$PATH"
-RUN which python
-RUN which pip
 
 # 2. Install reqs into venv
 #   Mount, rather than copy, reqs file for installing
@@ -21,7 +19,6 @@ COPY src/ogd /app/src/ogd
 COPY pyproject.toml /app/pyproject.toml
 # 3. Install local copy of API package code.
 RUN pip install /app
-RUN ls /app/.venv/lib/python3.12/site-packages/
 
 # STAGE 2: Create final image
 FROM python:3.12-alpine
@@ -37,7 +34,6 @@ COPY src/ ./
 # Remove redundant copy of the package code
 RUN rm -r ./ogd
 COPY config/config.py ./config.py
-RUN ls /app/.venv/lib/python3.12/site-packages/
 
 CMD ["gunicorn", \
      "--bind",    ":8080", \
