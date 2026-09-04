@@ -36,5 +36,4 @@ RUN rm -r ./ogd
 COPY config/config.py ./config.py
 RUN ls /app/.venv/lib/python3.12/site-packages/
 
-EXPOSE 5000
-CMD ["waitress-serve", "--port=5000", "app:application"]
+CMD ["waitress-serve", "app:application"]
