@@ -25,6 +25,6 @@ jobs:
     with:
       service_name: "ogd-api-files-test"
       image_name: "N/A"
-      branch_tag: ${{ needs.setup.outputs.branch_tag }}
+      revision_tag: ${{ needs.setup.outputs.branch_tag }}
       remove: true
     secrets: inherit
