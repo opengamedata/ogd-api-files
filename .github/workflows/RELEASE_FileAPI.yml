@@ -26,7 +26,7 @@ jobs:
       with_caching: true
       cache_to: env.CACHE_KEY
 
-  pypi_release:
+  release:
     name: Publish Release to PyPI
     needs: [package]
     runs-on: ubuntu-24.04
@@ -37,25 +37,48 @@ jobs:
       id-token: write
     steps:
 
-    # 1. Local checkout & config
     - name: Restore Cached Build
       id: cached-build
       uses: actions/download-artifact@v7.0.0
       with:
         name: env.CACHE_KEY
         path: ./dist/
-    # 2. Build 
 
-    # 3. Remote config & deploy
     - name: Publish to PyPI
       if: steps.cached-build.outputs.cache-hit == 'true'
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         print-hash: true
 
+  prerelease:
+    name: Publish Prerelease to PyPI
+    if: github.event.action == 'prereleased'
+    needs: [package]
+    runs-on: ubuntu-24.04
+    environment:
+      name: pypi_prerelease
+      url: https://pypi.org/manage/project/opengamedata-api-files/
+    permissions:
+      id-token: write
+    steps:
+
+    - name: Restore Cached Build
+      id: cached-build
+      uses: actions/download-artifact@v7.0.0
+      with:
+        name: env.CACHE_KEY
+        path: ./dist/
+
+    - name: Publish to PyPI
+      if: steps.cached-build.outputs.cache-hit == 'true'
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        print-hash: true
+        repository-url: https://test.pypi.org/legacy/
+
   wait_for_pypi:
     name: Wait for PyPI to Update
-    needs: [package, pypi_release]
+    needs: [package, release]
     environment: release-wait-deploy # use environment to force waiting a few minutes after the PyPI release.
     runs-on: ubuntu-24.04
     steps:
@@ -72,7 +95,38 @@ jobs:
     secrets:
       image_repository: ${{ secrets.DOCKER_IMAGE_REPO }}
 
-  deploy:
+  # *** Prerelease Case ***
+
+  deploy_prerelease:
+    name: Release Deploy
+    if: github.event.action == 'prereleased'
+    needs: [build]
+    uses: ./.github/workflows/DEPLOY_FileAPI.yml
+    with:
+      service_name: "ogd-api-files"
+      image_name: ${{ needs.build.outputs.image_name }}
+      revision_tag: "prerelease"
+      remove: false
+      as_latest: true
+    secrets: inherit
+
+  testbed_hello_remote_pre:
+    name: HelloAPI Remote Testbed
+    needs: [deploy_prerelease]
+    uses: ./.github/workflows/TEST_HelloAPI_remote.yml
+    with:
+      base_url: "file.api.opengamedata.io"
+
+  testbed_fileapi_pre:
+    name: FileAPI Remote Testbed
+    needs: [deploy_prerelease]
+    uses: ./.github/workflows/TEST_FileAPI_remote.yml
+    with:
+      base_url: "file.api.opengamedata.io"
+
+    # *** Release Case ***
+
+  deploy_release:
     name: Release Deploy
     if: github.event.action == 'released'
     needs: [build]
@@ -87,14 +141,14 @@ jobs:
 
   testbed_hello_remote:
     name: HelloAPI Remote Testbed
-    needs: [deploy]
+    needs: [deploy_release]
     uses: ./.github/workflows/TEST_HelloAPI_remote.yml
     with:
       base_url: "file.api.opengamedata.io"
 
   testbed_fileapi:
     name: FileAPI Remote Testbed
-    needs: [deploy]
+    needs: [deploy_release]
     uses: ./.github/workflows/TEST_FileAPI_remote.yml
     with:
       base_url: "file.api.opengamedata.io"
