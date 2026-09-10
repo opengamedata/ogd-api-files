@@ -9,6 +9,9 @@ on:
   release:
     types: [released, prereleased]
 
+env:
+  CACHE_KEY: opengamedata-api-files-build-${{ github.run_id }}-${{ github.run_attempt }}
+
 jobs:
 
   testbed_fileapi_local:
@@ -21,6 +24,7 @@ jobs:
     uses: ./.github/workflows/PACKAGE_FileAPI.yml
     with:
       with_caching: true
+      cache_to: env.CACHE_KEY
 
   pypi_release:
     name: Publish Release to PyPI
@@ -36,14 +40,10 @@ jobs:
     # 1. Local checkout & config
     - name: Restore Cached Build
       id: cached-build
-      uses: actions/cache/restore@v6.1.0
+      uses: actions/download-artifact@v7.0.0
       with:
-        key: opengamedata-api-files-build-${{ github.run_id }}-${{ github.run_attempt }}
-        path: dist/
-        fail-on-cache-miss: true
-    - name: Fail if Cache Restore Failed
-      if: steps.cached-build.outputs.cache-hit == 'false'
-      run: exit 1
+        name: env.CACHE_KEY
+        path: ./dist/
     # 2. Build 
 
     # 3. Remote config & deploy
