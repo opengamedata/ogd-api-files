@@ -47,7 +47,7 @@ jobs:
     needs: [check_deploy]
     if: always() && (needs.check_deploy.result == 'success' || needs.deploy_if_needed.result == 'success')
     runs-on: ubuntu-24.04
-    container: python:${{ vars.OGD_PYTHON_VERSION }}-alpine
+    container: ${{ vars.EXEC_CONTAINER }}
     concurrency:
       group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-file
       cancel-in-progress: false
