@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # STAGE 1: setup dependencies
-FROM python:3.12-alpine AS setup
+FROM python:3.12-slim-trixie AS setup
 
 # 1. Set up a venv for easy copying
 RUN python -m venv /app/.venv
@@ -21,7 +21,7 @@ COPY pyproject.toml /app/pyproject.toml
 RUN pip install /app
 
 # STAGE 2: Create final image
-FROM python:3.12-alpine
+FROM python:3.12-slim-trixie
 WORKDIR /app
 
 # 1. Copy venv from setup stage
