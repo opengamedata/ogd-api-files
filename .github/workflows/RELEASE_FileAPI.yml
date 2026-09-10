@@ -97,15 +97,30 @@ jobs:
 
   # *** Prerelease Case ***
 
+  get_branch:
+    name: Get Branch
+    if: github.event.action == 'prereleased'
+    needs: [build]
+    runs-on: ubuntu-24.04
+    outputs:
+      branch_tag: ${{ steps.get-branch.outputs.branch-name }}
+    steps:
+    - name: Get Branch
+      id: get-branch
+      uses: opengamedata/actions-get-branch@v1.1
+      with:
+        n: 20
+        remove: '\.'
+
   deploy_prerelease:
     name: Release Deploy
     if: github.event.action == 'prereleased'
-    needs: [build]
+    needs: [build, get_branch]
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:
       service_name: "ogd-api-files"
       image_name: ${{ needs.build.outputs.image_name }}
-      revision_tag: "prerelease"
+      revision_tag: ${{ needs.get_branch.outputs.branch_tag }}
       remove: false
       as_latest: true
     secrets: inherit
