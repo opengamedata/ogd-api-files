@@ -72,6 +72,7 @@ jobs:
       run: |
         echo "VERSION_TAG=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
         echo "SRC_REVISION=$(git rev-list -1 HEAD -- src/)" >> $GITHUB_OUTPUT
+
     - name: Set up Config File
       uses: ./.github/actions/test_config
       with:
@@ -90,4 +91,5 @@ jobs:
     - name: Upload logs as artifacts
       uses: actions/upload-artifact@v7.0.1
       with:
+        name: "test-log"
         path: ./*.log
