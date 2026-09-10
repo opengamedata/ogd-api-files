@@ -1,1 +1,14 @@
 gha-creds-*.json
+*__pycache__/*
+.github/
+.vscode/
+store/
+tests/
+.DS_Store
+.gitignore
+.gitmodules
+.git
+.pylintrc
+CITATION.cff
+README.md
+*.log
