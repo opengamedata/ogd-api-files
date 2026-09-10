@@ -18,24 +18,31 @@ jobs:
     name: Get Branch
     runs-on: ubuntu-24.04
     outputs:
-      branch-tag: ${{ steps.get-branch.outputs.branch-name }}
+      branch_tag: ${{ steps.get_branch.outputs.branch-name }}
     steps:
       - name: Get Branch
-        id: get-branch
+        id: get_branch
         uses: opengamedata/actions-get-branch@v1.0
+        with:
+          n: 14
 
   testbed_fileapi_local:
     name: FileAPI Local Testbeds
     uses: ./.github/workflows/TEST_FileAPI_local.yml
 
-  build:
-    name: Build Python Package & Image
+  package:
+    name: Test-Build Python Package
     needs: [setup, testbed_fileapi_local]
+    uses: ./.github/workflows/PACKAGE_FileAPI.yml
+    with:
+      with_caching: false
+
+  build:
+    name: Build Docker Image
+    needs: [setup, package]
     uses: ./.github/workflows/BUILD_FileAPI.yml
     with:
-      image_name:   ${{ github.repository }} # github.repository includes organization as prefix
-      image_tag:    ${{ needs.setup.outputs.branch-tag }}
-      with_caching: false
+      image_tag: ${{ needs.setup.outputs.branch_tag }}
     secrets:
       image_repository: ${{ secrets.DOCKER_IMAGE_REPO }}
 
@@ -44,21 +51,22 @@ jobs:
     needs: [setup, build]
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:
-      image_name: ${{ github.repository }} # github.repository includes organization as prefix
-      image_tag:  ${{ needs.setup.outputs.branch-tag }}
+      service_name: "ogd-api-files-test"
+      image_name: ${{ needs.build.outputs.image_name }}
+      revision_tag: "t-${{ needs.setup.outputs.branch_tag }}"
       remove: false
     secrets: inherit
 
   testbed_hello_remote:
     name: HelloAPI Remote Testbed
-    needs: [setup, deploy]
+    needs: [deploy]
     uses: ./.github/workflows/TEST_HelloAPI_remote.yml
     with:
-      base_url: "${{ needs.setup.outputs.branch-tag }}---${{ github.event.repository.name }}-test-${{ vars.API_FILES_TEST_ID }}.a.run.app"
+      base_url: ${{ needs.deploy.outputs.url }}
 
   testbed_fileapi_remote:
     name: FileAPI Remote Testbeds
-    needs: [setup, deploy]
+    needs: [deploy]
     uses: ./.github/workflows/TEST_FileAPI_remote.yml
     with:
-      base_url: "${{ needs.setup.outputs.branch-tag }}---${{ github.event.repository.name }}-test-${{ vars.API_FILES_TEST_ID }}.a.run.app"
+      base_url: ${{ needs.deploy.outputs.url }}
