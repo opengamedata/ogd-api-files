@@ -15,7 +15,10 @@ jobs:
     steps:
       - name: Get Branch
         id: get_branch
-        uses: opengamedata/actions-get-branch@v1.0
+        uses: opengamedata/actions-get-branch@v1.1
+        with:
+          n: 20
+          remove: '\.'
 
   branch_delete:
     name: Dead Branch Cleanup

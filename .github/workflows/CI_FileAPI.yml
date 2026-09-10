@@ -22,9 +22,10 @@ jobs:
     steps:
       - name: Get Branch
         id: get_branch
-        uses: opengamedata/actions-get-branch@v1.0
+        uses: opengamedata/actions-get-branch@v1.1
         with:
-          n: 14
+          n: 20
+          remove: '\.'
 
   testbed_fileapi_local:
     name: FileAPI Local Testbeds
