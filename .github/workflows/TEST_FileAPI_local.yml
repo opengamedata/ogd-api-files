@@ -33,7 +33,6 @@ jobs:
         shell: sh
     concurrency:
       group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-file
-      cancel-in-progress: false
 
     steps:
 
