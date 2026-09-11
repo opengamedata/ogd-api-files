@@ -113,7 +113,7 @@ jobs:
         remove: '\.'
 
   deploy_prerelease:
-    name: Release Deploy
+    name: Pre-release Deploy
     if: github.event.action == 'prereleased'
     needs: [build, get_branch]
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
@@ -126,14 +126,14 @@ jobs:
     secrets: inherit
 
   testbed_hello_remote_pre:
-    name: HelloAPI Remote Testbed
+    name: HelloAPI Remote Testbed (prerelease)
     needs: [deploy_prerelease]
     uses: ./.github/workflows/TEST_HelloAPI_remote.yml
     with:
       base_url: ${{ needs.deploy_prerelease.outputs.url }}
 
   testbed_fileapi_pre:
-    name: FileAPI Remote Testbed
+    name: FileAPI Remote Testbed (prerelease)
     needs: [deploy_prerelease]
     uses: ./.github/workflows/TEST_FileAPI_remote.yml
     with:
