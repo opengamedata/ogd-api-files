@@ -28,6 +28,7 @@ jobs:
 
   release:
     name: Publish Release to PyPI
+    if: github.event.action == 'released'
     needs: [package]
     runs-on: ubuntu-24.04
     environment:
@@ -45,7 +46,6 @@ jobs:
         path: ./dist/
 
     - name: Publish to PyPI
-      if: steps.cached-build.outputs.cache-hit == 'true'
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         print-hash: true
@@ -70,7 +70,6 @@ jobs:
         path: ./dist/
 
     - name: Publish to PyPI
-      if: steps.cached-build.outputs.cache-hit == 'true'
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         print-hash: true
