@@ -26,59 +26,18 @@ jobs:
       with_caching: true
       cache_to: env.CACHE_KEY
 
-  release:
-    name: Publish Release to PyPI
-    if: github.event.action == 'released'
-    needs: [package]
-    runs-on: ubuntu-24.04
-    environment:
-      name: pypi_release
-      url: https://pypi.org/manage/project/opengamedata-api-files/
+  publish:
+    name: Build Python Package
+    needs: [testbed_fileapi_local]
+    uses: ./.github/workflows/PUBLISH_FileAPI.yml
     permissions:
       id-token: write
-    steps:
-
-    - name: Restore Cached Build
-      id: cached-build
-      uses: actions/download-artifact@v7.0.0
-      with:
-        name: env.CACHE_KEY
-        path: ./dist/
-
-    - name: Publish to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        print-hash: true
-
-  prerelease:
-    name: Publish Prerelease to PyPI
-    if: github.event.action == 'prereleased'
-    needs: [package]
-    runs-on: ubuntu-24.04
-    environment:
-      name: pypi_prerelease
-      url: https://pypi.org/manage/project/opengamedata-api-files/
-    permissions:
-      id-token: write
-    steps:
-
-    - name: Restore Cached Build
-      id: cached-build
-      uses: actions/download-artifact@v7.0.0
-      with:
-        name: env.CACHE_KEY
-        path: ./dist/
-
-    - name: Publish to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        print-hash: true
-        repository-url: https://test.pypi.org/legacy/
+    with:
+      release_type: ${{ github.event.action }}
 
   wait_for_pypi:
     name: Wait for PyPI to Update
-    needs: [release, prerelease]
-    if: always() && (needs.release.result == 'success' || needs.prerelease.result == 'success')
+    needs: [publish]
     environment: release-wait-deploy # use environment to force waiting a few minutes after the PyPI release.
     runs-on: ubuntu-24.04
     steps:
