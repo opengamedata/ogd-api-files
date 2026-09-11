@@ -9,9 +9,6 @@ on:
   release:
     types: [released, prereleased]
 
-env:
-  CACHE_KEY: opengamedata-api-files-build-${{ github.run_id }}-${{ github.run_attempt }}
-
 jobs:
 
   testbed_fileapi_local:
@@ -24,7 +21,7 @@ jobs:
     uses: ./.github/workflows/PACKAGE_FileAPI.yml
     with:
       with_caching: true
-      cache_to: env.CACHE_KEY
+      build_name: &artifact opengamedata-api-files-build-${{ github.run_id }}-${{ github.run_attempt }}
 
   publish:
     name: Publish Python Package
@@ -34,7 +31,7 @@ jobs:
       id-token: write
     with:
       release_type: ${{ github.event.action }}
-      build_name: env.CACHE_KEY
+      build_name: *artifact
 
   wait_for_pypi:
     name: Wait for PyPI to Update

@@ -8,7 +8,7 @@ on:
         type: boolean
         description: "Whether to cache the build for upload in a later job."
         required: true
-      cache_to:
+      build_name:
         type: string
         description: "Name of artifact to store package for sharing to other workflows, if caching is used."
         required: false
@@ -51,7 +51,7 @@ jobs:
       id: cache-build
       uses: actions/upload-artifact@v7.0.1
       with:
-        name: ${{ inputs.cache_to }}
+        name: ${{ inputs.build_name }}
         path: ./dist/
     - name: Non-Cached Build
       if: inputs.with_caching != true
