@@ -11,6 +11,7 @@ on:
       build_name:
         type: string
         description: "The name of the artifact uploaded by the build job."
+        required: true
 
 jobs:
 

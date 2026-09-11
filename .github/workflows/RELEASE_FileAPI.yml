@@ -25,7 +25,7 @@ jobs:
 
   publish:
     name: Publish Python Package
-    needs: [testbed_fileapi_local]
+    needs: [package]
     uses: ./.github/workflows/PUBLISH_FileAPI.yml
     permissions:
       id-token: write
