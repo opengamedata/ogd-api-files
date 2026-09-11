@@ -27,7 +27,7 @@ jobs:
       cache_to: env.CACHE_KEY
 
   publish:
-    name: Build Python Package
+    name: Publish Python Package
     needs: [testbed_fileapi_local]
     uses: ./.github/workflows/PUBLISH_FileAPI.yml
     permissions:
