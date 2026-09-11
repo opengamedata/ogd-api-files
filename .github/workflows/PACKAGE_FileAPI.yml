@@ -32,6 +32,8 @@ jobs:
     # 1. Local checkout & config
     - name: Checkout repository
       uses: actions/checkout@v7.0.1
+      with:
+        fetch-depth: 0
     - name: Get Dependencies
       run: python -m pip install -r requirements.txt
     - name: Get Build Dependencies
