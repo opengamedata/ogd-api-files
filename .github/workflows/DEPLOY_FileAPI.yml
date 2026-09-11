@@ -90,6 +90,7 @@ jobs:
       with:
         service: ${{ inputs.service_name }}
         image:   "${{ secrets.DOCKER_IMAGE_REPO }}/${{ inputs.image_name }}"
+        revision_traffic: 'LATEST=100'
 
     - name: Deploy as Test
       if: ${{ inputs.as_latest != 'true' }}
