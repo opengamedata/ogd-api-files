@@ -77,7 +77,8 @@ jobs:
 
   wait_for_pypi:
     name: Wait for PyPI to Update
-    needs: [package, release]
+    needs: [release, prerelease]
+    if: always() && (needs.release.result == 'success' || needs.prerelease.result == 'success')
     environment: release-wait-deploy # use environment to force waiting a few minutes after the PyPI release.
     runs-on: ubuntu-24.04
     steps:
