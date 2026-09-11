@@ -8,6 +8,9 @@ on:
         type: string
         description: "The type of release being performed, either 'released' or 'prereleased'."
         required: true
+      build_name:
+        type: string
+        description: "The name of the artifact uploaded by the build job."
 
 jobs:
 
@@ -26,7 +29,7 @@ jobs:
       id: cached-build
       uses: actions/download-artifact@v7.0.0
       with:
-        name: env.CACHE_KEY
+        name: ${{ inputs.build_name }}
         path: ./dist/
 
     - name: Publish to PyPI
@@ -49,7 +52,7 @@ jobs:
       id: cached-build
       uses: actions/download-artifact@v7.0.0
       with:
-        name: env.CACHE_KEY
+        name: ${{ inputs.build_name }}
         path: ./dist/
 
     - name: Publish to PyPI

@@ -34,6 +34,7 @@ jobs:
       id-token: write
     with:
       release_type: ${{ github.event.action }}
+      build_name: env.CACHE_KEY
 
   wait_for_pypi:
     name: Wait for PyPI to Update
