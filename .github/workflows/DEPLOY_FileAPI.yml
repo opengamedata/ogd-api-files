@@ -29,35 +29,18 @@ on:
     outputs:
       url:
         description: "The URL of the deploy."
-        value: ${{ jobs.derive_url.outputs.url }}
+        value: ${{ jobs.deploy_image.outputs.url }}
 
 env:
   SERVICE_URL: "file.api.opengamedata.io"
-  TEST_URL: ${{ inputs.revision_tag }}---${{ inputs.service_name }}-${{ vars.GCLOUD_REVISION_HASH }}.a.run.app
 
 jobs:
-  derive_url:
-    name: Derive Target URL for Deploy
-    runs-on: ubuntu-24.04
-    outputs:
-      url: ${{ steps.set-url.outputs.url }}
-    steps:
-      - name: Release Case
-        if: inputs.as_latest == 'true'
-        run: echo "DEPLOY_URL=${{ env.SERVICE_URL }}" >> $GITHUB_ENV
-      - name: Testing Case
-        if: inputs.as_latest != 'true'
-        run: echo "DEPLOY_URL=${{ env.TEST_URL }}" >> $GITHUB_ENV
-      - name: Check URL
-        run: echo "$DEPLOY_URL"
-      - name: Get URL
-        id: set-url
-        run: echo "url=$DEPLOY_URL" >> "$GITHUB_OUTPUT"
 
   deploy_image:
     name: Deploy Image to Google Cloud
+    outputs:
+      url: ${{ steps.get-url.outputs.url }}
     if: inputs.remove == false
-    needs: [derive_url]
     runs-on: ubuntu-24.04
     concurrency:
       group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}-deploy
@@ -68,8 +51,16 @@ jobs:
 
     steps:
 
+    - name: Get URL
+      id: get-url
+      uses: opengamedata/actions-derive-gcp-url@v1.0
+      with:
+        service_name:      ${{ inputs.service_name }}
+        revision_tag:      ${{ inputs.revision_tag }}
+        revision_url_hash: ${{ vars.GCLOUD_REVISION_HASH }}
+
     - name: Announce deploy
-      run: echo "Deploying ${{ github.ref }} to ${{ needs.derive_url.outputs.url }}"
+      run: echo "Deploying ${{ github.ref }} to ${{ case(inputs.as_latest == 'true', env.SERVICE_URL, steps.get-url.outputs.url) }}"
 
     # Need checkout in order to have authentication step apply to deploy step.
     - name: Checkout repository
