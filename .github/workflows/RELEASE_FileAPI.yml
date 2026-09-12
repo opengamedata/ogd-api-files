@@ -28,7 +28,7 @@ jobs:
       build_name: &artifact opengamedata-api-files-build-${{ github.run_id }}-${{ github.run_attempt }}
 
   publish:
-    name: Publish to PyPI
+    name: Publish Python Package
     runs-on: ubuntu-24.04
     environment:
       name: ${{ case(github.event.action == 'released', 'pypi_release', 'pypi_prerelease') }}
