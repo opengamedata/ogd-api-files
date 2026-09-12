@@ -9,6 +9,7 @@ on:
 jobs:
   setup:
     name: Get Branch
+    if: github.event.ref_type == 'branch'
     runs-on: ubuntu-24.04
     outputs:
       branch_tag: ${{ steps.get_branch.outputs.branch-name }}
@@ -24,6 +25,33 @@ jobs:
     name: Dead Branch Cleanup
     if: github.event.ref_type == 'branch'
     needs: [setup]
+    runs-on: ubuntu-24.04
+    concurrency:
+      group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}
+      cancel-in-progress: false
+    
+    steps:
+
+    - name: Announce cleanup
+      run: echo "Removing branch deploy at ${{ needs.derive_url.outputs.url }}"
+    
+    # 1. Remove Image from GitHub
+
+    - name: Remove Image from Repo
+      uses: dataaxiom/ghcr-cleanup-action@v1.2.2
+      with:
+        delete-tags: ${{ inputs.revision_tag }}
+
+    # 2. Remove from GCP
+    # TODO
+
+    - name: Upload logs as artifacts
+      uses: actions/upload-artifact@v7.0.1
+      with:
+        name: "cleanup-log"
+        path: ./*.log
+
+  branch_delete:
     uses: ./.github/workflows/DEPLOY_FileAPI.yml
     with:
       service_name: "ogd-api-files-test"
