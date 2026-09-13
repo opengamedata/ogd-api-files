@@ -76,15 +76,16 @@ jobs:
         service_account: ${{ secrets.GCLOUD_DEPLOY_USER }}
     
     - name: Deploy as Latest
-      if: ${{ inputs.as_latest == 'true' }}
+      if: ${{ inputs.as_latest == true }}
       uses: 'google-github-actions/deploy-cloudrun@v3.0.1'
       with:
         service: ${{ inputs.service_name }}
         image:   "${{ secrets.DOCKER_IMAGE_REPO }}/${{ inputs.image_name }}"
+        tag:     ${{ inputs.revision_tag }}
         revision_traffic: 'LATEST=100'
 
     - name: Deploy as Test
-      if: ${{ inputs.as_latest != 'true' }}
+      if: ${{ inputs.as_latest != true }}
       uses: 'google-github-actions/deploy-cloudrun@v3.0.1'
       with:
         service: ${{ inputs.service_name }}
