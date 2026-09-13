@@ -79,8 +79,6 @@ jobs:
     secrets:
       image_repository: ${{ secrets.DOCKER_IMAGE_REPO }}
 
-    # *** Prerelease Case ***
-
   get_branch:
     name: Get Branch
     needs: [build]
