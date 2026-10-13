@@ -33,7 +33,7 @@ class DatasetFileRequest(APIRequest):
                 url = api_base_url
             case str():
                 url = URLLocationConfig.FromString(name="API Location", raw_url=api_base_url)
-        endpoint = URLLocationConfig.FromString(name="Endpoint", raw_url=f"/games/{game_id}/datasets/{year}/{month}/{file_type}")
+        endpoint = URLLocationConfig.FromString(name="Endpoint", raw_url=f"games/{game_id}/datasets/{year}/{month}/{file_type}")
         super().__init__(url=url + endpoint, request_type=RESTType.GET, params=None, body=None, timeout=timeout)
 
     def Execute(self, logger:Optional[logging.Logger]=None, retry:int=0) -> "DatasetFile | APIResponse":

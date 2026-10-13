@@ -79,7 +79,7 @@ class DatasetListRequest(APIRequest):
             case str():
                 url = URLLocationConfig.FromString(name="API Location", raw_url=api_base_url)
         _year_component = f"/{year}" if year is not None else ""
-        endpoint = URLLocationConfig.FromString(name="Endpoint", raw_url=f"/games/{game_id}/datasets{_year_component}")
+        endpoint = URLLocationConfig.FromString(name="Endpoint", raw_url=f"games/{game_id}/datasets{_year_component}")
         super().__init__(url=url + endpoint, request_type=RESTType.GET, params=None, body=None, timeout=timeout)
 
     def Execute(self, logger:Optional[logging.Logger]=None, retry:int=0) -> "DatasetList | APIResponse":
