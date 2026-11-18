@@ -209,9 +209,17 @@ class DatasetResources(DatasetSchema):
         """
         ret_val : DatasetResources
 
-        if response.Value is not None:
-            ret_val = DatasetResources.FromDict(raw_dict=response.Value)
-        else:
-            raise ValueError(f"Response for DataSummary contained no values!")
+        match response:
+            case DatasetResources():
+                # If we were asked to create a DatasetResources instance from a DatasetResources instance, we just return directly
+                ret_val = response
+            case APIResponse():
+                # If asked to create DatasetResources from a basic APIResponse, do extra processing to inflate JSON to DatasetResources object.
+                if response.Value is not None:
+                    ret_val = DatasetResources.FromDict(raw_dict=response.Value)
+                else:
+                    raise ValueError(f"Response for DataSummary contained no values!")
+            case _:
+                raise ValueError(f"DatasetResources.FromAPIResponse was given an invalid 'response' object of unexpected type {type(response)}")
 
         return ret_val

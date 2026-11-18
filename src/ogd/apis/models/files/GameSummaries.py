@@ -72,10 +72,18 @@ class GameSummaries:
         """
         ret_val : GameSummaries
 
-        if response.Value is not None:
-            ret_val = GameSummaries(summaries=response.Value)
-        else:
-            ret_val = GameSummaries({})
+        match response:
+            case GameSummaries():
+                # If we were asked to create a GameSummaries instance from a GameSummaries instance, we just return directly
+                ret_val = response
+            case APIResponse():
+                # If asked to create GameSummaries from a basic APIResponse, do extra processing to inflate JSON to GameSummaries object.
+                if response.Value is not None:
+                    ret_val = GameSummaries(summaries={key : GameSummary.FromDict(val) for key, val in response.Value.items()})
+                else:
+                    ret_val = GameSummaries({})
+            case _:
+                raise ValueError(f"GameSummaries.FromAPIResponse was given an invalid 'response' object of unexpected type {type(response)}")
         return ret_val
 
 
