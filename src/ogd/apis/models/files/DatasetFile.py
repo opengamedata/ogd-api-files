@@ -87,8 +87,16 @@ class DatasetFile:
         """
         ret_val : DatasetFile
 
-        if isinstance(response.Value, dict):
-            ret_val = DatasetFile.FromDict(raw_dict=response.Value)
-        else:
-            raise ValueError("Response for DatasetFile contained no values!")
+        match response:
+            case DatasetFile():
+                # If we were asked to create a DatasetFile instance from a DatasetFile instance, we just return directly
+                ret_val = response
+            case APIResponse():
+                # If asked to create DatasetFile from a basic APIResponse, do extra processing to inflate JSON to DatasetFile object.
+                if isinstance(response.Value, dict):
+                    ret_val = DatasetFile.FromDict(raw_dict=response.Value)
+                else:
+                    raise ValueError("Response for DatasetFile contained no values!")
+            case _:
+                raise ValueError(f"DatasetFile.FromAPIResponse was given an invalid 'response' object of unexpected type {type(response)}")
         return ret_val

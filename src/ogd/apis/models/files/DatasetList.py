@@ -138,8 +138,16 @@ class DatasetList:
         """
         ret_val : DatasetList
 
-        if isinstance(response.Value, dict):
-            ret_val = DatasetList.FromDict(response.Value)
-        else:
-            ret_val = DatasetList(game_id="GAME NOT FOUND", datasets=[])
+        match response:
+            case DatasetList():
+                # If we were asked to create a DatasetList instance from a DatasetList instance, we just return directly
+                ret_val = response
+            case APIResponse():
+                # If asked to create DatasetList from a basic APIResponse, do extra processing to inflate JSON to DatasetList object.
+                if isinstance(response.Value, dict):
+                    ret_val = DatasetList.FromDict(response.Value)
+                else:
+                    ret_val = DatasetList(game_id="GAME NOT FOUND", datasets=[])
+            case _:
+                raise ValueError(f"DatasetList.FromAPIResponse was given an invalid 'response' object of unexpected type {type(response)}")
         return ret_val

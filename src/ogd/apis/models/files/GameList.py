@@ -66,8 +66,16 @@ class GameList:
         """
         ret_val : GameList
 
-        if isinstance(response.Value, dict):
-            ret_val = GameList.FromDict(response.Value)
-        else:
-            ret_val = GameList([])
+        match response:
+            case GameList():
+                # If we were asked to create a GameList instance from a GameList instance, we just return directly
+                ret_val = response
+            case APIResponse():
+                # If asked to create GameList from a basic APIResponse, do extra processing to inflate JSON to GameList object.
+                if isinstance(response.Value, dict):
+                    ret_val = GameList.FromDict(response.Value)
+                else:
+                    ret_val = GameList([])
+            case _:
+                raise ValueError(f"GameList.FromAPIResponse was given an invalid 'response' object of unexpected type {type(response)}")
         return ret_val

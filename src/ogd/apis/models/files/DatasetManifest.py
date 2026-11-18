@@ -91,9 +91,17 @@ class DatasetManifest(DatasetSchema):
         """
         ret_val : DatasetManifest
 
-        if response.Value is not None:
-            ret_val = DatasetManifest.FromDict(raw_dict=response.Value)
-        else:
-            raise ValueError(f"Response for DataSummary contained no values!")
+        match response:
+            case DatasetManifest():
+                # If we were asked to create a DatasetManifest instance from a DatasetManifest instance, we just return directly
+                ret_val = response
+            case APIResponse():
+                # If asked to create DatasetManifest from a basic APIResponse, do extra processing to inflate JSON to DatasetManifest object.
+                if response.Value is not None:
+                    ret_val = DatasetManifest.FromDict(raw_dict=response.Value)
+                else:
+                    raise ValueError(f"Response for DataSummary contained no values!")
+            case _:
+                raise ValueError(f"DatasetManifest.FromAPIResponse was given an invalid 'response' object of unexpected type {type(response)}")
 
         return ret_val
